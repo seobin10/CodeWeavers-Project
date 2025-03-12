@@ -12,4 +12,9 @@ public class MainController {
     public String Main(){
         return "main";
     }
+
+    @GetMapping("/score")
+    public String viewScoreTest() {
+        return "view_score_test.html";
+    }
 }
