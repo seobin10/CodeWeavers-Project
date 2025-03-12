@@ -19,6 +19,7 @@ class UserTest {
     @Autowired
     private UserRepository userRepository;
 
+
 @Test
     public void repoTest(){
     String stuNum = "202400001";
@@ -26,6 +27,6 @@ class UserTest {
     User user = res.orElseThrow();
     log.info("학번 - " + user.getUserId());
     log.info("이름 - " + user.getUserName());
-    log.info("학과 - " + user.getDepartment().toString());
+    log.info("학과 - " + user.getDepartment());
     }
 }
