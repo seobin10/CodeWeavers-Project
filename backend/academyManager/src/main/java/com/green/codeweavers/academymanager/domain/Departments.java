@@ -18,4 +18,11 @@ public class Departments {
 
     @OneToMany(mappedBy = "departmentId")
     private List<Courses> courses = new ArrayList<>();
+
+    // 주소 값을 출력하기 위해 값을 출력하도록 오버라이딩한다
+    @Override
+    public String toString() {
+        return String.valueOf(this.departmentId);
+    }
 }
+
