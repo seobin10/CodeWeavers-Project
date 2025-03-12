@@ -1,13 +1,24 @@
 package com.green.codeweavers.academymanager.dto;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import com.green.codeweavers.academymanager.domain.Departments;
+import com.green.codeweavers.academymanager.domain.UserRole;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import lombok.*;
 
-// 계층 간 데이터 교환을 하기 위해 사용하는 유저 객체
-// user를 extends해도 됩니다
-@Getter
-@Setter
-@ToString
+import java.util.Date;
+
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserDTO {
+    private String userId;
+    private String userName;
+    private UserRole userRole;
+    private Date userBirth;
+    private String userEmail;
+    private String userPhone;
+    private String userPassword;
+    private Departments department;
 }
