@@ -17,7 +17,7 @@ public class Grade {
     private Long gradeId;
 
     @Column(name = "enrollment_id")
-    private Long enrollmentId;
+    private int enrollmentId;
 
     @Column(name = "grade_grade")
     private StudentGrade grade;
@@ -43,7 +43,4 @@ public class Grade {
             default -> StudentGrade.valueOf(db);
         };
     }
-
-
-
 }
