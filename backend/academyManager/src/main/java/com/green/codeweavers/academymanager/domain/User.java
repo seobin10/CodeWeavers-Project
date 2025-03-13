@@ -21,6 +21,7 @@ public class User {
     @Column(name = "user_id", length = 9)
     private String userId;
     private String userName;
+    @Enumerated(EnumType.ORDINAL)
     private UserRole userRole;
     private Date userBirth;
     private String userEmail;

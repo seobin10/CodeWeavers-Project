@@ -20,5 +20,5 @@ public class UserDTO {
     private String userEmail;
     private String userPhone;
     private String userPassword;
-    private Departments department;
+    private int department;
 }
