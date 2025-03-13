@@ -4,14 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.util.List;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class GradeDTO{
-    private long gradeId;
-    private List<String> studentGrade;
-    private int enrollmentId;
+public class ClassesDTO {
+    private int classId;
+    private String classSemester;
+    private String classesSchedule;
+    private int courseId;
+    private int professorId;
 }
