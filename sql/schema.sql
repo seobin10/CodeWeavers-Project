@@ -1,15 +1,13 @@
-CREATE DATABASE  IF NOT EXISTS `cwdb` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `cwdb`;
--- MySQL dump 10.13  Distrib 8.0.40, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.4.3, for Win64 (x86_64)
 --
--- Host: 127.0.0.1    Database: cwdb
+-- Host: localhost    Database: cwdb
 -- ------------------------------------------------------
 -- Server version	8.4.3
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!50503 SET NAMES utf8 */;
+/*!50503 SET NAMES utf8mb4 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -35,17 +33,8 @@ CREATE TABLE `classes` (
   KEY `professor_id` (`professor_id`),
   CONSTRAINT `classes_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE,
   CONSTRAINT `classes_ibfk_2` FOREIGN KEY (`professor_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `classes`
---
-
-LOCK TABLES `classes` WRITE;
-/*!40000 ALTER TABLE `classes` DISABLE KEYS */;
-/*!40000 ALTER TABLE `classes` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `courses`
@@ -65,17 +54,8 @@ CREATE TABLE `courses` (
   KEY `department_id` (`department_id`),
   CONSTRAINT `courses_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `departments` (`department_id`) ON DELETE SET NULL,
   CONSTRAINT `courses_chk_1` CHECK ((`credit` between 1 and 3))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `courses`
---
-
-LOCK TABLES `courses` WRITE;
-/*!40000 ALTER TABLE `courses` DISABLE KEYS */;
-/*!40000 ALTER TABLE `courses` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `departments`
@@ -86,20 +66,11 @@ DROP TABLE IF EXISTS `departments`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `departments` (
   `department_id` int NOT NULL AUTO_INCREMENT,
-  `department_name` varchar(50) NOT NULL,
+  `department_name` varchar(255) NOT NULL,
   PRIMARY KEY (`department_id`),
   UNIQUE KEY `department_name` (`department_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `departments`
---
-
-LOCK TABLES `departments` WRITE;
-/*!40000 ALTER TABLE `departments` DISABLE KEYS */;
-/*!40000 ALTER TABLE `departments` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `enrollments`
@@ -118,17 +89,8 @@ CREATE TABLE `enrollments` (
   KEY `class_id` (`class_id`),
   CONSTRAINT `enrollments_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
   CONSTRAINT `enrollments_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `classes` (`class_id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `enrollments`
---
-
-LOCK TABLES `enrollments` WRITE;
-/*!40000 ALTER TABLE `enrollments` DISABLE KEYS */;
-/*!40000 ALTER TABLE `enrollments` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `grades`
@@ -138,23 +100,14 @@ DROP TABLE IF EXISTS `grades`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `grades` (
-  `grade_id` int NOT NULL AUTO_INCREMENT,
+  `grade_id` bigint NOT NULL,
   `enrollment_id` int NOT NULL,
-  `grade_grade` enum('A+','A0','B+','B0','C+','C0','D+','D0','F') NOT NULL,
+  `grade_grade` tinyint DEFAULT NULL,
   PRIMARY KEY (`grade_id`),
   KEY `enrollment_id` (`enrollment_id`),
   CONSTRAINT `grades_ibfk_1` FOREIGN KEY (`enrollment_id`) REFERENCES `enrollments` (`enrollment_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `grades`
---
-
-LOCK TABLES `grades` WRITE;
-/*!40000 ALTER TABLE `grades` DISABLE KEYS */;
-/*!40000 ALTER TABLE `grades` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `users`
@@ -165,11 +118,11 @@ DROP TABLE IF EXISTS `users`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `users` (
   `user_id` varchar(9) NOT NULL,
-  `user_name` varchar(50) NOT NULL,
+  `user_name` varchar(255) DEFAULT NULL,
   `user_role` enum('STUDENT','PROFESSOR','ADMIN') NOT NULL,
   `user_birth` date NOT NULL,
-  `user_email` varchar(50) DEFAULT NULL,
-  `user_phone` varchar(15) DEFAULT NULL,
+  `user_email` varchar(255) DEFAULT NULL,
+  `user_phone` varchar(255) DEFAULT NULL,
   `user_password` varchar(255) NOT NULL,
   `department_id` int DEFAULT NULL,
   PRIMARY KEY (`user_id`),
@@ -179,15 +132,6 @@ CREATE TABLE `users` (
   CONSTRAINT `users_ibfk_1` FOREIGN KEY (`department_id`) REFERENCES `departments` (`department_id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `users`
---
-
-LOCK TABLES `users` WRITE;
-/*!40000 ALTER TABLE `users` DISABLE KEYS */;
-/*!40000 ALTER TABLE `users` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -198,4 +142,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-10 17:47:13
+-- Dump completed on 2025-03-13 13:04:28
