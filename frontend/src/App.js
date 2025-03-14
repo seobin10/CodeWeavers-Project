@@ -6,9 +6,8 @@ export const AuthContext = createContext(null);
 
 function App() {
   const [userId, setUserId] = useState(null); // 로그인 상태 관리
-
   return (
-    <AuthContext.Provider value={{ userId, setUserId }}>
+    <AuthContext.Provider value={{ userId, setUserId}}>
       <RouterProvider router={root} />
     </AuthContext.Provider>
   );

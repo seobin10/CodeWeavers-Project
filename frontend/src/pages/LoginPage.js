@@ -22,7 +22,6 @@ function LoginPage() {
 
       const userData = await response.json();
       setUserId(userData.userId);
-
       navigate("/main");
     } catch (error) {
       setMessage("로그인에 실패했습니다.");
