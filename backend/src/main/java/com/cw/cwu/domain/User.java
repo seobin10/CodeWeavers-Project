@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @Builder
 public class User {
     @Id
-    @Column(name = "user_id")
+    @Column(name = "user_id", length = 9)
     private String userId;
 
     @Column(name = "user_name")
