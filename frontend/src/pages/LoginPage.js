@@ -5,7 +5,7 @@ import { AuthContext } from "../App";
 function LoginPage() {
   const { setUserId } = useContext(AuthContext);
   const [userId, setLocalUserId] = useState("");
-  const [password, setPassword] = useState("");
+  const [userPassword, setUserPassword] = useState("");
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
@@ -15,7 +15,7 @@ function LoginPage() {
       const response = await fetch("http://localhost:8080/api/user/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, password }),
+        body: JSON.stringify({ userId, userPassword }),
       });
 
       if (!response.ok) throw new Error("로그인 실패");
@@ -44,8 +44,8 @@ function LoginPage() {
         <input
           type="password"
           placeholder="비밀번호"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          value={userPassword}
+          onChange={(e) => setUserPassword(e.target.value)}
           className="w-full p-2 border rounded mb-3"
         />
         <button
