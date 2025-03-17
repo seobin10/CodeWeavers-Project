@@ -13,37 +13,15 @@ import lombok.*;
 public class Grade {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "grade_id")
-    private Integer gradeId;
+    private Long gradeId;
 
-    @Column(name = "enrollment_id")
-    private Integer enrollmentId;
+    @ManyToOne
+    @JoinColumn(name = "enrollment_id")
+    private Enrollment enrollmentId;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "grade_grade")
     private StudentGrade grade;
-
-    // DB 저장용 변환
-    private String ConvertToDb(StudentGrade grade) {
-        return switch (grade) {
-            case A_PLUS -> "A+";
-            case B_PLUS -> "B+";
-            case C_PLUS -> "C+";
-            case D_PLUS -> "D+";
-            default -> grade.name();
-        };
-    }
-
-    // DB -> ENUM
-    private StudentGrade convertToEnum(String db) {
-        return switch (db) {
-            case "A+" -> StudentGrade.A_PLUS;
-            case "B+" -> StudentGrade.B_PLUS;
-            case "C+" -> StudentGrade.C_PLUS;
-            case "D+" -> StudentGrade.D_PLUS;
-            default -> StudentGrade.valueOf(db);
-        };
-    }
-
-
-
 }
