@@ -22,9 +22,7 @@ function StudentPage() {
 
   const fetchStudentInfo = async (userId) => {
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/user/${userId}` 
-      );
+      const response = await fetch(`http://localhost:8080/api/user/${userId}`);
       if (!response.ok) throw new Error("Failed to fetch student data");
 
       const data = await response.json();
@@ -35,41 +33,39 @@ function StudentPage() {
         userBirth: data.userBirth,
         userEmail: data.userEmail,
         userPhone: data.userPhone,
-        departmentName: data.departmentName || "", 
+        departmentName: data.departmentName || "",
       });
     } catch (error) {
       setMessage("학생 정보를 불러올 수 없습니다.");
     }
   };
 
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-
   const handleSave = async () => {
     try {
       const response = await fetch(
-        `http://localhost:8080/api/user/update`, 
+        `http://localhost:8080/api/user/${formData.userId}/update`, 
         {
-          method: "PATCH",
+          method: "PUT", 
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            userId: formData.userId, // userId는 변경 불가
-            userEmail: formData.userEmail, // 변경 가능
-            userPhone: formData.userPhone, // 변경 가능
+            userEmail: formData.userEmail, 
+            userPhone: formData.userPhone,
           }),
         }
       );
-      if (!response.ok) throw new Error("수정에 실패했습니다.");
 
-      setMessage("정보가 성공적으로 수정되었습니다.");
+      if (!response.ok) throw new Error("정보 수정 실패");
+
+      setMessage("정보가 업데이트되었습니다.");
     } catch (error) {
-      setMessage("수정 중 오류가 발생했습니다.");
+      setMessage("정보 수정에 실패했습니다.");
     }
   };
 
