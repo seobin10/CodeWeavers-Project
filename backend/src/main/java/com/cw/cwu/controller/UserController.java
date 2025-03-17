@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
@@ -32,6 +33,5 @@ public class UserController {
             @RequestBody UserDTO request) {
         return ResponseEntity.ok(userService.updateUser(userId, request));
     }
-
 
 }

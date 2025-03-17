@@ -35,6 +35,9 @@ public class User {
     @Column(name = "user_password")
     private String userPassword;
 
+    @Column(name = "user_img_url")
+    private String userImgUrl;
+
     @ManyToOne
     @JoinColumn(name = "department_id")
     private Department department;
