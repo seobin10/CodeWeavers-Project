@@ -24,4 +24,14 @@ public class UserController {
     public ResponseEntity<UserDTO> getUserInfo(@PathVariable String userId) {
         return ResponseEntity.ok(userService.getUserInfo(userId));
     }
+
+    // 사용자 정보 업데이트 (이메일, 전화번호)
+    @PutMapping("/{userId}/update")
+    public ResponseEntity<UserDTO> updateUser(
+            @PathVariable String userId,
+            @RequestBody UserDTO request) {
+        return ResponseEntity.ok(userService.updateUser(userId, request));
+    }
+
+
 }
