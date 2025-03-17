@@ -11,6 +11,7 @@ function StudentPage() {
     userBirth: "",
     userEmail: "",
     userPhone: "",
+    userImgUrl: "",
     departmentName: "",
   });
 
@@ -23,7 +24,7 @@ function StudentPage() {
   const fetchStudentInfo = async (userId) => {
     try {
       const response = await fetch(`http://localhost:8080/api/user/${userId}`);
-      if (!response.ok) throw new Error("Failed to fetch student data");
+      if (!response.ok) throw new Error("Failed to fetch data");
 
       const data = await response.json();
       setStudentInfo(data);
@@ -33,6 +34,7 @@ function StudentPage() {
         userBirth: data.userBirth,
         userEmail: data.userEmail,
         userPhone: data.userPhone,
+        userImgUrl: data.userImgUrl,
         departmentName: data.departmentName || "",
       });
     } catch (error) {
@@ -48,14 +50,14 @@ function StudentPage() {
   const handleSave = async () => {
     try {
       const response = await fetch(
-        `http://localhost:8080/api/user/${formData.userId}/update`, 
+        `http://localhost:8080/api/user/${formData.userId}/update`,
         {
-          method: "PUT", 
+          method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            userEmail: formData.userEmail, 
+            userEmail: formData.userEmail,
             userPhone: formData.userPhone,
           }),
         }
@@ -78,7 +80,11 @@ function StudentPage() {
           <form className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="col-span-1 flex justify-center">
               <img
-                src="/path-to-profile-image.jpg"
+                src={
+                  formData.userImgUrl
+                    ? `http://localhost:8080${formData.userImgUrl}`
+                    : "/default-profile.jpg"
+                }
                 alt="Profile"
                 className="w-32 h-32 object-cover rounded-full border"
               />
