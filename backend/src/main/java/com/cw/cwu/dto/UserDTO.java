@@ -17,4 +17,5 @@ public class UserDTO {
     private String role; // STUDENT, PROFESSOR, ADMIN 구분
     private Integer departmentId; // 학과 ID
     private String departmentName; // 학과명
+    private String userImgUrl;
 }
