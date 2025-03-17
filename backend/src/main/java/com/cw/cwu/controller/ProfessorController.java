@@ -10,4 +10,5 @@ import org.springframework.web.bind.annotation.*;
 public class ProfessorController {
 
     private final ProfessorService professorService;
+
 }
