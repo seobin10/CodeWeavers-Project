@@ -25,7 +25,6 @@ public class UserService {
     }
 
 
-
     // 정보 조회
     public UserDTO getUserInfo(String userId) {
         User user = userRepository.findById(userId)
@@ -47,4 +46,18 @@ public class UserService {
         dto.setDepartmentName(user.getDepartment() != null ? user.getDepartment().getDepartmentName() : null);
         return dto;
     }
+
+    // 이메일과 전화번호 업데이트
+    public UserDTO updateUser(String userId, UserDTO request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        user.setUserEmail(request.getUserEmail());
+        user.setUserPhone(request.getUserPhone());
+
+        userRepository.save(user);
+
+        return convertToDTO(user);
+    }
+
 }
