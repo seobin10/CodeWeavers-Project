@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
 public class UserController {
 
     private final UserService userService;
@@ -27,10 +26,12 @@ public class UserController {
     }
 
     // 사용자 정보 업데이트 (이메일, 전화번호)
-    @PatchMapping("/{userId}/update")
+    @PutMapping("/{userId}/update")
     public ResponseEntity<UserDTO> updateUser(
             @PathVariable String userId,
             @RequestBody UserDTO request) {
         return ResponseEntity.ok(userService.updateUser(userId, request));
     }
+
+
 }

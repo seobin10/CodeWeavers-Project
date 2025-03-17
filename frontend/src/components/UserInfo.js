@@ -5,13 +5,10 @@ const UserInfo = () => {
   const { userId } = useContext(AuthContext);
   const [userInfo, setUserInfo] = useState(null);
 
-  const localId = localStorage.getItem("id");
-
   useEffect(() => {
-    const idToUse = userId || localId;
-    if (!idToUse) return;
-    fetchUserInfo(idToUse);
-  }, [userId, localId]);
+    if (!userId) return;
+    fetchUserInfo(userId);
+  }, [userId]);
 
   const fetchUserInfo = async (userId) => {
     try {

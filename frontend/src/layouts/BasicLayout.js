@@ -2,10 +2,6 @@ import React from "react";
 import { Link, Outlet } from "react-router-dom";
 import UserInfo from "../components/UserInfo";
 
-const cleanLocal = function () {
-  localStorage.removeItem("id");
-  localStorage.removeItem("pw");
-};
 const BasicLayout = () => {
   return (
     <>
@@ -19,25 +15,9 @@ const BasicLayout = () => {
         </Link>
         <div className="flex items-center space-x-6">
           <UserInfo />
-          {localStorage.getItem("id") != null ? (
-            <Link
-              to="/"
-              button
-              className="bg-gray-700 hover:bg-gray-900 text-white text-sm font-semibold py-1 px-3 rounded transition"
-              onClick={cleanLocal}
-            >
-              로그아웃
-            </Link>
-          ) : (
-            <Link
-              to="/"
-              button
-              className="bg-gray-700 hover:bg-gray-900 text-white text-sm font-semibold py-1 px-3 rounded transition"
-              onClick={cleanLocal}
-            >
-              로그인
-            </Link>
-          )}
+          <button className="bg-gray-700 hover:bg-gray-900 text-white text-sm font-semibold py-1 px-3 rounded transition">
+            로그아웃
+          </button>
         </div>
       </header>
 
@@ -45,22 +25,13 @@ const BasicLayout = () => {
       <div className="min-h-screen flex flex-col bg-gray-100">
         {/* 네비게이션 바 */}
         <nav className="bg-blue-600 text-white p-3 flex justify-center space-x-6">
-          <Link
-            to="/main/student"
-            className="hover:bg-blue-700 px-4 py-2 rounded"
-          >
+          <Link to="/main/student" className="hover:bg-blue-700 px-4 py-2 rounded">
             정보조회
           </Link>
-          <Link
-            to="/main/courses"
-            className="hover:bg-blue-700 px-4 py-2 rounded"
-          >
+          <Link to="/main/courses" className="hover:bg-blue-700 px-4 py-2 rounded">
             수강신청
           </Link>
-          <Link
-            to="/main/grades"
-            className="hover:bg-blue-700 px-4 py-2 rounded"
-          >
+          <Link to="/main/grades" className="hover:bg-blue-700 px-4 py-2 rounded">
             성적조회
           </Link>
         </nav>
