@@ -14,10 +14,10 @@ public class Grade {
 
     @Id
     @Column(name = "grade_id")
-    private Long gradeId;
+    private Integer gradeId;
 
     @Column(name = "enrollment_id")
-    private Long enrollmentId;
+    private Integer enrollmentId;
 
     @Column(name = "grade_grade")
     private StudentGrade grade;
