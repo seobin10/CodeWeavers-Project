@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect, useCallback } from "react";
+import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../App";
 
@@ -8,7 +8,6 @@ function LoginPage() {
   const [userPassword, setUserPassword] = useState("");
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
-  const localIsNotNull = localStorage.getItem("id") != null && localStorage.getItem("pw");
 
   const handleLogin = async () => {
     setMessage("");
@@ -20,10 +19,6 @@ function LoginPage() {
       });
 
       if (!response.ok) throw new Error("로그인 실패");
-      else {
-        localStorage.setItem("id", userId);
-        localStorage.setItem("pw", userPassword);
-      }
 
       const userData = await response.json();
       setUserId(userData.userId);
@@ -33,35 +28,6 @@ function LoginPage() {
       setMessage("로그인에 실패했습니다.");
     }
   };
-
-  const autoLogin = useCallback(
-    async (localId, localPw) => {
-      setMessage("");
-      try {
-        const response = await fetch("http://localhost:8080/api/user/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: localId, password: localPw }),
-        });
-
-        const userData = await response.json();
-        setUserId(userData.userId);
-        navigate("/main");
-      } catch (error) {
-        setMessage("로그인에 실패했습니다.");
-      }
-    },
-    [navigate, setUserId]
-  );
-
-  useEffect(() => {
-    if (localIsNotNull) {
-      let localId = localStorage.getItem("id");
-      let localPw = localStorage.getItem("pw");
-      autoLogin(localId, localPw);
-    }
-    return () => {};
-  }, [autoLogin, localIsNotNull]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
