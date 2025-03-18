@@ -21,7 +21,7 @@ public class Class {
     private Course courseId;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "professor_id")
     private User professorId;
 
     @Column(name = "class_semester")
