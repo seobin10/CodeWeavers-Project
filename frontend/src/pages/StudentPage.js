@@ -1,8 +1,9 @@
 import { useEffect, useContext, useState } from "react";
 import { AuthContext } from "../App";
 
+
 function StudentPage() {
-  const { userId } = useContext(AuthContext);
+  const { userId, setUserId } = useContext(AuthContext);
   const [studentInfo, setStudentInfo] = useState(null);
   const [message, setMessage] = useState("");
   const [formData, setFormData] = useState({
@@ -14,16 +15,22 @@ function StudentPage() {
     userImgUrl: "",
     departmentName: "",
   });
-
+  console.log(formData);
+  const localId = localStorage.getItem("id");
+  
   useEffect(() => {
     if (userId) {
       fetchStudentInfo(userId);
+    } else if (localId) {
+      setUserId(localId);
+      fetchStudentInfo(localId);
     }
-  }, [userId]);
+  }, [userId, setUserId, localId]);
 
   const fetchStudentInfo = async (userId) => {
     try {
       const response = await fetch(`http://localhost:8080/api/user/${userId}`);
+
       if (!response.ok) throw new Error("Failed to fetch data");
 
       const data = await response.json();
@@ -35,17 +42,19 @@ function StudentPage() {
         userEmail: data.userEmail,
         userPhone: data.userPhone,
         userImgUrl: data.userImgUrl,
-        departmentName: data.departmentName || "",
+        departmentName: data.departmentName || "", 
       });
     } catch (error) {
       setMessage("학생 정보를 불러올 수 없습니다.");
     }
   };
 
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+
 
   const handleSave = async () => {
     try {
@@ -57,12 +66,12 @@ function StudentPage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            userEmail: formData.userEmail,
-            userPhone: formData.userPhone,
+            userId: formData.userId, // userId는 변경 불가
+            userEmail: formData.userEmail, 
+            userPhone: formData.userPhone, 
           }),
         }
       );
-
       if (!response.ok) throw new Error("정보 수정 실패");
 
       setMessage("정보가 업데이트되었습니다.");
@@ -79,12 +88,12 @@ function StudentPage() {
         {studentInfo ? (
           <form className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="col-span-1 flex justify-center">
-              <img
-                src={
-                  formData.userImgUrl
-                    ? `http://localhost:8080${formData.userImgUrl}`
-                    : "/default-profile.jpg"
-                }
+            <img
+                 src={
+                   formData.userImgUrl
+                     ? `http://localhost:8080${formData.userImgUrl}`
+                     : "/default-profile.jpg"
+                 }
                 alt="Profile"
                 className="w-32 h-32 object-cover rounded-full border"
               />
