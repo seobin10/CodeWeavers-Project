@@ -1,8 +1,8 @@
 -- MySQL dump 10.13  Distrib 8.4.3, for Win64 (x86_64)
 --
--- Host: localhost    Database: cwdb
+-- Host: 34.64.170.40    Database: cwdb
 -- ------------------------------------------------------
--- Server version	8.4.3
+-- Server version	8.0.41-0ubuntu0.22.04.1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -16,6 +16,27 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `answers`
+--
+
+DROP TABLE IF EXISTS `answers`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `answers` (
+  `answer_id` int NOT NULL AUTO_INCREMENT,
+  `question_id` int NOT NULL,
+  `user_id` varchar(9) NOT NULL,
+  `content` text NOT NULL,
+  `created_at` date DEFAULT (curdate()),
+  PRIMARY KEY (`answer_id`),
+  KEY `question_id` (`question_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `answers_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `questions` (`question_id`) ON DELETE CASCADE,
+  CONSTRAINT `answers_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `classes`
 --
 
@@ -26,13 +47,16 @@ CREATE TABLE `classes` (
   `class_id` int NOT NULL AUTO_INCREMENT,
   `course_id` int NOT NULL,
   `professor_id` varchar(9) DEFAULT NULL,
-  `class_semester` varchar(10) NOT NULL,
-  `class_schedule` varchar(50) DEFAULT NULL,
+  `class_semester` varchar(255) DEFAULT NULL,
+  `class_schedule` varchar(255) DEFAULT NULL,
+  `user_id` varchar(9) DEFAULT NULL,
   PRIMARY KEY (`class_id`),
   KEY `course_id` (`course_id`),
   KEY `professor_id` (`professor_id`),
+  KEY `FKr4g4x4emo8ermns7r9x4gkijh` (`user_id`),
   CONSTRAINT `classes_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE,
-  CONSTRAINT `classes_ibfk_2` FOREIGN KEY (`professor_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL
+  CONSTRAINT `classes_ibfk_2` FOREIGN KEY (`professor_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL,
+  CONSTRAINT `FKr4g4x4emo8ermns7r9x4gkijh` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -45,10 +69,13 @@ DROP TABLE IF EXISTS `courses`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `courses` (
   `course_id` int NOT NULL AUTO_INCREMENT,
-  `course_name` varchar(50) NOT NULL,
+  `course_name` varchar(255) NOT NULL,
   `course_type` enum('MAJOR','LIBERAL') NOT NULL,
-  `credit` tinyint NOT NULL,
+  `credit` int DEFAULT NULL,
   `department_id` int DEFAULT NULL,
+  `class_schedule` varchar(255) DEFAULT NULL,
+  `class_semester` varchar(255) DEFAULT NULL,
+  `professor_id` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`course_id`),
   UNIQUE KEY `course_name` (`course_name`),
   KEY `department_id` (`department_id`),
@@ -89,7 +116,7 @@ CREATE TABLE `enrollments` (
   KEY `class_id` (`class_id`),
   CONSTRAINT `enrollments_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
   CONSTRAINT `enrollments_ibfk_2` FOREIGN KEY (`class_id`) REFERENCES `classes` (`class_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -102,11 +129,32 @@ DROP TABLE IF EXISTS `grades`;
 CREATE TABLE `grades` (
   `grade_id` bigint NOT NULL,
   `enrollment_id` int NOT NULL,
-  `grade_grade` tinyint DEFAULT NULL,
+  `grade_grade` enum('A0','A_PLUS','B0','B_PLUS','C0','C_PLUS','D0','D_PLUS','F') DEFAULT NULL,
   PRIMARY KEY (`grade_id`),
   KEY `enrollment_id` (`enrollment_id`),
   CONSTRAINT `grades_ibfk_1` FOREIGN KEY (`enrollment_id`) REFERENCES `enrollments` (`enrollment_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `questions`
+--
+
+DROP TABLE IF EXISTS `questions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `questions` (
+  `question_id` int NOT NULL AUTO_INCREMENT,
+  `user_id` varchar(9) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `content` text NOT NULL,
+  `created_at` date DEFAULT (curdate()),
+  `status` enum('OPEN','ANSWERED') DEFAULT 'OPEN',
+  `view_count` int DEFAULT '0',
+  PRIMARY KEY (`question_id`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `questions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -125,6 +173,7 @@ CREATE TABLE `users` (
   `user_phone` varchar(255) DEFAULT NULL,
   `user_password` varchar(255) NOT NULL,
   `department_id` int DEFAULT NULL,
+  `user_img_url` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `user_email` (`user_email`),
   UNIQUE KEY `user_phone` (`user_phone`),
@@ -142,4 +191,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-13 13:04:28
+-- Dump completed on 2025-03-18 11:50:30
