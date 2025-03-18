@@ -1,6 +1,6 @@
 import { useEffect, useContext, useState } from "react";
 import { AuthContext } from "../App";
-
+import axios from "axios";
 
 function StudentPage() {
   const { userId, setUserId } = useContext(AuthContext);
@@ -15,9 +15,8 @@ function StudentPage() {
     userImgUrl: "",
     departmentName: "",
   });
-  console.log(formData);
   const localId = localStorage.getItem("id");
-  
+
   useEffect(() => {
     if (userId) {
       fetchStudentInfo(userId);
@@ -29,51 +28,39 @@ function StudentPage() {
 
   const fetchStudentInfo = async (userId) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/user/${userId}`);
-
-      if (!response.ok) throw new Error("Failed to fetch data");
-
-      const data = await response.json();
-      setStudentInfo(data);
+      const response = await axios.get(
+        `http://localhost:8080/api/user/${userId}`
+      );
+      setStudentInfo(response.data);
       setFormData({
-        userName: data.userName,
-        userId: data.userId,
-        userBirth: data.userBirth,
-        userEmail: data.userEmail,
-        userPhone: data.userPhone,
-        userImgUrl: data.userImgUrl,
-        departmentName: data.departmentName || "", 
+        userName: response.data.userName,
+        userId: response.data.userId,
+        userBirth: response.data.userBirth,
+        userEmail: response.data.userEmail,
+        userPhone: response.data.userPhone,
+        userImgUrl: response.data.userImgUrl,
+        departmentName: response.data.departmentName || "",
       });
     } catch (error) {
       setMessage("학생 정보를 불러올 수 없습니다.");
     }
   };
 
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-
   const handleSave = async () => {
     try {
-      const response = await fetch(
+      await axios.put(
         `http://localhost:8080/api/user/${formData.userId}/update`,
         {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId: formData.userId, // userId는 변경 불가
-            userEmail: formData.userEmail, 
-            userPhone: formData.userPhone, 
-          }),
+          userId: formData.userId, // userId는 변경 불가
+          userEmail: formData.userEmail,
+          userPhone: formData.userPhone,
         }
       );
-      if (!response.ok) throw new Error("정보 수정 실패");
-
       setMessage("정보가 업데이트되었습니다.");
     } catch (error) {
       setMessage("정보 수정에 실패했습니다.");
@@ -88,12 +75,12 @@ function StudentPage() {
         {studentInfo ? (
           <form className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="col-span-1 flex justify-center">
-            <img
-                 src={
-                   formData.userImgUrl
-                     ? `http://localhost:8080${formData.userImgUrl}`
-                     : "/default-profile.jpg"
-                 }
+              <img
+                src={
+                  formData.userImgUrl
+                    ? `http://localhost:8080${formData.userImgUrl}`
+                    : "/default-profile.jpg"
+                }
                 alt="Profile"
                 className="w-32 h-32 object-cover rounded-full border"
               />
@@ -108,7 +95,6 @@ function StudentPage() {
                 readOnly
                 className="w-full p-2 border rounded bg-gray-100"
               />
-
               <label className="block font-semibold p-2 mt-2">학번</label>
               <input
                 type="text"
@@ -117,7 +103,6 @@ function StudentPage() {
                 readOnly
                 className="w-full p-2 border rounded bg-gray-100"
               />
-
               <label className="block font-semibold p-2 mt-2">생년월일</label>
               <input
                 type="text"
@@ -126,7 +111,6 @@ function StudentPage() {
                 readOnly
                 className="w-full p-2 border rounded bg-gray-100"
               />
-
               <label className="block font-semibold p-2 mt-2">이메일</label>
               <input
                 type="email"
@@ -135,7 +119,6 @@ function StudentPage() {
                 onChange={handleChange}
                 className="w-full p-2 border rounded"
               />
-
               <label className="block font-semibold p-2 mt-2">전화번호</label>
               <input
                 type="text"
@@ -144,7 +127,6 @@ function StudentPage() {
                 onChange={handleChange}
                 className="w-full p-2 border rounded"
               />
-
               <label className="block font-semibold p-2 mt-2">학과</label>
               <input
                 type="text"
