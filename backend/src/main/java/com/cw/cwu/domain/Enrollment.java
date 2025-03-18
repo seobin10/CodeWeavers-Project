@@ -16,6 +16,6 @@ public class Enrollment {
 
     @ManyToOne
     @JoinColumn(name = "class_id")
-    private Class classId;
+    private Class enrolledClass;
 }
 
