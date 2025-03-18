@@ -17,11 +17,12 @@ public class Grade {
     @Column(name = "grade_id")
     private Long gradeId;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "enrollment_id")
-    private Enrollment enrollmentId;
+    private Enrollment enrollment;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "grade_grade")
     private StudentGrade grade;
 }
+

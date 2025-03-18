@@ -6,6 +6,7 @@ const cleanLocal = function () {
   localStorage.removeItem("id");
   localStorage.removeItem("pw");
 };
+
 const BasicLayout = () => {
   return (
     <>
@@ -22,7 +23,6 @@ const BasicLayout = () => {
           {localStorage.getItem("id") != null ? (
             <Link
               to="/"
-              button
               className="bg-gray-700 hover:bg-gray-900 text-white text-sm font-semibold py-1 px-3 rounded transition"
               onClick={cleanLocal}
             >
@@ -31,7 +31,6 @@ const BasicLayout = () => {
           ) : (
             <Link
               to="/"
-              button
               className="bg-gray-700 hover:bg-gray-900 text-white text-sm font-semibold py-1 px-3 rounded transition"
               onClick={cleanLocal}
             >
@@ -55,7 +54,19 @@ const BasicLayout = () => {
             to="/main/courses"
             className="hover:bg-blue-700 px-4 py-2 rounded"
           >
+            강의목록
+          </Link>
+          <Link
+            to="/main/enrollment"
+            className="hover:bg-blue-700 px-4 py-2 rounded"
+          >
             수강신청
+          </Link>
+          <Link
+            to="/main/schedule"
+            className="hover:bg-blue-700 px-4 py-2 rounded"
+          >
+            시간표 조회
           </Link>
           <Link
             to="/main/grades"

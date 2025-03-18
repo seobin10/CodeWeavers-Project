@@ -26,8 +26,9 @@ CREATE TABLE `answers` (
   `answer_id` int NOT NULL AUTO_INCREMENT,
   `question_id` int NOT NULL,
   `user_id` varchar(9) NOT NULL,
-  `content` text NOT NULL,
+  `content` varchar(255) DEFAULT NULL,
   `created_at` date DEFAULT (curdate()),
+  `date` date DEFAULT NULL,
   PRIMARY KEY (`answer_id`),
   KEY `question_id` (`question_id`),
   KEY `user_id` (`user_id`),
@@ -48,12 +49,20 @@ CREATE TABLE `classes` (
   `course_id` int NOT NULL,
   `professor_id` varchar(9) DEFAULT NULL,
   `class_semester` varchar(255) DEFAULT NULL,
+  `class_capacity` int NOT NULL,
+  `class_enrolled` int NOT NULL,
+  `class_day` varchar(10) NOT NULL,
+  `class_start` int NOT NULL,
+  `class_end` int NOT NULL,
   `class_schedule` varchar(255) DEFAULT NULL,
+  `user_id` varchar(9) DEFAULT NULL,
   PRIMARY KEY (`class_id`),
   KEY `course_id` (`course_id`),
   KEY `professor_id` (`professor_id`),
+  KEY `FKr4g4x4emo8ermns7r9x4gkijh` (`user_id`),
   CONSTRAINT `classes_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE,
-  CONSTRAINT `classes_ibfk_2` FOREIGN KEY (`professor_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL
+  CONSTRAINT `classes_ibfk_2` FOREIGN KEY (`professor_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL,
+  CONSTRAINT `FKr4g4x4emo8ermns7r9x4gkijh` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -70,6 +79,9 @@ CREATE TABLE `courses` (
   `course_type` enum('MAJOR','LIBERAL') NOT NULL,
   `credit` int DEFAULT NULL,
   `department_id` int DEFAULT NULL,
+  `class_schedule` varchar(255) DEFAULT NULL,
+  `class_semester` varchar(255) DEFAULT NULL,
+  `professor_id` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`course_id`),
   UNIQUE KEY `course_name` (`course_name`),
   KEY `department_id` (`department_id`),
@@ -141,7 +153,7 @@ CREATE TABLE `questions` (
   `question_id` int NOT NULL AUTO_INCREMENT,
   `user_id` varchar(9) NOT NULL,
   `title` varchar(255) NOT NULL,
-  `content` text NOT NULL,
+  `content` varchar(255) DEFAULT NULL,
   `created_at` date DEFAULT (curdate()),
   `status` enum('OPEN','ANSWERED') DEFAULT 'OPEN',
   `view_count` int DEFAULT '0',
@@ -185,4 +197,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-18 12:45:07
+-- Dump completed on 2025-03-18 16:23:17

@@ -30,7 +30,7 @@ UNLOCK TABLES;
 
 LOCK TABLES `classes` WRITE;
 /*!40000 ALTER TABLE `classes` DISABLE KEYS */;
-INSERT INTO `classes` VALUES (1,1,'P001','2024-1','월 9:00-11:00',NULL),(2,2,'P001','2024-1','화 14:00-16:00',NULL),(3,3,NULL,'2024-1','수 10:00-12:00',NULL),(4,4,'P002','2024-1','목 13:00-15:00',NULL),(5,5,NULL,'2024-1','금 15:00-17:00',NULL);
+INSERT INTO `classes` VALUES (1,1,'P001','2024-1',30,0,'월',1,2,NULL,NULL),(2,2,'P001','2024-1',30,0,'화',3,3,NULL,NULL),(3,3,NULL,'2024-1',30,0,'수',4,6,NULL,NULL),(4,4,'P002','2024-1',30,0,'목',2,3,NULL,NULL),(5,5,NULL,'2024-1',30,0,'금',5,6,NULL,NULL);
 /*!40000 ALTER TABLE `classes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -85,6 +85,15 @@ INSERT INTO `questions` VALUES (1,'201319021','수강신청 오류가 발생했�
 UNLOCK TABLES;
 
 --
+-- Dumping data for table `student_records`
+--
+
+LOCK TABLES `student_records` WRITE;
+/*!40000 ALTER TABLE `student_records` DISABLE KEYS */;
+/*!40000 ALTER TABLE `student_records` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Dumping data for table `users`
 --
 
@@ -103,4 +112,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-18 11:51:15
+-- Dump completed on 2025-03-18 17:07:17
