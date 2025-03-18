@@ -7,6 +7,8 @@ const LoginPage = lazy(() => import("../pages/LoginPage"));
 const StudentPage = lazy(() => import("../pages/StudentPage"));
 const CoursePage = lazy(() => import("../pages/CoursePage"));
 const GradePage = lazy(() => import("../pages/GradePage"));
+const EnrollmentPage = lazy(() => import("../pages/EnrollmentPage"));
+const SchedulePage = lazy(() => import("../pages/SchedulePage"));
 
 const root = createBrowserRouter([
   {
@@ -38,6 +40,22 @@ const root = createBrowserRouter([
         element: (
           <Suspense fallback={Loading}>
             <CoursePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "enrollment",
+        element: (
+          <Suspense fallback={Loading}>
+            <EnrollmentPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "schedule",
+        element: (
+          <Suspense fallback={Loading}>
+            <SchedulePage />
           </Suspense>
         ),
       },

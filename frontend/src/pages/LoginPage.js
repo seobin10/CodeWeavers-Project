@@ -1,6 +1,7 @@
 import { useState, useContext, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../App";
+import axios from "axios";
 
 function LoginPage() {
   const { setUserId } = useContext(AuthContext);
@@ -8,59 +9,86 @@ function LoginPage() {
   const [userPassword, setUserPassword] = useState("");
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
-  const localIsNotNull = localStorage.getItem("id") != null && localStorage.getItem("pw");
+  
+
+  const localIsNotNull =
+    localStorage.getItem("id") !== null && localStorage.getItem("pw") !== null;
+
 
   const handleLogin = async () => {
     setMessage("");
+
+
+    console.log("로그인 요청 데이터:", { userId, userPassword });
+
     try {
-      const response = await fetch("http://localhost:8080/api/user/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, userPassword }),
+      const response = await axios.post("http://localhost:8080/api/user/login", {
+        userId,
+        userPassword,
       });
 
-      if (!response.ok) throw new Error("로그인 실패");
-      else {
-        localStorage.setItem("id", userId);
-        localStorage.setItem("pw", userPassword);
-      }
 
-      const userData = await response.json();
-      setUserId(userData.userId);
-
+      localStorage.setItem("id", userId);
+      localStorage.setItem("pw", userPassword);
+      setUserId(response.data.userId);
       navigate("/main");
     } catch (error) {
-      setMessage("로그인에 실패했습니다.");
+      console.error("서버 응답 에러:", error.response);
+
+      if (error.response) {
+        if (error.response.status === 401) {
+          console.error("로그인 실패: 비밀번호가 틀림");
+          setMessage("비밀번호가 일치하지 않습니다.");
+        } else if (error.response.status === 404) {
+          console.error("로그인 실패: 존재하지 않는 사용자");
+          setMessage("존재하지 않는 사용자입니다.");
+        } else {
+          console.error("로그인 요청 실패:", error);
+          setMessage("로그인에 실패했습니다.");
+        }
+      } else {
+        console.error("서버 연결 실패");
+        setMessage("서버에 연결할 수 없습니다.");
+      }
     }
   };
 
-  const autoLogin = useCallback(
-    async (localId, localPw) => {
-      setMessage("");
-      try {
-        const response = await fetch("http://localhost:8080/api/user/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: localId, password: localPw }),
-        });
 
-        const userData = await response.json();
-        setUserId(userData.userId);
-        navigate("/main");
-      } catch (error) {
-        setMessage("로그인에 실패했습니다.");
-      }
-    },
-    [navigate, setUserId]
-  );
+  const autoLogin = useCallback(async (localId, localPw) => {
+    setMessage("");
+
+    console.log("자동 로그인 시도 - ID:", localId, "PW:", localPw);
+
+    if (!localId || !localPw) {
+      console.log("자동 로그인 실패 - 저장된 ID/PW가 없음");
+      return;
+    }
+
+    try {
+      const response = await axios.post("http://localhost:8080/api/user/login", {
+        userId: localId,
+        userPassword: localPw,
+      });
+
+      setUserId(response.data.userId);
+      navigate("/main");
+    } catch (error) {
+      console.error("자동 로그인 실패:", error.response);
+      setMessage("자동 로그인에 실패했습니다.");
+    }
+  }, [navigate, setUserId]);
+
 
   useEffect(() => {
     if (localIsNotNull) {
       let localId = localStorage.getItem("id");
       let localPw = localStorage.getItem("pw");
-      autoLogin(localId, localPw);
+
+
+      if (localId && localPw) {
+        autoLogin(localId, localPw);
+      }
     }
-    return () => {};
   }, [autoLogin, localIsNotNull]);
 
   return (
