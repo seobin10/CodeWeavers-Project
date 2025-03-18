@@ -4,8 +4,9 @@ import com.cw.cwu.dto.UserDTO;
 import com.cw.cwu.domain.User;
 import com.cw.cwu.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -15,20 +16,20 @@ public class UserService {
     // 로그인
     public UserDTO login(UserDTO request) {
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
 
         // 비밀번호 검증
         if (!user.getUserPassword().equals(request.getUserPassword())) {
-            throw new RuntimeException("비밀번호가 일치하지 않습니다.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "비밀번호가 일치하지 않습니다.");
         }
+
         return convertToDTO(user);
     }
-
 
     // 정보 조회
     public UserDTO getUserInfo(String userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
         return convertToDTO(user);
     }
 
@@ -51,7 +52,7 @@ public class UserService {
     // 이메일과 전화번호 업데이트
     public UserDTO updateUser(String userId, UserDTO request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
 
         user.setUserEmail(request.getUserEmail());
         user.setUserPhone(request.getUserPhone());
@@ -60,5 +61,6 @@ public class UserService {
 
         return convertToDTO(user);
     }
+
 
 }

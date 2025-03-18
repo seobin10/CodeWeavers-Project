@@ -1,5 +1,6 @@
 import { useEffect, useContext, useState } from "react";
 import { AuthContext } from "../App";
+import axios from "axios";
 
 const GradePage = () => {
   const { userId, setUserId } = useContext(AuthContext);
@@ -7,7 +8,7 @@ const GradePage = () => {
   const [gradeInfo, setGradeInfo] = useState([]);
 
   const localId = localStorage.getItem("id");
-  
+
   useEffect(() => {
     if (userId) {
       fetchStudentInfo(userId);
@@ -19,14 +20,11 @@ const GradePage = () => {
 
   const fetchStudentInfo = async (userId) => {
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/grade/${userId}`
+      const response = await axios.get(
+        `http://localhost:8080/api/students/${userId}/grade`
       );
-      if (!response.ok) throw new Error("Failed to fetch student data");
-
-      const data = await response.json();
-      console.log("Fetched data:", data);
-      setGradeInfo(data);
+      console.log("Fetched data:", response.data);
+      setGradeInfo(response.data);
     } catch (error) {
       setMessage("성적 정보를 불러올 수 없습니다.");
     }
@@ -67,7 +65,9 @@ const GradePage = () => {
             </div>
           ))
         ) : (
-          <p className="text-center text-gray-500">성적 정보를 불러오는 중...</p>
+          <p className="text-center text-gray-500">
+            성적 정보를 불러오는 중...
+          </p>
         )}
       </div>
     </div>

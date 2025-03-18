@@ -27,10 +27,9 @@ public class Course {
     private CourseType courseType;
 
     @Column(name = "credit")
-    private int Credit;
+    private int credit;
 
     @ManyToOne
     @JoinColumn(name = "department_id")
     private Department departmentId;
-
 }
