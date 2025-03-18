@@ -33,12 +33,4 @@ public class Course {
     @JoinColumn(name = "department_id")
     private Department departmentId;
 
-    @Column(name = "class_semester")
-    private String classSemester;
-
-    @Column(name = "class_schedule")
-    private String classSchedule;
-
-    private String professorId;
-
 }
