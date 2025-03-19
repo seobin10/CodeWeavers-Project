@@ -3,9 +3,6 @@ package com.cw.cwu.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
 @Table(name = "courses")
 @Getter
@@ -14,22 +11,27 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class Course {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "course_id")
-    private Integer courseId;
+    private Integer id;
 
-    @Column(name = "course_name", unique = true, nullable = false)
-    private String courseName;
+    @Column(name = "course_name", unique = true, nullable = false, length = 255)
+    private String name;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "course_type")
-    private CourseType courseType;
+    @Column(name = "course_type", nullable = false)
+    private CourseType type;
 
     @Column(name = "credit")
-    private int credit;
+    private Integer credit;
 
     @ManyToOne
     @JoinColumn(name = "department_id")
-    private Department departmentId;
+    private Department department;
+
+    @Column(name = "course_year", nullable = false)
+    private Integer year;
 }
+
