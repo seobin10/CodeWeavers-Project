@@ -6,6 +6,7 @@ import com.cw.cwu.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -17,7 +18,6 @@ public class StudentService {
     private final UserRepository userRepository;
 
     // 학생 성적 기록 업데이트 (학점, 취득 학점, GPA 계산 후 저장)
-
     public void updateStudentRecords(String studentId) {
         List<Enrollment> enrollments = studentRepository.findEnrollmentsByStudentId(studentId);
 
@@ -27,7 +27,7 @@ public class StudentService {
         int totalCredits = 0;
 
         for (Enrollment enrollment : enrollments) {
-            Course course = enrollment.getEnrolledClass().getCourse();
+            Course course = enrollment.getEnrolledClassEntity().getCourse();
             int credit = course.getCredit();
             totalEnrolled += credit;
 
@@ -74,7 +74,6 @@ public class StudentService {
     // 학생 학년 계산 (누적 학점 기반)
     public int calculateStudentYear(String studentId) {
         Integer totalCredits = studentRepository.findTotalEarnedCreditsByStudent(studentId);
-
         if (totalCredits == null || totalCredits < 24) return 1;
         if (totalCredits < 48) return 2;
         if (totalCredits < 72) return 3;
@@ -82,7 +81,6 @@ public class StudentService {
     }
 
     // 학생 졸업 가능 여부 확인 (130학점 이상 필요)
-
     public boolean checkGraduationEligibility(String studentId) {
         Integer totalCredits = studentRepository.findTotalEarnedCreditsByStudent(studentId);
         return totalCredits != null && totalCredits >= 130;
@@ -101,5 +99,8 @@ public class StudentService {
                 .collect(Collectors.toList());
     }
 
-
+    // 학생이 수강 신청 가능한 강의 목록 조회
+    public List<Map<String, Object>> getAvailableCourses(String studentId, String courseType, Integer departmentId, Integer courseYear, String classDay, Integer classStart, Integer credit, String courseName) {
+        return studentRepository.findAvailableCourses(studentId, courseType, departmentId, courseYear, classDay, classStart, credit, courseName);
+    }
 }

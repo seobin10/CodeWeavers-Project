@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/students")
@@ -41,4 +42,20 @@ public class StudentController {
     public ResponseEntity<List<GradeDTO>> getStudentGrade(@PathVariable String studentId) {
         return ResponseEntity.ok(studentService.getStudentGrade(studentId));
     }
+
+    // 학생이 수강 신청 가능한 강의 목록 조회
+    @GetMapping("/{studentId}/enrollment")
+    public ResponseEntity<List<Map<String, Object>>> getAvailableCourses(
+            @PathVariable String studentId,
+            @RequestParam(required = false) String courseType,
+            @RequestParam(required = false) Integer departmentId,
+            @RequestParam(required = false) Integer courseYear,
+            @RequestParam(required = false) String classDay,
+            @RequestParam(required = false) Integer classStart,
+            @RequestParam(required = false) Integer credit,
+            @RequestParam(required = false) String courseName
+    ) {
+        return ResponseEntity.ok(studentService.getAvailableCourses(studentId, courseType, departmentId, courseYear, classDay, classStart, credit, courseName));
+    }
+
 }

@@ -28,13 +28,27 @@ CREATE TABLE `answers` (
   `user_id` varchar(9) NOT NULL,
   `content` varchar(255) DEFAULT NULL,
   `created_at` date DEFAULT (curdate()),
-  `date` date DEFAULT NULL,
   PRIMARY KEY (`answer_id`),
   KEY `question_id` (`question_id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `answers_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `questions` (`question_id`) ON DELETE CASCADE,
   CONSTRAINT `answers_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `buildings`
+--
+
+DROP TABLE IF EXISTS `buildings`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `buildings` (
+  `building_id` int NOT NULL AUTO_INCREMENT,
+  `building_name` varchar(50) NOT NULL,
+  PRIMARY KEY (`building_id`),
+  UNIQUE KEY `building_name` (`building_name`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -54,15 +68,14 @@ CREATE TABLE `classes` (
   `class_day` varchar(10) NOT NULL,
   `class_start` int NOT NULL,
   `class_end` int NOT NULL,
-  `class_schedule` varchar(255) DEFAULT NULL,
-  `user_id` varchar(9) DEFAULT NULL,
+  `room_id` int DEFAULT NULL,
   PRIMARY KEY (`class_id`),
   KEY `course_id` (`course_id`),
   KEY `professor_id` (`professor_id`),
-  KEY `FKr4g4x4emo8ermns7r9x4gkijh` (`user_id`),
+  KEY `fk_classes_room` (`room_id`),
   CONSTRAINT `classes_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) ON DELETE CASCADE,
   CONSTRAINT `classes_ibfk_2` FOREIGN KEY (`professor_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL,
-  CONSTRAINT `FKr4g4x4emo8ermns7r9x4gkijh` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
+  CONSTRAINT `fk_classes_room` FOREIGN KEY (`room_id`) REFERENCES `lecture_rooms` (`room_id`) ON DELETE SET NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -143,6 +156,23 @@ CREATE TABLE `grades` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `lecture_rooms`
+--
+
+DROP TABLE IF EXISTS `lecture_rooms`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `lecture_rooms` (
+  `room_id` int NOT NULL AUTO_INCREMENT,
+  `room_name` varchar(50) NOT NULL,
+  `building_id` int NOT NULL,
+  PRIMARY KEY (`room_id`),
+  UNIQUE KEY `building_id` (`building_id`,`room_name`),
+  CONSTRAINT `lecture_rooms_ibfk_1` FOREIGN KEY (`building_id`) REFERENCES `buildings` (`building_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=55 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `questions`
 --
 
@@ -160,7 +190,28 @@ CREATE TABLE `questions` (
   PRIMARY KEY (`question_id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `questions_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `student_records`
+--
+
+DROP TABLE IF EXISTS `student_records`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `student_records` (
+  `record_id` int NOT NULL AUTO_INCREMENT,
+  `student_id` varchar(9) NOT NULL,
+  `semester` varchar(10) NOT NULL,
+  `enrolled` int NOT NULL,
+  `earned` int NOT NULL,
+  `gpa` float NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`record_id`),
+  KEY `student_id` (`student_id`),
+  CONSTRAINT `student_records_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -197,4 +248,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-03-18 16:23:17
+-- Dump completed on 2025-03-19 16:44:59

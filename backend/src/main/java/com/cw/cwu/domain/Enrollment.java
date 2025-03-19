@@ -20,12 +20,12 @@ public class Enrollment {
 
     @ManyToOne
     @JoinColumn(name = "class_id")
-    private Class enrolledClass;
+    private ClassEntity enrolledClassEntity;
 
     @OneToOne(mappedBy = "enrollment", cascade = CascadeType.ALL)
     private Grade grade;
 
-    public Class getEnrolledClass() {
-        return enrolledClass;
+    public ClassEntity getEnrolledClassEntity() {
+        return enrolledClassEntity;
     }
 }
