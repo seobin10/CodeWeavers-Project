@@ -13,31 +13,22 @@ const EnrollmentPage = () => {
   const [filterCredit, setFilterCredit] = useState("전체");
 
   useEffect(() => {
-    fetchCourses();
-    fetchEnrolledCourses();
+    const loadData = async () => {
+      try {
+        const [coursesResponse, enrolledResponse] = await Promise.all([
+          axios.get("http://localhost:8080/api/courses"),
+          axios.get("http://localhost:8080/api/enrollment"),
+        ]);
+        setCourses(coursesResponse.data);
+        setSelectedCourses(
+          enrolledResponse.data.map((course) => course.courseId)
+        );
+      } catch (error) {
+        console.error("데이터 불러오기 실패:", error);
+      }
+    };
+    loadData();
   }, []);
-
-  const fetchCourses = () => {
-    axios
-      .get("http://localhost:8080/api/courses")
-      .then((response) => {
-        setCourses(response.data);
-      })
-      .catch((error) => {
-        console.error("강의 목록 조회 실패:", error);
-      });
-  };
-
-  const fetchEnrolledCourses = () => {
-    axios
-      .get("http://localhost:8080/api/enrollment")
-      .then((response) => {
-        setSelectedCourses(response.data.map((course) => course.courseId));
-      })
-      .catch((error) => {
-        console.error("수강신청 조회 실패:", error);
-      });
-  };
 
   const filteredCourses = courses.filter(
     (course) =>
@@ -56,6 +47,7 @@ const EnrollmentPage = () => {
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-md mt-4 rounded-md">
       <h2 className="text-2xl font-bold text-center mb-6">수강 신청</h2>
 
+      {/* 기존 UI 유지 */}
       <div className="space-y-4">
         <div className="grid grid-cols-3 gap-4">
           <select
@@ -128,17 +120,16 @@ const EnrollmentPage = () => {
           </select>
         </div>
 
-        <div>
-          <input
-            type="text"
-            className="border p-2 rounded w-full"
-            placeholder="강의번호 또는 강의명 검색"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
+        <input
+          type="text"
+          className="border p-2 rounded w-full"
+          placeholder="강의번호 또는 강의명 검색"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
       </div>
 
+      {/* 강의 리스트 */}
       <table className="w-full border-collapse border border-gray-300 mt-6">
         <thead>
           <tr className="bg-gray-100 text-center">

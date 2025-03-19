@@ -2,11 +2,13 @@ package com.cw.cwu.dto;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDate;
 
 @Getter
 @Setter
+@ToString
 public class UserDTO {
     private String userId; // 사용자ID(학번or교수관리자코드)
     private String userName; // 이름

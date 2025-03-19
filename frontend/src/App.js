@@ -1,11 +1,21 @@
-import { useState, createContext } from "react";
+import { useState, createContext, useEffect } from "react";
 import { RouterProvider } from "react-router-dom";
 import root from "./router/root";
 
 export const AuthContext = createContext(null);
 
 function App() {
-  const [userId, setUserId] = useState(null); // 로그인 상태 관리
+  const [userId, setUserId] = useState(() => {
+    return localStorage.getItem("id"); 
+  });
+
+  useEffect(() => {
+    if (userId) {
+      localStorage.setItem("id", userId);
+    } else {
+      localStorage.removeItem("id");
+    }
+  }, [userId]);
 
   return (
     <AuthContext.Provider value={{ userId, setUserId }}>
