@@ -1,6 +1,7 @@
 import { useEffect, useContext, useState } from "react";
 import { AuthContext } from "../App";
 import axios from "axios";
+import { updateUserInfo } from "../api/memberApi";
 
 function StudentPage() {
   const { userId, setUserId } = useContext(AuthContext);
@@ -53,14 +54,12 @@ function StudentPage() {
 
   const handleSave = async () => {
     try {
-      await axios.put(
-        `http://localhost:8080/api/user/${formData.userId}/update`,
-        {
-          userId: formData.userId, // userId는 변경 불가
-          userEmail: formData.userEmail,
-          userPhone: formData.userPhone,
-        }
-      );
+      // formData에서 필요한 정보를 추출하여 업데이트 API에 전달합니다.
+      await updateUserInfo({
+        userId: formData.userId,
+        userEmail: formData.userEmail,
+        userPhone: formData.userPhone,
+      });
       setMessage("정보가 업데이트되었습니다.");
     } catch (error) {
       setMessage("정보 수정에 실패했습니다.");

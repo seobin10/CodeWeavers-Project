@@ -1,13 +1,17 @@
-import React from "react";
+import React, { useCallback, useContext } from "react";
 import { Link, Outlet } from "react-router-dom";
 import UserInfo from "../components/UserInfo";
-
-const cleanLocal = function () {
-  localStorage.removeItem("id");
-  localStorage.removeItem("pw");
-};
+import { AuthContext } from "../App";
 
 const BasicLayout = () => {
+  const { userId, setUserId } = useContext(AuthContext);
+
+  const handleLogout = useCallback(() => {
+    setUserId(null);
+    localStorage.removeItem("id");
+    localStorage.removeItem("pw");
+  }, [setUserId]);
+
   return (
     <>
       {/* 상단 헤더 */}
@@ -20,11 +24,11 @@ const BasicLayout = () => {
         </Link>
         <div className="flex items-center space-x-6">
           <UserInfo />
-          {localStorage.getItem("id") != null ? (
+          {userId ? (
             <Link
               to="/"
               className="bg-gray-700 hover:bg-gray-900 text-white text-sm font-semibold py-1 px-3 rounded transition"
-              onClick={cleanLocal}
+              onClick={handleLogout}
             >
               로그아웃
             </Link>
@@ -32,7 +36,6 @@ const BasicLayout = () => {
             <Link
               to="/"
               className="bg-gray-700 hover:bg-gray-900 text-white text-sm font-semibold py-1 px-3 rounded transition"
-              onClick={cleanLocal}
             >
               로그인
             </Link>
@@ -40,9 +43,7 @@ const BasicLayout = () => {
         </div>
       </header>
 
-      {/* 메인 레이아웃 */}
       <div className="min-h-screen flex flex-col bg-gray-100">
-        {/* 네비게이션 바 */}
         <nav className="bg-blue-600 text-white p-3 flex justify-center space-x-6">
           <Link
             to="/main/student"
@@ -76,12 +77,10 @@ const BasicLayout = () => {
           </Link>
         </nav>
 
-        {/* 메인 컨텐츠 */}
         <main className="flex-1 mx-auto p-6 bg-white shadow-md mt-4 rounded-md w-full max-w-7xl">
           <Outlet />
         </main>
 
-        {/* 푸터 */}
         <footer className="bg-gray-800 text-white text-center py-4 text-sm mt-auto">
           © 2025 CWU | 학사관리 시스템
         </footer>
