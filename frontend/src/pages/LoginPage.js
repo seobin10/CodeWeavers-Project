@@ -1,121 +1,166 @@
-import { useState, useContext, useEffect, useCallback } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../App";
-import axios from "axios";
+
+const images = [
+  "/images/u1.jpg",
+  "/images/u2.jpg",
+  "/images/u3.jpg",
+  "/images/u4.jpg",
+  "/images/u5.jpg",
+];
 
 function LoginPage() {
   const { setUserId } = useContext(AuthContext);
-  const [userId, setLocalUserId] = useState("");
-  const [userPassword, setUserPassword] = useState("");
+  const [userId, setLocalUserId] = useState(
+    localStorage.getItem("savedUserId") || ""
+  );
+  const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [rememberUserId, setRememberUserId] = useState(
+    !!localStorage.getItem("savedUserId")
+  );
   const navigate = useNavigate();
-  
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  const localIsNotNull =
-    localStorage.getItem("id") !== null && localStorage.getItem("pw") !== null;
+  useEffect(() => {
+    const sliderInterval = 3000;
 
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
+    }, sliderInterval);
 
-  const handleLogin = async () => {
-    setMessage("");
+    return () => clearInterval(interval);
+  }, []);
 
+  const handleRememberUserId = (e) => {
+    const isChecked = e.target.checked;
+    setRememberUserId(isChecked);
 
-    console.log("로그인 요청 데이터:", { userId, userPassword });
-
-    try {
-      const response = await axios.post("http://localhost:8080/api/user/login", {
-        userId,
-        userPassword,
-      });
-
-
-      localStorage.setItem("id", userId);
-      localStorage.setItem("pw", userPassword);
-      setUserId(response.data.userId);
-      navigate("/main");
-    } catch (error) {
-      console.error("서버 응답 에러:", error.response);
-
-      if (error.response) {
-        if (error.response.status === 401) {
-          console.error("로그인 실패: 비밀번호가 틀림");
-          setMessage("비밀번호가 일치하지 않습니다.");
-        } else if (error.response.status === 404) {
-          console.error("로그인 실패: 존재하지 않는 사용자");
-          setMessage("존재하지 않는 사용자입니다.");
-        } else {
-          console.error("로그인 요청 실패:", error);
-          setMessage("로그인에 실패했습니다.");
-        }
-      } else {
-        console.error("서버 연결 실패");
-        setMessage("서버에 연결할 수 없습니다.");
-      }
+    if (isChecked) {
+      localStorage.setItem("savedUserId", userId);
+    } else {
+      localStorage.removeItem("savedUserId");
     }
   };
 
-
-  const autoLogin = useCallback(async (localId, localPw) => {
+  const handleLogin = async () => {
     setMessage("");
-
-    console.log("자동 로그인 시도 - ID:", localId, "PW:", localPw);
-
-    if (!localId || !localPw) {
-      console.log("자동 로그인 실패 - 저장된 ID/PW가 없음");
-      return;
-    }
-
     try {
-      const response = await axios.post("http://localhost:8080/api/user/login", {
-        userId: localId,
-        userPassword: localPw,
+      const response = await fetch("http://localhost:8080/api/user/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, userPassword: password }),
       });
 
-      setUserId(response.data.userId);
+      if (!response.ok) throw new Error("로그인 실패");
+
+      const userData = await response.json();
+      setUserId(userData.userId);
+
+      if (rememberUserId) {
+        localStorage.setItem("savedUserId", userId);
+      }
+
       navigate("/main");
     } catch (error) {
-      console.error("자동 로그인 실패:", error.response);
-      setMessage("자동 로그인에 실패했습니다.");
+      setMessage("로그인에 실패했습니다.");
     }
-  }, [navigate, setUserId]);
-
-
-  useEffect(() => {
-    if (localIsNotNull) {
-      let localId = localStorage.getItem("id");
-      let localPw = localStorage.getItem("pw");
-
-
-      if (localId && localPw) {
-        autoLogin(localId, localPw);
-      }
-    }
-  }, [autoLogin, localIsNotNull]);
+  };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-center mb-4">로그인</h2>
-        {message && <p className="text-red-500 text-center">{message}</p>}
-        <input
-          type="text"
-          placeholder="사용자 ID"
-          value={userId}
-          onChange={(e) => setLocalUserId(e.target.value)}
-          className="w-full p-2 border rounded mb-3"
-        />
-        <input
-          type="password"
-          placeholder="비밀번호"
-          value={userPassword}
-          onChange={(e) => setUserPassword(e.target.value)}
-          className="w-full p-2 border rounded mb-3"
-        />
-        <button
-          onClick={handleLogin}
-          className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-700"
-        >
-          로그인
-        </button>
+    <div className="relative w-full h-screen overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-full">
+        {images.map((src, index) => (
+          <img
+            key={index}
+            src={src}
+            className="absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-700"
+            alt={`bg-${index}`}
+            style={{ opacity: index === currentIndex ? 1 : 0 }}
+          />
+        ))}
+      </div>
+
+      <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 bg-opacity-40">
+        <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md flex flex-col items-center">
+          <img
+            src="/images/eonLogo.jpg"
+            alt="학교 로고"
+            className="w-20 h-20 rounded-full mb-4"
+          />
+
+          {message && (
+            <p className="text-red-500 text-center mb-2">{message}</p>
+          )}
+
+          <div className="w-full">
+            <div className="flex items-center border border-gray-300 rounded px-3 py-2 mb-3 relative">
+              <img
+                src="/images/id1.jpg"
+                alt="User Icon"
+                className="w-6 h-6 mr-2"
+              />
+              <input
+                type="text"
+                placeholder="학번"
+                value={userId}
+                onChange={(e) => setLocalUserId(e.target.value)}
+                className="w-full outline-none"
+              />
+              <label className="flex items-center absolute right-3">
+                <input
+                  type="checkbox"
+                  checked={rememberUserId}
+                  onChange={handleRememberUserId}
+                  className="mr-1"
+                />
+                <span className="text-sm text-gray-500">학번 저장</span>
+              </label>
+            </div>
+
+            <div className="flex items-center border border-gray-300 rounded px-3 py-2 mb-3">
+              <img
+                src="/images/pw2.jpg"
+                alt="Lock Icon"
+                className="w-6 h-6 mr-2"
+              />
+              <input
+                type="password"
+                placeholder="비밀번호"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full outline-none"
+              />
+            </div>
+          </div>
+
+          <ul className="flex justify-end w-full mt-2">
+            <li className="px-3 py-2 rounded">
+              <button
+                onClick={() => navigate("/member/findid")}
+                className="text-gray-400 hover:text-gray-800 text-sm"
+              >
+                학번 찾기
+              </button>
+            </li>
+            <li className="px-3 py-2 rounded">
+              <button
+                onClick={() => navigate("/member/findpw")}
+                className="text-gray-400 hover:text-gray-800 text-sm"
+              >
+                비밀번호 찾기
+              </button>
+            </li>
+          </ul>
+
+          <button
+            onClick={handleLogin}
+            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-800 mt-3"
+          >
+            로그인
+          </button>
+        </div>
       </div>
     </div>
   );

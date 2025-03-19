@@ -1,22 +1,33 @@
 package com.cw.cwu.controller;
 
 import com.cw.cwu.dto.UserDTO;
-import com.cw.cwu.service.UserService;
+import com.cw.cwu.service.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.print.DocFlavor;
 
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserService userService;
+    private final UserServiceImpl userService;
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<UserDTO> login(@RequestBody UserDTO request) {
-        return ResponseEntity.ok(userService.login(request));
+    public ResponseEntity<UserDTO> login(@RequestBody UserDTO dto) {
+        System.out.println("login controller: " +dto);
+        return ResponseEntity.ok(userService.login(dto));
+    }
+
+    @PostMapping("/finduserId")
+    public ResponseEntity<String> findId(@RequestBody UserDTO dto){
+        System.out.println("find userid controller : " +dto);
+        String userid= userService.findUserIdByUserName(dto.getUserName());
+        System.out.println("db에서 찾은  user_id "+userid);
+        return ResponseEntity.ok(userid);
     }
 
     // 사용자 정보 조회
