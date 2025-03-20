@@ -1,24 +1,32 @@
-package com.cw.cwu.service;
+package com.cw.cwu.service.student;
 
 import com.cw.cwu.domain.*;
 import com.cw.cwu.dto.GradeDTO;
-import com.cw.cwu.repository.*;
+import com.cw.cwu.repository.student.StudentRepository;
+import com.cw.cwu.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class StudentServiceImpl implements StudentService {
+public class StudentGradeServiceImpl implements StudentGradeService {
 
     private final StudentRepository studentRepository;
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+
+    // 학생 성적 조회
+    public List<GradeDTO> getStudentGrade(String studentId) {
+        return studentRepository.findGrade(studentId)
+                .stream()
+                .map(grade -> modelMapper.map(grade, GradeDTO.class))
+                .collect(Collectors.toList());
+    }
 
     // 학생 성적 기록 업데이트 (학점, 취득 학점, GPA 계산 후 저장)
     public void updateStudentRecords(String studentId) {
@@ -58,14 +66,6 @@ public class StudentServiceImpl implements StudentService {
         studentRepository.save(studentRecord);
     }
 
-    // 학생 성적 조회
-    public List<GradeDTO> getStudentGrade(String studentId) {
-        return studentRepository.findGrade(studentId)
-                .stream()
-                .map(grade -> modelMapper.map(grade, GradeDTO.class))
-                .collect(Collectors.toList());
-    }
-
     private double convertGradeToPoint(StudentGrade grade) {
         if (grade == null) return 0.0;
         return switch (grade) {
@@ -79,25 +79,5 @@ public class StudentServiceImpl implements StudentService {
             case D0 -> 1.0;
             case F -> 0.0;
         };
-    }
-
-    // 학생 학년 계산 (누적 학점 기반)
-    public int calculateStudentYear(String studentId) {
-        Integer totalCredits = studentRepository.findTotalEarnedCreditsByStudent(studentId);
-        if (totalCredits == null || totalCredits < 24) return 1;
-        if (totalCredits < 48) return 2;
-        if (totalCredits < 72) return 3;
-        return 4;
-    }
-
-    // 학생 졸업 가능 여부 확인 (130학점 이상 필요)
-    public boolean checkGraduationEligibility(String studentId) {
-        Integer totalCredits = studentRepository.findTotalEarnedCreditsByStudent(studentId);
-        return totalCredits != null && totalCredits >= 130;
-    }
-
-    // 학생이 수강 신청 가능한 강의 목록 조회
-    public List<Map<String, Object>> getAvailableCourses(String studentId, String courseType, Integer departmentId, Integer courseYear, String classDay, Integer classStart, Integer credit, String courseName) {
-        return studentRepository.findAvailableCourses(studentId, courseType, departmentId, courseYear, classDay, classStart, credit, courseName);
     }
 }

@@ -1,6 +1,6 @@
-package com.cw.cwu.controller;
+package com.cw.cwu.controller.admin;
 
-import com.cw.cwu.service.AdminService;
+import com.cw.cwu.service.admin.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
