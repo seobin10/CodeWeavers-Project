@@ -25,7 +25,7 @@ function FindidPage() {
     try {
       const data = await findUserId(formData);
       console.log("응답데이터 :", data);
-      alert(data.message || "학번 찾기 결과: " + data.userId);
+      alert(data.message || "학번 찾기 결과: " + data);
     } catch (error) {
       console.error("요청중 오류 발생 !:", error);
       alert("학번 찾기에 실패했습니다.");

@@ -15,7 +15,7 @@ const EnrollmentPage = () => {
     const loadData = async (userId) => {
       try {
         const response = await axios.get(
-          `http://localhost:8080/api/students/${userId}/enrollment`,
+          `http://localhost:8080/api/students/enrollment/${userId}/enrollment`,
           {
             params: {
               courseType: filterCategory !== "전체" ? filterCategory : null,

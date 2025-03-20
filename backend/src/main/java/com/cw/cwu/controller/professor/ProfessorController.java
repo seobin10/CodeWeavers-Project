@@ -1,6 +1,6 @@
-package com.cw.cwu.controller;
+package com.cw.cwu.controller.professor;
 
-import com.cw.cwu.service.ProfessorService;
+import com.cw.cwu.service.professor.ProfessorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

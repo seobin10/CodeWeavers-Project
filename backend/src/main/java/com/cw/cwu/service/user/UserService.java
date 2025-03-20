@@ -1,12 +1,21 @@
-package com.cw.cwu.service;
+package com.cw.cwu.service.user;
 
 import com.cw.cwu.domain.User;
+import com.cw.cwu.dto.AnswerDTO;
+import com.cw.cwu.dto.QuestionDTO;
 import com.cw.cwu.dto.UserDTO;
+
+import java.util.List;
 
 public interface UserService {
     public UserDTO login(UserDTO request);
     public UserDTO getUserInfo(String userId);
     public String findUserIdByUserName(String username);
+    //Qna
+    public List<QuestionDTO> findAllQna();
+    public List<AnswerDTO> findAnswer(Integer questionId);
+    public QuestionDTO updateCount(Integer questionId);
+
     // User 엔티티 -> UserDTO 변환
     default UserDTO convertToDTO(User user) {
         UserDTO dto = new UserDTO();

@@ -4,11 +4,13 @@ import com.cw.cwu.domain.Grade;
 import com.cw.cwu.domain.StudentGrade;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 public class GradeDTO {
     private String studentId;
     private String courseName;
