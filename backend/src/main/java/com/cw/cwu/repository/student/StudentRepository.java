@@ -1,7 +1,6 @@
-package com.cw.cwu.repository;
+package com.cw.cwu.repository.student;
 
 import com.cw.cwu.domain.Enrollment;
-import com.cw.cwu.domain.Grade;
 import com.cw.cwu.domain.StudentRecord;
 import com.cw.cwu.dto.GradeDTO;
 import org.springframework.data.jpa.repository.JpaRepository;

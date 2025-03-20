@@ -1,6 +1,6 @@
-package com.cw.cwu.service;
+package com.cw.cwu.service.admin;
 
-import com.cw.cwu.repository.UserRepository;
+import com.cw.cwu.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -8,6 +8,5 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class AdminService {
-    private final UserRepository userRepository;
 
 }

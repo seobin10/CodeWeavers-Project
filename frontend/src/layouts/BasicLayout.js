@@ -75,6 +75,9 @@ const BasicLayout = () => {
           >
             성적조회
           </Link>
+          <Link to="/main/qnalist" className="hover:bg-blue-700 px-4 py-2 rounded">
+            Q&A
+          </Link>
         </nav>
 
         <main className="flex-1 mx-auto p-6 bg-white shadow-md mt-4 rounded-md w-full max-w-7xl">
