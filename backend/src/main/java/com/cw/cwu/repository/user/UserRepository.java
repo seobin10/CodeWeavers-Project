@@ -1,4 +1,4 @@
-package com.cw.cwu.repository;
+package com.cw.cwu.repository.user;
 
 import com.cw.cwu.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;

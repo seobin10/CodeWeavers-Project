@@ -21,7 +21,7 @@ const GradePage = () => {
   const fetchStudentInfo = async (userId) => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/students/${userId}/grade`
+        `http://localhost:8080/api/students/grade/${userId}/grade`
       );
       console.log("Fetched data:", response.data);
       setGradeInfo(response.data);
