@@ -21,13 +21,44 @@ public class StudentEnrollmentController {  // 학생 수강 신청 관리 컨�
     public ResponseEntity<List<Map<String, Object>>> getAvailableCourses(
             @PathVariable("studentId") String studentId,
             @RequestParam(required = false) String courseType,
-            @RequestParam(required = false) Integer departmentId,
+            @RequestParam(required = false) String departmentName,
             @RequestParam(required = false) Integer courseYear,
             @RequestParam(required = false) String classDay,
             @RequestParam(required = false) Integer classStart,
             @RequestParam(required = false) Integer credit,
             @RequestParam(required = false) String courseName
     ) {
-        return ResponseEntity.ok(studentEnrollmentService.getAvailableCourses(studentId, courseType, departmentId, courseYear, classDay, classStart, credit, courseName));
+        return ResponseEntity.ok(studentEnrollmentService.getAvailableCourses(studentId, courseType, departmentName, courseYear, classDay, classStart, credit, courseName));
     }
+
+    @GetMapping("/departments")
+    public ResponseEntity<List<Map<String, Object>>> getDepartments() {
+        return ResponseEntity.ok(studentEnrollmentService.getDepartments());
+    }
+
+    @GetMapping("/courseTypes")
+    public ResponseEntity<List<Map<String, Object>>> getCourseTypes() {
+        return ResponseEntity.ok(studentEnrollmentService.getCourseTypes());
+    }
+
+    @GetMapping("/courseYears")
+    public ResponseEntity<List<Map<String, Object>>> getCourseYears() {
+        return ResponseEntity.ok(studentEnrollmentService.getCourseYears());
+    }
+
+    @GetMapping("/classDays")
+    public ResponseEntity<List<Map<String, Object>>> getClassDays() {
+        return ResponseEntity.ok(studentEnrollmentService.getClassDays());
+    }
+
+    @GetMapping("/classTimes")
+    public ResponseEntity<List<Map<String, Object>>> getClassTimes() {
+        return ResponseEntity.ok(studentEnrollmentService.getClassTimes());
+    }
+
+    @GetMapping("/credits")
+    public ResponseEntity<List<Map<String, Object>>> getCredits() {
+        return ResponseEntity.ok(studentEnrollmentService.getCredits());
+    }
+
 }
