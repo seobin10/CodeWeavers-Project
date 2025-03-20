@@ -34,7 +34,10 @@ public interface StudentRepository extends JpaRepository<StudentRecord, Long> {
     @Query(value = """
     SELECT 
         c.class_id AS 강의번호,
-        co.course_type AS 구분,
+        CASE
+            WHEN co.course_type = 'MAJOR' THEN '전공'
+            WHEN co.course_type = 'LIBERAL' THEN '교양'
+        END AS 구분,
         d.department_name AS 개설학과,
         co.course_year AS 강의학년,
         co.course_name AS 강의명,
@@ -55,8 +58,10 @@ public interface StudentRepository extends JpaRepository<StudentRecord, Long> {
     ) n
     ON n.number BETWEEN 0 AND (c.class_end - c.class_start)
     WHERE 
-        (:courseType IS NULL OR co.course_type = :courseType)
-        AND (:departmentId IS NULL OR co.department_id = :departmentId)
+        (:courseType IS NULL OR
+            (co.course_type = 'MAJOR' AND :courseType = '전공') OR
+            (co.course_type = 'LIBERAL' AND :courseType = '교양'))
+        AND (:departmentName IS NULL OR d.department_name = :departmentName)
         AND (:courseYear IS NULL OR co.course_year = :courseYear)
         AND (:classDay IS NULL OR c.class_day = :classDay) 
         AND (:classStart IS NULL OR c.class_start = :classStart)
@@ -68,7 +73,7 @@ public interface StudentRepository extends JpaRepository<StudentRecord, Long> {
     List<Map<String, Object>> findAvailableCourses(
             @Param("studentId") String studentId,
             @Param("courseType") String courseType,
-            @Param("departmentId") Integer departmentId,
+            @Param("departmentName") String departmentName,
             @Param("courseYear") Integer courseYear,
             @Param("classDay") String classDay,
             @Param("classStart") Integer classStart,
