@@ -25,7 +25,6 @@ function LoginPage() {
 
   useEffect(() => {
     const sliderInterval = 3000;
-
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
     }, sliderInterval);
@@ -83,7 +82,7 @@ function LoginPage() {
       </div>
 
       <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 bg-opacity-40">
-        <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md flex flex-col items-center">
+        <div className="w-full max-w-md bg-white bg-opacity-90 p-6 rounded-lg shadow-md flex flex-col items-center">
           <img
             src="/images/eonLogo.jpg"
             alt="학교 로고"
@@ -95,9 +94,9 @@ function LoginPage() {
           )}
 
           <div className="w-full">
-            <div className="flex items-center border border-gray-300 rounded px-3 py-2 mb-3 relative">
+            <div className="w-full bg-white border border-gray-300 rounded px-3 py-2 mb-3 flex items-center">
               <img
-                src="/images/id1.jpg"
+                src="/images/id.jpg"
                 alt="User Icon"
                 className="w-6 h-6 mr-2"
               />
@@ -106,22 +105,22 @@ function LoginPage() {
                 placeholder="학번"
                 value={userId}
                 onChange={(e) => setLocalUserId(e.target.value)}
-                className="w-full outline-none"
+                className="w-3/4 outline-none bg-white"
               />
-              <label className="flex items-center absolute right-3">
+              <label className="flex items-center gap-2 whitespace-nowrap">
                 <input
                   type="checkbox"
+                  className="w-4 h-3"
                   checked={rememberUserId}
                   onChange={handleRememberUserId}
-                  className="mr-1"
                 />
                 <span className="text-sm text-gray-500">학번 저장</span>
               </label>
             </div>
 
-            <div className="flex items-center border border-gray-300 rounded px-3 py-2 mb-3">
+            <div className="w-full bg-white border border-gray-300 rounded px-3 py-2 mb-3 flex items-center">
               <img
-                src="/images/pw2.jpg"
+                src="/images/pw.jpg"
                 alt="Lock Icon"
                 className="w-6 h-6 mr-2"
               />
@@ -130,15 +129,15 @@ function LoginPage() {
                 placeholder="비밀번호"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full outline-none"
+                className="w-full outline-none bg-white"
               />
             </div>
           </div>
 
-          <ul className="flex justify-end w-full mt-2">
+          <ul className="flex justify-end w-full">
             <li className="px-3 py-2 rounded">
               <button
-                onClick={() => navigate("/member/findid")}
+                onClick={() => navigate("/member/findId")}
                 className="text-gray-400 hover:text-gray-800 text-sm"
               >
                 학번 찾기
@@ -146,20 +145,35 @@ function LoginPage() {
             </li>
             <li className="px-3 py-2 rounded">
               <button
-                onClick={() => navigate("/member/findpw")}
+                onClick={() => navigate("/member/findPw")}
                 className="text-gray-400 hover:text-gray-800 text-sm"
               >
                 비밀번호 찾기
               </button>
             </li>
           </ul>
-
           <button
             onClick={handleLogin}
             className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-800 mt-3"
           >
             로그인
           </button>
+          <br></br>
+          <div className="text-xs text-gray-500 mt-4 text-left">
+            <ul>
+              <li>
+                * 최초 로그인 시 반드시 비밀번호를 변경해 주시기 바랍니다.
+              </li>
+              <li>
+                * 신입생의 경우, 초기 비밀번호는 주민등록번호 앞자리입니다.
+              </li>
+              <li>
+                * 비밀번호를 분실한 경우에는 ‘비밀번호 찾기’를 이용하시기
+                바랍니다.
+              </li>
+            </ul>
+            <br></br>
+          </div>
         </div>
       </div>
     </div>
