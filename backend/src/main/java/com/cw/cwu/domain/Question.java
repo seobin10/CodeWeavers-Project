@@ -26,7 +26,7 @@ public class Question {
     private String title;
 
     @Column(name = "content", length = 255)
-    private String question;
+    private String content;
 
     @Column(name = "created_at")
     private LocalDate questionDate;

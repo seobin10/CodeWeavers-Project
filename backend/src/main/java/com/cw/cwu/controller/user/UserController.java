@@ -5,10 +5,12 @@ import com.cw.cwu.dto.QuestionDTO;
 import com.cw.cwu.dto.UserDTO;
 import com.cw.cwu.service.user.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/user")
@@ -24,12 +26,24 @@ public class UserController {
         return ResponseEntity.ok(userService.login(dto));
     }
 
+    // 학번 찾기
     @PostMapping("/finduserId")
     public ResponseEntity<String> findId(@RequestBody UserDTO dto){
         System.out.println("find userid controller : " +dto);
         String userid= userService.findUserIdByUserName(dto.getUserName());
         System.out.println("db에서 찾은  user_id "+userid);
         return ResponseEntity.ok(userid);
+    }
+
+    // pw 찾기
+    @PostMapping("/finduserPassword")
+    public ResponseEntity<Map<String, String>> findPassword(@RequestBody UserDTO dto) {
+        System.out.println("find userpassword controller : " + dto);
+        Map<String, String> response = userService.findUserPasswordByUserIdAndEmail(dto.getUserId(), dto.getUserEmail());
+        if (response.containsKey("error")) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+        return ResponseEntity.ok(response);
     }
 
     // 사용자 정보 조회
@@ -65,5 +79,12 @@ public class UserController {
     public ResponseEntity<String> updateView(@PathVariable("questionId") Integer questionId) {
         userService.updateCount(questionId);
         return ResponseEntity.ok("조회수 업데이트가 완료되었습니다.");
+    }
+
+    // 질의응답 게시판 글 작성
+    @PostMapping("/qna/write")
+    public String writeText(@RequestBody QuestionDTO dto) {
+        Integer questionId = userService.writeQna(dto);
+        return "result : " + questionId;
     }
 }
