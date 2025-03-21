@@ -68,7 +68,7 @@ const QnaListPage = () => {
           </tbody>
         </table>
       </div><br/>
-      <button className="bg-blue-500 hover:bg-blue-700 text-white text-sm font-semibold py-1 px-3 rounded transition" onClick={() => alert("아직 구현 중인 기능입니다!")}>등록</button>
+      <Link to = "/main/qnawrite" className="bg-blue-500 hover:bg-blue-700 text-white text-sm font-semibold py-1 px-3 rounded transition">등록</Link>
     </div>
     
   );

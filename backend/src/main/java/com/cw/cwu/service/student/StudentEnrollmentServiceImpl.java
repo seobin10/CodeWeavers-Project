@@ -1,6 +1,6 @@
 package com.cw.cwu.service.student;
 
-import com.cw.cwu.domain.ClassEntity;
+import com.cw.cwu.domain.Enrollment;
 import com.cw.cwu.dto.EnrollmentRequestDTO;
 import com.cw.cwu.repository.EnrollmentRepository;
 import com.cw.cwu.repository.student.FilterRepository;
@@ -8,8 +8,8 @@ import com.cw.cwu.repository.student.StudentRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -79,31 +79,12 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional
-    public void applyForCourse(EnrollmentRequestDTO requestDto) {
-        if (enrollmentRepository.existsByStudentIdAndClassId(requestDto.getStudentId(), requestDto.getClassId())) {
-            throw new IllegalStateException("이미 신청한 강의입니다.");
-        }
 
-        ClassEntity classEntity = classRepository.findById(requestDto.getClassId())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 강의입니다."));
-
-        if (classEntity.getClassEnrolled() >= classEntity.getClassCapacity()) {
-            throw new IllegalStateException("강의 정원이 초과되었습니다.");
-        }
-
-        Enrollment enrollment = modelMapper.map(requestDto, Enrollment.class);
+    // 수강 신청 처리
+    public void applyToClass(EnrollmentRequestDTO requestDTO) {
+        Enrollment enrollment = modelMapper.map(requestDTO, Enrollment.class);
+        enrollment.setEnrollmentDate(LocalDate.now());
         enrollmentRepository.save(enrollment);
-
-        classEntity.setClassEnrolled(classEntity.getClassEnrolled() + 1);
-        classRepository.save(classEntity);
-    }
-
-    public List<EnrollmentResponseDto> getStudentEnrollments(String studentId) {
-        List<Enrollment> enrollments = enrollmentRepository.findByStudentId(studentId);
-        return enrollments.stream()
-                .map(enrollment -> modelMapper.map(enrollment, EnrollmentResponseDto.class))
-                .collect(Collectors.toList());
     }
 
 
