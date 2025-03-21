@@ -11,6 +11,7 @@ const EnrollmentPage = lazy(() => import("../pages/EnrollmentPage"));
 const SchedulePage = lazy(() => import("../pages/SchedulePage"));
 const QnaListPage = lazy(() => import("../pages/QnaListPage"));
 const QnaDataPage = lazy(() => import("../pages/QnaDataPage"))
+const QnaWritePage = lazy(() => import("../pages/QnaWritePage"));
 
 const root = createBrowserRouter([
   {
@@ -74,6 +75,14 @@ const root = createBrowserRouter([
         element: (
           <Suspense fallback={Loading}>
             <QnaDataPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "qnawrite",
+        element: (
+          <Suspense fallback={Loading}>
+            <QnaWritePage />
           </Suspense>
         ),
       },

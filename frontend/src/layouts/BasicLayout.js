@@ -13,29 +13,32 @@ const BasicLayout = () => {
   }, [setUserId]);
 
   return (
-    <>
+    <div className="flex flex-col min-h-screen bg-gray-100">
       {/* 상단 헤더 */}
-      <header className="bg-white p-4 flex justify-between items-center w-full mx-auto px-4 sm:px-8 lg:px-16 max-w-7xl">
-        <Link to="/main" className="flex items-center space-x-3 cursor-pointer">
-          <img src="/eonLogo.jpg" alt="학교 로고" className="h-14" />
-          <span className="text-xl font-semibold text-gray-700">
+      <header className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 p-4 flex justify-between items-center bg-opacity-80">
+        {/* 로고 & 시스템명 */}
+        <Link to="/main" className="flex items-center space-x-3">
+          <img src="/images/eonLogo.jpg" alt="학교 로고" className="h-16" />
+          <span className="text-lg font-extrabold text-blue-800">
             이온 학사관리 시스템
           </span>
         </Link>
-        <div className="flex items-center space-x-6">
+
+        {/* 사용자 정보 및 로그인/로그아웃 버튼 */}
+        <div className="flex items-center space-x-4">
           <UserInfo />
           {userId ? (
             <Link
               to="/"
-              className="bg-gray-700 hover:bg-gray-900 text-white text-sm font-semibold py-1 px-3 rounded transition"
+              className="bg-blue-500 hover:bg-blue-900 text-white text-sm font-semibold py-1 px-4 rounded transition"
               onClick={handleLogout}
             >
               로그아웃
             </Link>
           ) : (
             <Link
-              to="/"
-              className="bg-gray-700 hover:bg-gray-900 text-white text-sm font-semibold py-1 px-3 rounded transition"
+              to="/member/login"
+              className="bg-blue-500 hover:bg-blue-900 text-white text-sm font-semibold py-1 px-4 rounded transition"
             >
               로그인
             </Link>
@@ -43,52 +46,51 @@ const BasicLayout = () => {
         </div>
       </header>
 
-      <div className="min-h-screen flex flex-col bg-gray-100">
-        <nav className="bg-blue-600 text-white p-3 flex justify-center space-x-6">
-          <Link
-            to="/main/student"
-            className="hover:bg-blue-700 px-4 py-2 rounded"
-          >
-            정보조회
-          </Link>
-          <Link
-            to="/main/courses"
-            className="hover:bg-blue-700 px-4 py-2 rounded"
-          >
-            강의목록
-          </Link>
-          <Link
-            to="/main/enrollment"
-            className="hover:bg-blue-700 px-4 py-2 rounded"
-          >
-            수강신청
-          </Link>
-          <Link
-            to="/main/schedule"
-            className="hover:bg-blue-700 px-4 py-2 rounded"
-          >
-            시간표 조회
-          </Link>
-          <Link
-            to="/main/grades"
-            className="hover:bg-blue-700 px-4 py-2 rounded"
-          >
-            성적조회
-          </Link>
-          <Link to="/main/qnalist" className="hover:bg-blue-700 px-4 py-2 rounded">
-            Q&A
-          </Link>
+      {/* 메인 컨테이너 (사이드바 & 콘텐츠) */}
+      <div className="flex flex-1">
+        {/* 왼쪽 사이드바 */}
+        <nav className="bg-blue-800 text-white w-64 p-4 flex flex-col min-h-full">
+          <div className="flex flex-col space-y-8">
+            <Link
+              to="/main/student"
+              className="hover:bg-blue-500 px-6 py-3 mt-6"
+            >
+              정보조회 ▶
+            </Link>
+            <Link to="/main/courses" className="hover:bg-blue-500 px-6 py-3">
+              강의목록 ▶
+            </Link>
+            <Link to="/main/enrollment" className="hover:bg-blue-500 px-6 py-3">
+              수강신청 ▶
+            </Link>
+            <Link to="/main/schedule" className="hover:bg-blue-500 px-6 py-3">
+              시간표 조회 ▶
+            </Link>
+            <Link to="/main/grades" className="hover:bg-blue-500 px-6 py-3">
+              성적조회 ▶
+            </Link>
+            <Link to="/main/qnalist" className="hover:bg-blue-500 px-6 py-3">
+              Q&A ▶
+            </Link>
+          </div>
         </nav>
 
-        <main className="flex-1 mx-auto p-6 bg-white shadow-md mt-4 rounded-md w-full max-w-7xl">
+        {/* 오른쪽 콘텐츠 영역 */}
+        <main className="p-8 bg-gray-50 shadow-md w-full flex-1 pb-16">
           <Outlet />
         </main>
-
-        <footer className="bg-gray-800 text-white text-center py-4 text-sm mt-auto">
-          © 2025 CWU | 학사관리 시스템
-        </footer>
       </div>
-    </>
+
+      {/* 하단 푸터 */}
+      <footer className="bg-blue-900 text-white text-center py-4 text-sm w-full mt-auto">
+        <div>
+          01212 서울특별시 한국구 한국산로 12(한국동) 이온대학교 02-123-1234
+          webmaster@eon.ac.kr
+          <br />
+          COPYRIGHT © EON UNIVERSITY.ALL RIGHTS RESERVED.
+        </div>
+      </footer>
+    </div>
   );
 };
 
