@@ -1,0 +1,36 @@
+package com.cw.cwu.service.user;
+
+import com.cw.cwu.domain.User;
+import com.cw.cwu.dto.AnswerDTO;
+import com.cw.cwu.dto.QuestionDTO;
+import com.cw.cwu.dto.UserDTO;
+
+import java.util.List;
+
+public interface UserService {
+    public UserDTO login(UserDTO request);
+    public UserDTO getUserInfo(String userId);
+    public String findUserIdByUserName(String username);
+    //Qna
+    public List<QuestionDTO> findAllQna();
+    public List<AnswerDTO> findAnswer(Integer questionId);
+    public QuestionDTO updateCount(Integer questionId);
+    public Integer writeQna(QuestionDTO dto);
+
+    // User 엔티티 -> UserDTO 변환
+    default UserDTO convertToDTO(User user) {
+        UserDTO dto = new UserDTO();
+        dto.setUserId(user.getUserId());
+        dto.setUserName(user.getUserName());
+        dto.setUserPassword(user.getUserPassword());
+        dto.setUserBirth(user.getUserBirth());
+        dto.setUserEmail(user.getUserEmail());
+        dto.setUserPhone(user.getUserPhone());
+        dto.setRole(user.getUserRole().toString());
+        dto.setUserImgUrl(user.getUserImgUrl());
+        dto.setDepartmentId(user.getDepartment() != null ? user.getDepartment().getDepartmentId() : null);
+        dto.setDepartmentName(user.getDepartment() != null ? user.getDepartment().getDepartmentName() : null);
+        return dto;
+    }
+
+}
