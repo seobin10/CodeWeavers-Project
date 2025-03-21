@@ -76,6 +76,8 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
 
+        modelMapper.getConfiguration().setPropertyCondition(context -> context.getSource() != null);
+
         modelMapper.map(request, user);
 
         userRepository.save(user);
