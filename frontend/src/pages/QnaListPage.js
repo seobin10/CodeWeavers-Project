@@ -10,7 +10,7 @@ const QnaListPage = () => {
 
   const localId = localStorage.getItem("id");
 
-
+  let frontNum = 0;
   
   useEffect(() => {
     if (userId) {
@@ -52,7 +52,7 @@ const QnaListPage = () => {
             {qnaInfo.length > 0 ? (
               qnaInfo.map((qna, i) => (
                 <tr key={i} className="text-center">
-                  <td className="border border-gray-400 px-4 py-2">{qna.questionId}</td>
+                  <td className="border border-gray-400 px-4 py-2">{++frontNum}</td>
                   <td className="text-left border border-gray-400 px-4 py-2">
                     <Link to="/main/qnadata" state={{questionId : qna.questionId}}>{qna.title}</Link>
                   </td>
@@ -68,7 +68,7 @@ const QnaListPage = () => {
           </tbody>
         </table>
       </div><br/>
-      <Link to = "/main/qnawrite" className="bg-blue-500 hover:bg-blue-700 text-white text-sm font-semibold py-1 px-3 rounded transition">등록</Link>
+      <Link to = "/main/qnawrite" className=" bg-blue-500 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 px-3 rounded transition float-right">&nbsp;등록&nbsp;</Link>
     </div>
     
   );

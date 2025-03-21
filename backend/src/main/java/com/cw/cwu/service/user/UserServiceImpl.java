@@ -16,10 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -164,6 +161,11 @@ public class UserServiceImpl implements UserService {
                 .viewCount(dto.getViewCount()).build();
         Question result = qnaRepository.save(question);
         return result.getQuestionId();
+    }
+
+    @Override
+    public void deleteQna(Integer questionId) {
+        qnaRepository.deleteById(questionId);
     }
 }
 

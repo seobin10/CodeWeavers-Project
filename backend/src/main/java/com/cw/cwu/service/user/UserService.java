@@ -16,6 +16,7 @@ public interface UserService {
     public List<AnswerDTO> findAnswer(Integer questionId);
     public QuestionDTO updateCount(Integer questionId);
     public Integer writeQna(QuestionDTO dto);
+    public void deleteQna(Integer questionId);
 
     // User 엔티티 -> UserDTO 변환
     default UserDTO convertToDTO(User user) {

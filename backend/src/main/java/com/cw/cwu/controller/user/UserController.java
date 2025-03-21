@@ -87,4 +87,11 @@ public class UserController {
         Integer questionId = userService.writeQna(dto);
         return "result : " + questionId;
     }
+
+    // 질의응답 게시판 글 삭제
+    @DeleteMapping("/qna/delete/{questionId}")
+    public Map<String, String> clearText(@PathVariable(name = "questionId") Integer questionId){
+        userService.deleteQna(questionId);
+        return Map.of("삭제 수행 결과", "성공");
+    }
 }

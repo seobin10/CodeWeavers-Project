@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect, useCallback } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../App";
 import axios from "axios";
 
@@ -11,18 +11,8 @@ const QnaDataPage = () => {
   const [message, setMessage] = useState("");
   const [contentInfo, setContentInfo] = useState([]);
 
-  const handleView = useCallback(async () => {
-    try {
-      await axios.put(
-        `http://localhost:8080/api/user/qna/${questionId}/update`
-      );
-    } catch (error) {
-      console.log("조회수 증가 실패");
-    }
-  }, [questionId]);
-
+  const navigate = useNavigate();
   useEffect(() => {
-    handleView();
     const localQnaNumber = localStorage.getItem("No.");
 
     if (questionId) {
@@ -32,7 +22,7 @@ const QnaDataPage = () => {
       setUserId(localQnaNumber);
       fetchContentInfo(localQnaNumber);
     }
-  }, [questionId, userId, setUserId, handleView]);
+  }, [questionId, userId, setUserId]);
 
   const fetchContentInfo = async (id) => {
     try {
@@ -46,11 +36,46 @@ const QnaDataPage = () => {
     }
   };
 
+  const handleDelete = useCallback(async () => {
+    try {
+      await axios.delete(
+        `http://localhost:8080/api/user/qna/delete/${questionId}`
+      );
+    } catch (error) {
+      console.log("데이터 삭제 실패");
+    }
+  }, [questionId]);
+
+  const deleteQna = function () {
+    let pw = prompt("삭제하려면 학번을 입력하세요");
+    if (pw === userId) {
+      alert("삭제되었습니다.");
+      handleDelete();
+    } else if (pw == null) {
+      alert("취소되었습니다.");
+    } else {
+      alert("학번이 틀립니다.");
+    }
+    navigate("/main/qnalist");
+    window.location.reload();
+  };
+
   return (
     <div>
-      <h1 className="text-3xl font-bold text-left mb-6">Q&A 조회</h1>
+      <h1 className="text-3xl font-bold text-left mb-6">Q&A 삭제</h1>
       {message && <p className="text-red-500 text-center">{message}</p>}
       <hr />
+      <br />
+      <div className="bg-red-200 rounded-lg pt-4 pb-4 text-red-600 border border-red-300 flex justify-between items-center px-4">
+        <span>정말로 삭제하시겠습니까?</span>
+        <button
+          className="bg-red-600 hover:bg-red-800 text-white text-sm font-semibold rounded transition px-3 py-1
+        "
+          onClick={deleteQna}
+        >
+          삭제
+        </button>
+      </div>
       <br />
       {contentInfo.length > 0 ? (
         contentInfo.map((qna, i) => (
@@ -110,20 +135,6 @@ const QnaDataPage = () => {
         <p className="text-center text-gray-500"> 데이터를 불러오는 중...</p>
       )}
       <br />
-      <Link
-        to="/main/qnalist"
-        button
-        className=" bg-blue-500 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 px-3 rounded transition"
-      >
-        목록
-      </Link>
-      &nbsp;<Link
-        to="/main/qnadelete"
-        button
-        className=" bg-red-500 hover:bg-red-700 text-white text-sm font-semibold py-2.5 px-3 rounded transition"
-        state={{questionId : questionId}}>
-        삭제
-      </Link>
     </div>
   );
 };

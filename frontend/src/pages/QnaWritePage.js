@@ -100,7 +100,7 @@ const QnaWritePage = () => {
     postAdd(obj).then(() => {
       alert(`질문이 등록되었습니다.`);
       navigate("/main/qnalist");
-      window.location.reload()
+      window.location.reload();
     });
   };
 
@@ -163,14 +163,14 @@ const QnaWritePage = () => {
         </tbody>
       </table>
       <div>
-        <p className="text-gray-400">
-          비밀 글 여부(추후 구현) <input type="checkbox" />
+        {/* <p className="text-gray-400">
+          비밀 글 여부(추후 구현) <input type="checkbox" /> */}
           <br />
           <div className="flex float-right">
             <Link
               to="/main/qnalist"
               button
-              className="py-2.5 bg-blue-500 hover:bg-blue-700 text-white text-sm font-semibold py-1 px-3 rounded transition"
+              className=" bg-blue-500 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 px-3 rounded transition"
             >
               돌아가기
             </Link>
@@ -178,13 +178,13 @@ const QnaWritePage = () => {
             <Link
               to="/main/qnalist"
               button
-              className=" py-2.5 bg-green-500 hover:bg-green-700 text-white text-sm font-semibold py-1 px-3 rounded transition"
+              className=" bg-green-500 hover:bg-green-700 text-white text-sm font-semibold py-2.5 px-3 rounded transition"
               onClick={handleClickAdd}
             >
               작성하기
             </Link>
           </div>
-        </p>
+        {/* </p> */}
       </div>
     </div>
   );

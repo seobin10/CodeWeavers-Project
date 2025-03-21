@@ -16,9 +16,10 @@ public interface QnaRepository extends JpaRepository<Question, Integer> {
     q.created_at AS createdAt, q.status, q.view_count AS viewCount
     FROM questions q
     JOIN users u ON q.user_id = u.user_id
-    ORDER BY q.question_id ASC
+    ORDER BY q.created_at DESC, q.question_id DESC
     """, nativeQuery = true)
     List<Object[]> findAllQna();
+
 
     // 특정 아이디의 게시글 및 답변을 조회하는 쿼리
     @Query(value = """
