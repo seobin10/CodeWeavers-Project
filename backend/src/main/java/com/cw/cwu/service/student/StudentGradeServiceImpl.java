@@ -21,10 +21,16 @@ public class StudentGradeServiceImpl implements StudentGradeService {
     private final ModelMapper modelMapper;
 
     // 학생 성적 조회
+    // ConvertToDb로 ENUM 데이터 String으로 변환 (예시> A_PLUS -> A+)
     public List<GradeDTO> getStudentGrade(String studentId) {
         return studentRepository.findGrade(studentId)
                 .stream()
-                .map(grade -> modelMapper.map(grade, GradeDTO.class))
+                .map(grade -> {
+                    GradeDTO dto = modelMapper.map(grade, GradeDTO.class);
+                    String changeGrade = grade.ConvertToDb(StudentGrade.valueOf(grade.getGrade()));
+                    dto.setGrade(changeGrade);
+                    return dto;
+                })
                 .collect(Collectors.toList());
     }
 
