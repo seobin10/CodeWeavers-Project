@@ -1,5 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { findUserId } from "../api/memberApi";
+
+const images = [
+  "/images/u1.jpg",
+  "/images/u2.jpg",
+  "/images/u3.jpg",
+  "/images/u4.jpg",
+  "/images/u5.jpg",
+];
 
 function FindidPage() {
   const [formData, setFormData] = useState({
@@ -7,6 +15,17 @@ function FindidPage() {
     userPhone: "",
     userEmail: "",
   });
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const sliderInterval = 3000;
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
+    }, sliderInterval);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -22,6 +41,7 @@ function FindidPage() {
       return;
     }
     console.log("요청 데이터:", formData);
+
     try {
       const data = await findUserId(formData);
       console.log("응답데이터 :", data);
@@ -31,16 +51,27 @@ function FindidPage() {
       alert("학번 찾기에 실패했습니다.");
     }
   };
-  return (
-    <div className="flex flex-col items-center justify-center py-10 bg-gray-100 w-full">
-      <div className="w-full max-w-md bg-white p-3 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-center mb-1">학번 찾기</h2>
 
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100 ">
+  return (
+    <div className="relative w-full h-screen overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-full">
+        {images.map((src, index) => (
+          <img
+            key={index}
+            src={src}
+            className="absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-700"
+            alt={`배경 이미지 ${index + 1}`}
+            style={{ opacity: index === currentIndex ? 1 : 0 }}
+          />
+        ))}
+      </div>
+
+      <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 bg-opacity-40">
+        <div className="w-full max-w-md bg-white bg-opacity-90 p-6 rounded-lg shadow-md flex flex-col items-center">
           <img
             src="/images/eonLogo.jpg"
             alt="학교 로고"
-            className="w-24 h-24 rounded-full mb-4"
+            className="w-20 h-20 rounded-full mb-4"
           />
 
           <form onSubmit={handleFindUserId} className="space-y-3">
@@ -51,7 +82,7 @@ function FindidPage() {
               onChange={handleChange}
               placeholder="이름"
               className="w-full p-2 border rounded"
-              requirednp
+              required
             />
 
             <input
@@ -69,14 +100,14 @@ function FindidPage() {
               name="userPhone"
               value={formData.userPhone}
               onChange={handleChange}
-              placeholder="010-****-****"
+              placeholder="010-0000-0000"
               className="w-full p-2 border rounded"
               required
             />
 
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-800"
+              className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-700"
             >
               학번 찾기
             </button>
