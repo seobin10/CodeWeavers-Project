@@ -1,5 +1,6 @@
 package com.cw.cwu.controller.student;
 
+import com.cw.cwu.dto.EnrollmentRequestDTO;
 import com.cw.cwu.service.student.StudentEnrollmentService;
 
 import lombok.RequiredArgsConstructor;
@@ -61,4 +62,11 @@ public class StudentEnrollmentController {  // 학생 수강 신청 관리 컨�
         return ResponseEntity.ok(studentEnrollmentService.getCredits());
     }
 
+    @PostMapping("/{studentId}/enrollment")
+    public ResponseEntity<String> enroll(@RequestBody EnrollmentRequestDTO requestDTO) {
+        System.out.println("등록  controller ");
+        String result=  studentEnrollmentService.applyToClass(requestDTO);
+        System.out.println("result controller:"+result);
+        return ResponseEntity.ok(result);
+    }
 }

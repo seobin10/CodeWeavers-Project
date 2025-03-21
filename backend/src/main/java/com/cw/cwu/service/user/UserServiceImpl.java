@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
     public UserDTO updateUser(String userId, UserDTO request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
-
+        modelMapper.getConfiguration().setPropertyCondition(context -> context.getSource() != null);
         modelMapper.map(request, user);
 
         userRepository.save(user);
@@ -164,4 +164,6 @@ public class UserServiceImpl implements UserService {
         return result.getQuestionId();
     }
 }
+
+
 
