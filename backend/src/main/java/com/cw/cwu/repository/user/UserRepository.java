@@ -15,6 +15,10 @@ public interface UserRepository extends JpaRepository<User, String> {
         // JPQL을 사용하여 userName으로 userId만 조회하는 메서드
         @Query("select u.userId from User u where u.userName = :userName")
         Optional<String> findUserIdByUserName(@Param("userName") String userName);
+
+        // 비밀번호 찾기(Optional 사용)
+        @Query("select u.userPassword from User u where u.userId = :userId and u.userEmail = :userEmail")
+        Optional<String> findUserPasswordByUserIdAndEmail(@Param("userId") String userId, @Param("userEmail") String userEmail);
 }
 
 

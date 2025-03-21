@@ -12,11 +12,12 @@ import java.util.List;
 public interface QnaRepository extends JpaRepository<Question, Integer> {
     // 전체 리스트를 조회하는 쿼리
     @Query(value = """
-        SELECT q.question_id AS questionId, q.title, u.user_name AS userName, 
-        q.created_at AS createdAt, q.status, q.view_count AS viewCount
-        FROM questions q
-        JOIN users u ON q.user_id = u.user_id
-        """, nativeQuery = true)
+    SELECT q.question_id AS questionId, q.title, q.content, u.user_name AS userName, 
+    q.created_at AS createdAt, q.status, q.view_count AS viewCount
+    FROM questions q
+    JOIN users u ON q.user_id = u.user_id
+    ORDER BY q.question_id ASC
+    """, nativeQuery = true)
     List<Object[]> findAllQna();
 
     // 특정 아이디의 게시글 및 답변을 조회하는 쿼리
@@ -28,4 +29,6 @@ public interface QnaRepository extends JpaRepository<Question, Integer> {
     WHERE q.question_id = :questionId
     """, nativeQuery = true)
     List<Object[]> findAnswer(@Param("questionId") Integer questionId);
+
+
 }
