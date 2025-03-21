@@ -1,17 +1,29 @@
 import React, { useContext, useState, useEffect, useCallback } from "react";
-import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../App";
 import axios from "axios";
 
 const QnaDataPage = () => {
   const location = useLocation();
   const questionId = location.state?.questionId;
-
+  const userName = localStorage.getItem("name");
   const { userId, setUserId } = useContext(AuthContext);
+  const [userInfo, setUserInfo] = useState(null);
+  const [userData, setUserData] = useState({
+    userName: "",
+    userId: "",
+    userBirth: "",
+    userEmail: "",
+    userPhone: "",
+    userImgUrl: "",
+    departmentName: "",
+  });
+
   const [message, setMessage] = useState("");
   const [contentInfo, setContentInfo] = useState([]);
-
   const navigate = useNavigate();
+  console.log(userName);
+
   useEffect(() => {
     const localQnaNumber = localStorage.getItem("No.");
 
@@ -36,6 +48,27 @@ const QnaDataPage = () => {
     }
   };
 
+  const fetchUserInfo = async (userId) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/api/user/${userId}`
+      );
+      setUserInfo(response.data);
+      setUserData({
+        userName: response.data.userName,
+        userId: response.data.userId,
+        userBirth: response.data.userBirth,
+        userEmail: response.data.userEmail,
+        userPhone: response.data.userPhone,
+        userImgUrl: response.data.userImgUrl,
+        departmentName: response.data.departmentName || "",
+      });
+      return response.data;
+    } catch (error) {
+      setMessage("유저 정보를 불러올 수 없습니다.");
+    }
+  };
+
   const handleDelete = useCallback(async () => {
     try {
       await axios.delete(
@@ -46,19 +79,29 @@ const QnaDataPage = () => {
     }
   }, [questionId]);
 
-  const deleteQna = function () {
-    let pw = prompt("삭제하려면 학번을 입력하세요");
-    if (pw === userId) {
+  const deleteQna = async () => {
+    let currentName = userData.userName;
+    const writerName = contentInfo[0]?.userName;
+  
+    if (!currentName) {
+      const fetched = await fetchUserInfo(userId);  
+      currentName = fetched?.userName;              
+    }
+  
+    console.log("currentName:", currentName);
+    console.log("writerName:", writerName);
+  
+    if (currentName === writerName) {
       alert("삭제되었습니다.");
       handleDelete();
-    } else if (pw == null) {
-      alert("취소되었습니다.");
+      navigate("/main/qnalist");
+      window.location.reload();
     } else {
-      alert("학번이 틀립니다.");
+      alert("작성자만 삭제할 수 있습니다!");
+      navigate("/main/qnalist");
     }
-    navigate("/main/qnalist");
-    window.location.reload();
   };
+  
 
   return (
     <div>

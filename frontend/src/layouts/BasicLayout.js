@@ -5,7 +5,6 @@ import { AuthContext } from "../App";
 
 const BasicLayout = () => {
   const { userId, setUserId } = useContext(AuthContext);
-
   const handleLogout = useCallback(() => {
     setUserId(null);
     localStorage.removeItem("id");

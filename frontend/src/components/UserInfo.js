@@ -38,7 +38,11 @@ const UserInfo = () => {
       <span className="font-semibold">
         성명: {processedUserInfo.userName} ({processedUserInfo.userId})
       </span>{" "}
-      |<span className="font-semibold"> 학과: {processedUserInfo.departmentName || "N/A"}</span>
+      |
+      <span className="font-semibold">
+        {" "}
+        학과: {processedUserInfo.departmentName || "N/A"}
+      </span>
     </div>
   ) : (
     "로그인 필요"

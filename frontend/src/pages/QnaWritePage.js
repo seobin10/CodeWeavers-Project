@@ -75,7 +75,6 @@ const QnaWritePage = () => {
         userImgUrl: response.data.userImgUrl,
         departmentName: response.data.departmentName || "",
       });
-      console.log("유저 정보 로딩 완료 : ", userInfo);
     } catch (error) {
       setMessage("유저 정보를 불러올 수 없습니다.");
     }
