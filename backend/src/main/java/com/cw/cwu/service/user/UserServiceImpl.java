@@ -147,11 +147,10 @@ public class UserServiceImpl implements UserService {
     }
 
     // Q&A 작성
-    public Integer writeQna(@RequestBody QuestionDTO dto) {
-        String userId = findUserIdByUserName(dto.getUserName());
-
+    public Integer writeQna(QuestionDTO dto, String userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(()->new RuntimeException("userId 데이터를 찾을 수 없습니다."));
+                .orElseThrow(() -> new RuntimeException("userId 데이터를 찾을 수 없습니다."));
+
         Question question = Question.builder()
                 .questionId(dto.getQuestionId())
                 .title(dto.getTitle())
@@ -159,9 +158,36 @@ public class UserServiceImpl implements UserService {
                 .userId(user)
                 .questionDate(dto.getCreatedAt())
                 .status(dto.statusToEnum(dto.getStatus()))
-                .viewCount(dto.getViewCount()).build();
+                .viewCount(dto.getViewCount())
+                .build();
+
         Question result = qnaRepository.save(question);
         return result.getQuestionId();
+    }
+
+    // Q&A 삭제
+    @Override
+    public void deleteQna(Integer questionId) {
+        qnaRepository.deleteById(questionId);
+    }
+
+    // Q&A 작성자 Id 가져오기
+    @Override
+    public String findQnaId(Integer questionId) {
+        Question question = qnaRepository.findById(questionId)
+                .orElseThrow(() -> new RuntimeException("게시글 아이디 데이터를 찾을 수 없습니다."));
+        return question.getUserId().getUserId();
+    }
+
+    @Override
+    public void editQna(QuestionDTO dto) {
+        Optional<Question> result = qnaRepository.findById(dto.getQuestionId());
+
+        Question question = result.orElseThrow();
+        question.editTitle(dto.getTitle());
+        question.editContent(dto.getContent());
+
+        qnaRepository.save(question);
     }
 }
 
