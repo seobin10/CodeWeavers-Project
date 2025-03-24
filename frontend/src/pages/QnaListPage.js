@@ -2,16 +2,19 @@ import React, { useContext, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../App";
 import axios from "axios";
+import PageComponent from "../components/PageComponent";
 
 const QnaListPage = () => {
   const { userId, setUserId } = useContext(AuthContext);
   const [message, setMessage] = useState("");
   const [qnaInfo, setQnaInfo] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemCount = 15;
 
   const localId = localStorage.getItem("id");
 
+  let frontNum = 0;
 
-  
   useEffect(() => {
     if (userId) {
       fetchQnaInfo(userId);
@@ -23,12 +26,23 @@ const QnaListPage = () => {
 
   const fetchQnaInfo = async (userId) => {
     try {
-      const response = await axios.get("http://localhost:8080/api/user/qna/list");
+      const response = await axios.get(
+        "http://localhost:8080/api/user/qna/list"
+      );
       setQnaInfo(response.data);
     } catch (error) {
       setMessage("Q&A 정보를 불러올 수 없습니다.");
     }
   };
+
+  const handlePage = (page) => {
+    setCurrentPage(page);
+  };
+
+  const lastItem = currentPage * itemCount;
+  const firstItem = lastItem - itemCount;
+  const currentItem = qnaInfo.slice(firstItem, lastItem);
+  const totalPage = Math.ceil(qnaInfo.length / itemCount);
 
   return (
     <div>
@@ -49,28 +63,57 @@ const QnaListPage = () => {
             </tr>
           </thead>
           <tbody>
-            {qnaInfo.length > 0 ? (
-              qnaInfo.map((qna, i) => (
+            {currentItem.length > 0 ? (
+              currentItem.map((qna, i) => (
                 <tr key={i} className="text-center">
-                  <td className="border border-gray-400 px-4 py-2">{qna.questionId}</td>
-                  <td className="text-left border border-gray-400 px-4 py-2">
-                    <Link to="/main/qnadata" state={{questionId : qna.questionId}}>{qna.title}</Link>
+                  <td className="border border-gray-400 px-4 py-2">
+                    {firstItem + i + 1}
                   </td>
-                  <td className="border border-gray-400 px-4 py-2">{qna.userName}</td>
-                  <td className="border border-gray-400 px-4 py-2">{qna.createdAt}</td>
-                  <td className="border border-gray-400 px-4 py-2">{qna.viewCount}</td>
-                  <td className="border border-gray-400 px-4 py-2">{qna.status}</td>
+                  <td className="text-left border border-gray-400 px-4 py-2">
+                    <Link
+                      to="/main/qnadata"
+                      state={{ questionId: qna.questionId }}
+                    >
+                      {qna.title}
+                    </Link>
+                  </td>
+                  <td className="border border-gray-400 px-4 py-2">
+                    {qna.userName}
+                  </td>
+                  <td className="border border-gray-400 px-4 py-2">
+                    {qna.createdAt}
+                  </td>
+                  <td className="border border-gray-400 px-4 py-2">
+                    {qna.viewCount}
+                  </td>
+                  <td className="border border-gray-400 px-4 py-2">
+                    {qna.status}
+                  </td>
                 </tr>
               ))
             ) : (
-              <p className="text-center text-gray-500">Q&A 정보를 불러오는 중...</p>
+              <tr>
+                <td colSpan="6" className="text-center text-gray-500 py-4">
+                  Q&A 정보를 불러오는 중...
+                </td>
+              </tr>
             )}
           </tbody>
         </table>
-      </div><br/>
-      <Link to = "/main/qnawrite" className="bg-blue-500 hover:bg-blue-700 text-white text-sm font-semibold py-1 px-3 rounded transition">등록</Link>
+        <PageComponent
+          currentPage={currentPage}
+          totalPage={totalPage}
+          onPageChange={handlePage}
+        />
+      </div>
+      <br />
+      <Link
+        to="/main/qnawrite"
+        className=" bg-blue-500 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 px-3 rounded transition float-right"
+      >
+        &nbsp;등록&nbsp;
+      </Link>
     </div>
-    
   );
 };
 
