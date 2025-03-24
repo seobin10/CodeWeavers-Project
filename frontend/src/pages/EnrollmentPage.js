@@ -4,13 +4,17 @@ import {
   getFilters,
   searchCourses,
   enrollCourse,
-  getMyCourses,
 } from "../api/enrollmentApi";
+import PageComponent from "../components/PageComponent";
 
 const EnrollmentPage = () => {
   const { userId, setUserId } = useContext(AuthContext);
-  const [courses, setCourses] = useState([]);
-  const [timetable, setTimetable] = useState([]);
+  const [courses, setCourses] = useState({
+    dtoList: [],
+    totalPage: 0,
+    current: 1,
+    totalCount: 0,
+  });
 
   const [filters, setFilters] = useState({
     departments: [],
@@ -62,22 +66,20 @@ const EnrollmentPage = () => {
     fetchFilters();
   }, [userId, setUserId]);
 
-  useEffect(() => {
-    const fetchMyEnrollments = async () => {
-      try {
-        const response = await getMyCourses(userId);
-        setTimetable(response.data);
-      } catch (error) {
-        console.error("내 수강 목록 불러오기 실패:", error);
-      }
-    };
 
+  // 페이지 첫화면에 바로 구현
+  useEffect(() => {
     if (userId) {
-      fetchMyEnrollments();
+      handleSearch(1);
     }
   }, [userId]);
 
-  const handleSearch = async () => {
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const handleSearch = async (page = 1, size = 15) => {
+    const safePage = isNaN(Number(page)) ? 1 : Number(page);
+    const safeSize = isNaN(Number(size)) ? 15 : Number(size);
     try {
       const response = await searchCourses(userId, {
         courseName: searchQuery !== "" ? searchQuery : null,
@@ -87,49 +89,40 @@ const EnrollmentPage = () => {
         classDay: filterDay !== "전체" ? filterDay : null,
         classStart: filterTime !== "전체" ? parseInt(filterTime) : null,
         credit: filterCredit !== "전체" ? parseInt(filterCredit) : null,
+        page : safePage,
+        size : safeSize,
       });
 
       setCourses(response.data);
+      setCurrentPage(page); // 현재 페이지 저장
     } catch (error) {
       console.error("데이터 불러오기 실패:", error);
     }
   };
 
   const handleEnroll = async (course) => {
-    const isAlreadyEnrolled = timetable.some(
-      (c) => c.강의번호 === course.강의번호
-    );
-    if (isAlreadyEnrolled) {
-      alert("이미 시간표에 추가된 강의입니다!");
-      return;
-    }
-  
     try {
       const response = await enrollCourse(userId, {
         studentId: userId,
         classId: course.강의번호,
       });
-    
-      const msg = typeof response.data === "string" 
-        ? response.data 
-        : response.data.message ?? "응답 메시지를 확인할 수 없습니다.";
-    
-      alert(msg); 
-    
 
-      if (msg === "수강 신청에 성공하였습니다") {
-        // const updated = await getMyCourses(userId);  미구현
-        // setTimetable(updated.data);
-      }
-    
+      const msg =
+        typeof response.data === "string"
+          ? response.data
+          : response.data.message ?? "응답 메시지를 확인할 수 없습니다.";
+
+      alert(msg);
+
     } catch (error) {
       console.error("수강 신청 실패:", error);
-    
-      const msg = error.response?.data?.message 
-        ?? error.response?.data 
-        ?? error.message 
-        ?? "수강 신청 중 오류가 발생했습니다.";
-      
+
+      const msg =
+        error.response?.data?.message ??
+        error.response?.data ??
+        error.message ??
+        "수강 신청 중 오류가 발생했습니다.";
+
       alert(msg);
     }
   };
@@ -257,7 +250,7 @@ const EnrollmentPage = () => {
             </tr>
           </thead>
           <tbody>
-            {courses.map((course) => (
+            {courses.dtoList.map((course) => (
               <tr key={course.강의번호} className="text-center">
                 <td className="border p-2">{course.강의번호}</td>
                 <td className="border p-2">{course.구분}</td>
@@ -283,6 +276,11 @@ const EnrollmentPage = () => {
             ))}
           </tbody>
         </table>
+        <PageComponent
+          currentPage={currentPage}
+          totalPage={courses.totalPage}
+          onPageChange={(page) => handleSearch(Number(page))}
+        />
       </div>
     </div>
   );
