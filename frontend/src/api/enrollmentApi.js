@@ -1,4 +1,3 @@
-// src/api/enrollmentApi.js
 import axios from "axios";
 
 export const API_SERVER_HOST = "http://localhost:8080";
@@ -16,13 +15,18 @@ export const getFilters = () => {
 };
 
 export const searchCourses = (userId, params) => {
-  return axios.get(`${prefix}/${userId}/enrollment`, { params });
+  const { page, size, ...restParams } = params;
+
+  return axios.get(`${prefix}/${userId}/enrollment`, {
+    params: {
+      ...restParams,
+      page: Number(page),
+      size: Number(size),
+    },
+  });
 };
 
 export const enrollCourse = (userId, data) => {
   return axios.post(`${prefix}/${userId}/enrollment`, data);
 };
 
-export const getMyCourses = (userId) => {
-  return axios.get(`${prefix}/${userId}/mycourses`);
-};
