@@ -3,6 +3,7 @@ package com.cw.cwu.repository.student;
 import com.cw.cwu.domain.Enrollment;
 import com.cw.cwu.domain.StudentRecord;
 import com.cw.cwu.dto.GradeDTO;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -70,8 +71,24 @@ WHERE
     AND (:courseName IS NULL OR co.course_name LIKE %:courseName%)
 GROUP BY c.class_id
 ORDER BY c.class_id
-""", nativeQuery = true)
-    List<Map<String, Object>> findAvailableCourses(
+""", countQuery = """
+SELECT COUNT(DISTINCT c.class_id)
+FROM classes c
+JOIN courses co ON c.course_id = co.course_id
+LEFT JOIN departments d ON co.department_id = d.department_id
+WHERE 
+    (:courseType IS NULL OR
+        (co.course_type = 'MAJOR' AND :courseType = '전공') OR
+        (co.course_type = 'LIBERAL' AND :courseType = '교양'))
+    AND (:departmentName IS NULL OR IFNULL(d.department_name, '공통') = :departmentName)
+    AND (:courseYear IS NULL OR co.course_year = :courseYear)
+    AND (:classDay IS NULL OR c.class_day = :classDay) 
+    AND (:classStart IS NULL OR c.class_start = :classStart)
+    AND (:credit IS NULL OR co.credit = :credit)
+    AND (:courseName IS NULL OR co.course_name LIKE %:courseName%)
+""",
+            nativeQuery = true)
+    Page<Map<String, Object>> findAvailableCoursesPaged(
             @Param("studentId") String studentId,
             @Param("courseType") String courseType,
             @Param("departmentName") String departmentName,
@@ -79,7 +96,8 @@ ORDER BY c.class_id
             @Param("classDay") String classDay,
             @Param("classStart") Integer classStart,
             @Param("credit") Integer credit,
-            @Param("courseName") String courseName
+            @Param("courseName") String courseName,
+            org.springframework.data.domain.Pageable pageable
     );
 }
 

@@ -1,15 +1,24 @@
 package com.cw.cwu.service.student;
 
 import com.cw.cwu.dto.EnrollmentRequestDTO;
+import com.cw.cwu.dto.PageRequestDTO;
+import com.cw.cwu.dto.PageResponseDTO;
 
 import java.util.List;
 import java.util.Map;
 
 public interface StudentEnrollmentService {
-    List<Map<String, Object>> getAvailableCourses(
-            String studentId, String courseType, String department_name,
-            Integer courseYear, String classDay, Integer classStart,
-            Integer credit, String courseName);
+    PageResponseDTO<Map<String, Object>> getAvailableCoursesPaged(
+            String studentId,
+            String courseType,
+            String departmentName,
+            Integer courseYear,
+            String classDay,
+            Integer classStart,
+            Integer credit,
+            String courseName,
+            PageRequestDTO pageRequestDTO
+    );
 
     List<Map<String, Object>> getDepartments();
 
