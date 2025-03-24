@@ -5,13 +5,19 @@ import com.cw.cwu.domain.CourseType;
 import com.cw.cwu.domain.Enrollment;
 import com.cw.cwu.domain.User;
 import com.cw.cwu.dto.EnrollmentRequestDTO;
+import com.cw.cwu.dto.PageRequestDTO;
+import com.cw.cwu.dto.PageResponseDTO;
 import com.cw.cwu.repository.student.ClassRepository;
 import com.cw.cwu.repository.student.EnrollmentRepository;
 import com.cw.cwu.repository.student.FilterRepository;
 import com.cw.cwu.repository.student.StudentRepository;
 import com.cw.cwu.repository.user.UserRepository;
+import com.cw.cwu.util.PageUtil;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,7 +41,7 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
     private final StudentInfoService studentInfoService;
 
     // 학생이 수강 신청 가능한 강의 목록 조회
-    public List<Map<String, Object>> getAvailableCourses(
+    public PageResponseDTO<Map<String, Object>> getAvailableCoursesPaged(
             String studentId,
             String courseType,
             String departmentName,
@@ -43,8 +49,18 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
             String classDay,
             Integer classStart,
             Integer credit,
-            String courseName) {
-        return studentRepository.findAvailableCourses(studentId, courseType, departmentName, courseYear, classDay, classStart, credit, courseName);
+            String courseName,
+            PageRequestDTO pageRequestDTO
+    ) {
+
+        Pageable pageable = PageRequest.of(pageRequestDTO.getPage() - 1, pageRequestDTO.getSize()); // 0이 베이스이므로
+
+        Page<Map<String, Object>> result = studentRepository.findAvailableCoursesPaged(
+                studentId, courseType, departmentName, courseYear,
+                classDay, classStart, credit, courseName, pageable
+        );
+
+        return PageUtil.toDTO(result, pageRequestDTO.getPage());
     }
 
     // 학과 목록 필터링
