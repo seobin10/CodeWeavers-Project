@@ -12,10 +12,8 @@ import com.cw.cwu.repository.student.StudentRepository;
 import com.cw.cwu.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -153,6 +151,6 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
         // 학생 수 1 증가
         classEntity.setEnrolled(classEntity.getEnrolled() + 1);
         classRepository.save(classEntity);
-        return "성공하셨습니다";
+        return "수강 신청에 성공하였습니다";
     }
 }
