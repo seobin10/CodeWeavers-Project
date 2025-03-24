@@ -1,6 +1,8 @@
 package com.cw.cwu.controller.student;
 
 import com.cw.cwu.dto.EnrollmentRequestDTO;
+import com.cw.cwu.dto.PageRequestDTO;
+import com.cw.cwu.dto.PageResponseDTO;
 import com.cw.cwu.service.student.StudentEnrollmentService;
 
 import lombok.RequiredArgsConstructor;
@@ -19,8 +21,9 @@ public class StudentEnrollmentController {  // 학생 수강 신청 관리 컨�
 
     // 학생이 수강 신청 가능한 강의 목록 조회
     @GetMapping("/{studentId}/enrollment")
-    public ResponseEntity<List<Map<String, Object>>> getAvailableCourses(
+    public ResponseEntity<PageResponseDTO<Map<String, Object>>> getAvailableCourses(
             @PathVariable("studentId") String studentId,
+            @ModelAttribute PageRequestDTO pageRequest,
             @RequestParam(required = false) String courseType,
             @RequestParam(required = false) String departmentName,
             @RequestParam(required = false) Integer courseYear,
@@ -29,7 +32,13 @@ public class StudentEnrollmentController {  // 학생 수강 신청 관리 컨�
             @RequestParam(required = false) Integer credit,
             @RequestParam(required = false) String courseName
     ) {
-        return ResponseEntity.ok(studentEnrollmentService.getAvailableCourses(studentId, courseType, departmentName, courseYear, classDay, classStart, credit, courseName));
+        return ResponseEntity.ok(
+                studentEnrollmentService.getAvailableCoursesPaged(
+                        studentId, courseType, departmentName, courseYear,
+                        classDay, classStart, credit, courseName,
+                        pageRequest
+                )
+        );
     }
 
     @GetMapping("/departments")

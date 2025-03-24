@@ -1,4 +1,3 @@
-// src/pages/EnrollmentPage.jsx
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../App";
 import {
