@@ -101,23 +101,37 @@ const EnrollmentPage = () => {
       (c) => c.강의번호 === course.강의번호
     );
     if (isAlreadyEnrolled) {
-      alert(" 이미 시간표에 추가된 강의입니다! ");
+      alert("이미 시간표에 추가된 강의입니다!");
       return;
     }
-
+  
     try {
       const response = await enrollCourse(userId, {
         studentId: userId,
         classId: course.강의번호,
       });
+    
+      const msg = typeof response.data === "string" 
+        ? response.data 
+        : response.data.message ?? "응답 메시지를 확인할 수 없습니다.";
+    
+      alert(msg); 
+    
 
-      alert(response.data);
-
-      const updated = await getMyCourses(userId);
-      setTimetable(updated.data);
+      if (msg === "수강 신청에 성공하였습니다") {
+        // const updated = await getMyCourses(userId);  미구현
+        // setTimetable(updated.data);
+      }
+    
     } catch (error) {
       console.error("수강 신청 실패:", error);
-      alert("수강 신청 중 오류가 발생했습니다.");
+    
+      const msg = error.response?.data?.message 
+        ?? error.response?.data 
+        ?? error.message 
+        ?? "수강 신청 중 오류가 발생했습니다.";
+      
+      alert(msg);
     }
   };
   return (
