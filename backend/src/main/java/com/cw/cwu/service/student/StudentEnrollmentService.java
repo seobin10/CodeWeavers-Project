@@ -1,5 +1,7 @@
 package com.cw.cwu.service.student;
 
+import com.cw.cwu.dto.EnrollmentRequestDTO;
+
 import java.util.List;
 import java.util.Map;
 
@@ -20,4 +22,6 @@ public interface StudentEnrollmentService {
     List<Map<String, Object>> getClassTimes();
 
     List<Map<String, Object>> getCredits();
+
+    public String applyToClass(EnrollmentRequestDTO requestDTO);
 }
