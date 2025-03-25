@@ -5,9 +5,8 @@ import root from "./router/root";
 export const AuthContext = createContext(null);
 
 function App() {
-  const [userId, setUserId] = useState(() => {
-    return localStorage.getItem("id"); 
-  });
+  const [userId, setUserId] = useState(() => localStorage.getItem("id"));
+  const [userRole, setUserRole] = useState(() => localStorage.getItem("role"));
 
   useEffect(() => {
     if (userId) {
@@ -17,8 +16,16 @@ function App() {
     }
   }, [userId]);
 
+  useEffect(() => {
+    if (userRole) {
+      localStorage.setItem("role", userRole);
+    } else {
+      localStorage.removeItem("role");
+    }
+  }, [userRole]);
+
   return (
-    <AuthContext.Provider value={{ userId, setUserId }}>
+    <AuthContext.Provider value={{ userId, setUserId, userRole, setUserRole }}>
       <RouterProvider router={root} />
     </AuthContext.Provider>
   );

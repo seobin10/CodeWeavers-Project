@@ -29,7 +29,7 @@ public interface UserService {
         dto.setUserBirth(user.getUserBirth());
         dto.setUserEmail(user.getUserEmail());
         dto.setUserPhone(user.getUserPhone());
-        dto.setRole(user.getUserRole().toString());
+        dto.setUserRole(user.getUserRole().toString());
         dto.setUserImgUrl(user.getUserImgUrl());
         dto.setDepartmentId(user.getDepartment() != null ? user.getDepartment().getDepartmentId() : null);
         dto.setDepartmentName(user.getDepartment() != null ? user.getDepartment().getDepartmentName() : null);
