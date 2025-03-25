@@ -11,7 +11,7 @@ const images = [
 ];
 
 function LoginPage() {
-  const { setUserId } = useContext(AuthContext);
+  const { setUserId, setUserRole } = useContext(AuthContext);
   const [userId, setLocalUserId] = useState(
     localStorage.getItem("savedUserId") || ""
   );
@@ -56,6 +56,10 @@ function LoginPage() {
 
       const userData = await response.json();
       setUserId(userData.userId);
+      setUserRole(userData.userRole);
+
+      localStorage.setItem("id", userData.userId);
+      localStorage.setItem("role", userData.userRole);
 
       if (rememberUserId) {
         localStorage.setItem("savedUserId", userId);
