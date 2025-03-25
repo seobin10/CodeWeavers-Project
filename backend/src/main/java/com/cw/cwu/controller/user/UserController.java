@@ -83,8 +83,31 @@ public class UserController {
 
     // 질의응답 게시판 글 작성
     @PostMapping("/qna/write")
-    public String writeText(@RequestBody QuestionDTO dto) {
-        Integer questionId = userService.writeQna(dto);
+    public String writeText(@RequestBody QuestionDTO dto, @RequestParam("userId") String userId) {
+        Integer questionId = userService.writeQna(dto, userId);
         return "result : " + questionId;
+    }
+
+    // 질의응답 게시판 글 삭제
+    @DeleteMapping("/qna/delete/{questionId}")
+    public Map<String, String> clearText(@PathVariable(name = "questionId") Integer questionId){
+        userService.deleteQna(questionId);
+        return Map.of("삭제 수행 결과", "성공");
+    }
+
+    // 질의응답 아이디 찾기
+    @GetMapping("qna/find/{questionId}")
+    public ResponseEntity<String> getWriterId(@PathVariable(name = "questionId") Integer questionId) {
+        return ResponseEntity.ok(userService.findQnaId(questionId));
+    }
+
+    // 질의응답 게시판 글 수정
+    @PutMapping("qna/edit/{questionId}")
+    public Map<String, String> edited(
+            @PathVariable(name = "questionId") Integer questionId,
+            @RequestBody QuestionDTO dto) {
+        dto.setQuestionId(questionId);
+        userService.editQna(dto);
+        return Map.of("수정 수행 결과", "성공");
     }
 }
