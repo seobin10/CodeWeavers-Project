@@ -42,13 +42,13 @@ const QnaWritePage = () => {
   const localId = localStorage.getItem("id");
 
   const postAdd = async (textObj) => {
-    const headers = { "Content-Type": "application/json" };
-    const res = await axios.post(
-      "http://localhost:8080/api/user/qna/write?userId=" + userData.userId,
-      textObj,
-      {headers}
-    );
-    return res.data;
+      const headers = { "Content-Type": "application/json" };
+      const res = await axios.post(
+        "http://localhost:8080/api/user/qna/write?userId=" + userData.userId,
+        textObj,
+        {headers}
+      );
+      return res.data;
   };
 
   useEffect(() => {
@@ -97,11 +97,16 @@ const QnaWritePage = () => {
         viewCount: 0,
       };
 
-    postAdd(obj).then(() => {
-      alert(`질문이 등록되었습니다.`);
-      navigate("/main/qnalist");
-      window.location.reload();
-    });
+      if(!formData.title.trim() || !formData.content.trim()){
+        alert("제목 혹은 내용을 입력해주세요")
+        return e.preventDefault();
+      } else{
+        postAdd(obj).then(() => {
+          alert(`질문이 등록되었습니다.`);
+          navigate("/main/qnalist");
+          window.location.reload();
+      });
+    }
   };
 
   return (
