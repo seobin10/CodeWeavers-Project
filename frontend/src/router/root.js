@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import memberRouter from "./memberRouter";
 import BasicLayout from "../layouts/BasicLayout";
+import RoleGuard from "../components/RoleGuard";
 
 const Loading = <div>Loading</div>;
 const StudentPage = lazy(() => import("../pages/StudentPage"));
@@ -14,6 +15,7 @@ const QnaDataPage = lazy(() => import("../pages/QnaDataPage"))
 const QnaWritePage = lazy(() => import("../pages/QnaWritePage"));
 const QnaDeletePage = lazy(() => import("../pages/QnaDeletePage"));
 const QnaEditPage = lazy(() => import("../pages/QnaEditPage"));
+const UnauthorizedPage = lazy(() => import("../pages/UnauthorizedPage"));
 
 const root = createBrowserRouter([
   {
@@ -43,25 +45,31 @@ const root = createBrowserRouter([
       {
         path: "grades",
         element: (
+          <RoleGuard allowedRoles={["STUDENT"]}>
           <Suspense fallback={Loading}>
             <GradePage />
           </Suspense>
+          </RoleGuard>
         ),
       },
       {
         path: "enrollment",
         element: (
+          <RoleGuard allowedRoles={["STUDENT"]}>
           <Suspense fallback={Loading}>
             <EnrollmentPage />
           </Suspense>
+          </RoleGuard>
         ),
       },
       {
         path: "schedule",
         element: (
+          <RoleGuard allowedRoles={["STUDENT"]}>
           <Suspense fallback={Loading}>
             <SchedulePage />
           </Suspense>
+          </RoleGuard>
         ),
       },
       {
@@ -101,6 +109,14 @@ const root = createBrowserRouter([
         element: (
           <Suspense fallback={Loading}>
             <QnaEditPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "unauthorized",
+        element: (
+          <Suspense fallback={Loading}>
+            <UnauthorizedPage />
           </Suspense>
         ),
       },

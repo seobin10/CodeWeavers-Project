@@ -30,7 +30,5 @@ public class Enrollment {
 
     @OneToOne(mappedBy = "enrollment", cascade = CascadeType.ALL)
     private Grade grade;
-
-    @FSDFMVDFL
-
+    
 }
