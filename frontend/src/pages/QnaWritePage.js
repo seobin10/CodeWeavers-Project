@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../App";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 // 날짜 데이터 포맷팅
 let date = new Date();
@@ -42,13 +42,13 @@ const QnaWritePage = () => {
   const localId = localStorage.getItem("id");
 
   const postAdd = async (textObj) => {
-    const headers = { "Content-Type": "application/json" };
-    const res = await axios.post(
-      "http://localhost:8080/api/user/qna/write",
-      textObj,
-      {headers}
-    );
-    return res.data;
+      const headers = { "Content-Type": "application/json" };
+      const res = await axios.post(
+        "http://localhost:8080/api/user/qna/write?userId=" + userData.userId,
+        textObj,
+        {headers}
+      );
+      return res.data;
   };
 
   useEffect(() => {
@@ -75,7 +75,6 @@ const QnaWritePage = () => {
         userImgUrl: response.data.userImgUrl,
         departmentName: response.data.departmentName || "",
       });
-      console.log("유저 정보 로딩 완료 : ", userInfo);
     } catch (error) {
       setMessage("유저 정보를 불러올 수 없습니다.");
     }
@@ -92,16 +91,22 @@ const QnaWritePage = () => {
         title: formData.title,
         content: formData.content,
         userName: userData.userName,
+        userId: userData.userId,
         createdAt: today,
         status: "OPEN",
         viewCount: 0,
       };
 
-    postAdd(obj).then(() => {
-      alert(`질문이 등록되었습니다.`);
-      navigate("/main/qnalist");
-      window.location.reload()
-    });
+      if(!formData.title.trim() || !formData.content.trim()){
+        alert("제목 혹은 내용을 입력해주세요")
+        return e.preventDefault();
+      } else{
+        postAdd(obj).then(() => {
+          alert(`질문이 등록되었습니다.`);
+          navigate("/main/qnalist");
+          window.location.reload();
+      });
+    }
   };
 
   return (
@@ -151,7 +156,7 @@ const QnaWritePage = () => {
           <tr className="w-full h-96 flex-auto">
             <td colSpan={2} className="p-4">
               <input
-                placeholder="질문 내용을 작성하세요"
+                placeholder="질문 내용을 작성하세요."
                 name="content"
                 className="w-full h-96 focus-visible:outline-none"
                 maxLength={255}
@@ -163,14 +168,12 @@ const QnaWritePage = () => {
         </tbody>
       </table>
       <div>
-        <p className="text-gray-400">
-          비밀 글 여부(추후 구현) <input type="checkbox" />
           <br />
           <div className="flex float-right">
             <Link
               to="/main/qnalist"
               button
-              className="py-2.5 bg-blue-500 hover:bg-blue-700 text-white text-sm font-semibold py-1 px-3 rounded transition"
+              className=" bg-blue-500 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 px-3 rounded transition"
             >
               돌아가기
             </Link>
@@ -178,13 +181,13 @@ const QnaWritePage = () => {
             <Link
               to="/main/qnalist"
               button
-              className=" py-2.5 bg-green-500 hover:bg-green-700 text-white text-sm font-semibold py-1 px-3 rounded transition"
+              className=" bg-green-500 hover:bg-green-700 text-white text-sm font-semibold py-2.5 px-3 rounded transition"
               onClick={handleClickAdd}
             >
               작성하기
             </Link>
           </div>
-        </p>
+        {/* </p> */}
       </div>
     </div>
   );
