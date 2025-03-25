@@ -3,7 +3,7 @@ import { AuthContext } from "../App";
 import axios from "axios";
 
 const UserInfo = () => {
-  const { userId } = useContext(AuthContext);
+  const { userId, userRole } = useContext(AuthContext);
   const [userInfo, setUserInfo] = useState(null);
   const localId = localStorage.getItem("id");
 
@@ -37,8 +37,17 @@ const UserInfo = () => {
     <div className="text-sm text-gray-600">
       <span className="font-semibold">
         성명: {processedUserInfo.userName} ({processedUserInfo.userId})
-      </span>{" "}
-      |<span className="font-semibold"> 학과: {processedUserInfo.departmentName || "N/A"}</span>
+      </span>
+      {userRole === "STUDENT" && (
+        <>
+          {" "}
+          {"|"}
+          <span className="font-semibold">
+            {" "}
+            학과: {processedUserInfo.departmentName || "N/A"}
+          </span>
+        </>
+      )}
     </div>
   ) : (
     "로그인 필요"
