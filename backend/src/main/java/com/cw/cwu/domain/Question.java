@@ -37,4 +37,7 @@ public class Question {
 
     @Column(name = "view_count")
     private int viewCount;
+
+    public void editTitle(String title){this.title=title;}
+    public void editContent(String content){this.content=content;}
 }
