@@ -1,10 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../App";
-import {
-  getFilters,
-  searchCourses,
-  enrollCourse,
-} from "../api/enrollmentApi";
+import { getFilters, searchCourses, enrollCourse } from "../api/enrollmentApi";
 import PageComponent from "../components/PageComponent";
 
 const EnrollmentPage = () => {
@@ -66,14 +62,12 @@ const EnrollmentPage = () => {
     fetchFilters();
   }, [userId, setUserId]);
 
-
   // 페이지 첫화면에 바로 구현
   useEffect(() => {
     if (userId) {
       handleSearch(1);
     }
   }, [userId]);
-
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -89,8 +83,8 @@ const EnrollmentPage = () => {
         classDay: filterDay !== "전체" ? filterDay : null,
         classStart: filterTime !== "전체" ? parseInt(filterTime) : null,
         credit: filterCredit !== "전체" ? parseInt(filterCredit) : null,
-        page : safePage,
-        size : safeSize,
+        page: safePage,
+        size: safeSize,
       });
 
       setCourses(response.data);
@@ -113,7 +107,6 @@ const EnrollmentPage = () => {
           : response.data.message ?? "응답 메시지를 확인할 수 없습니다.";
 
       alert(msg);
-
     } catch (error) {
       console.error("수강 신청 실패:", error);
 
@@ -124,6 +117,9 @@ const EnrollmentPage = () => {
         "수강 신청 중 오류가 발생했습니다.";
 
       alert(msg);
+    } finally {
+      // 강의 목록 최신화
+      handleSearch(currentPage);
     }
   };
   return (
