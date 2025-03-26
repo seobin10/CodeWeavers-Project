@@ -19,6 +19,10 @@ public interface UserRepository extends JpaRepository<User, String> {
         // 비밀번호 찾기(Optional 사용)
         @Query("select u.userPassword from User u where u.userId = :userId and u.userEmail = :userEmail")
         Optional<String> findUserPasswordByUserIdAndEmail(@Param("userId") String userId, @Param("userEmail") String userEmail);
+
+        boolean existsByUserEmail(String userEmail);
+
+        boolean existsByUserPhone(String userPhone);
 }
 
 
