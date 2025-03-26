@@ -92,24 +92,27 @@ function StudentPage() {
                 name="userName"
                 value={formData.userName}
                 readOnly
-                className="w-full p-2 border rounded bg-gray-100"
+                className="bg-blue-100 border p-2 rounded w-full"
               />
+
               <label className="block font-semibold p-2 mt-2">학번</label>
               <input
                 type="text"
                 name="userId"
                 value={formData.userId}
                 readOnly
-                className="w-full p-2 border rounded bg-gray-100"
+                className="bg-blue-100 border p-2 rounded w-full"
               />
+              
               <label className="block font-semibold p-2 mt-2">생년월일</label>
               <input
                 type="text"
                 name="userBirth"
                 value={formData.userBirth}
                 readOnly
-                className="w-full p-2 border rounded bg-gray-100"
+                className="bg-blue-100 border p-2 rounded w-full"
               />
+
               <label className="block font-semibold p-2 mt-2">이메일</label>
               <input
                 type="email"
@@ -118,6 +121,7 @@ function StudentPage() {
                 onChange={handleChange}
                 className="w-full p-2 border rounded"
               />
+
               <label className="block font-semibold p-2 mt-2">전화번호</label>
               <input
                 type="text"
@@ -126,13 +130,14 @@ function StudentPage() {
                 onChange={handleChange}
                 className="w-full p-2 border rounded"
               />
+
               <label className="block font-semibold p-2 mt-2">학과</label>
               <input
                 type="text"
                 name="departmentName"
                 value={formData.departmentName}
                 readOnly
-                className="w-full p-2 border rounded bg-gray-100"
+                 className="bg-blue-100 border p-2 rounded w-full"
               />
             </div>
 
@@ -140,7 +145,7 @@ function StudentPage() {
               <button
                 type="button"
                 onClick={handleSave}
-                className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
+                className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-800"
               >
                 저장
               </button>

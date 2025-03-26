@@ -44,5 +44,6 @@ public class ClassEntity {
 
     @ManyToOne
     @JoinColumn(name = "room_id", referencedColumnName = "room_id")
-    private LectureRoom lectureRoom;
+    private LectureRoom room; // room → lectureRoom
+
 }

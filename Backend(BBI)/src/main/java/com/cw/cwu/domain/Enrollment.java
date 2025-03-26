@@ -11,6 +11,7 @@ import java.time.LocalDate;
 @Setter
 @Table(name = "enrollments")
 public class Enrollment {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "enrollment_id")
@@ -20,7 +21,6 @@ public class Enrollment {
     @JoinColumn(name = "student_id", nullable = false)
     private User student;
 
-    @Getter
     @ManyToOne
     @JoinColumn(name = "class_id", nullable = false)
     private ClassEntity enrolledClassEntity;
@@ -30,5 +30,4 @@ public class Enrollment {
 
     @OneToOne(mappedBy = "enrollment", cascade = CascadeType.ALL)
     private Grade grade;
-
 }

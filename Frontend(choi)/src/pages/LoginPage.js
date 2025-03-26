@@ -67,6 +67,12 @@ function LoginPage() {
     }
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      handleLogin();
+    }
+  };
+
   return (
     <div className="relative w-full h-screen overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-full">
@@ -105,6 +111,7 @@ function LoginPage() {
                 placeholder="학번"
                 value={userId}
                 onChange={(e) => setLocalUserId(e.target.value)}
+                onKeyDown={handleKeyPress}
                 className="w-3/4 outline-none bg-white"
               />
               <label className="flex items-center gap-2 whitespace-nowrap">
@@ -129,6 +136,7 @@ function LoginPage() {
                 placeholder="비밀번호"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={handleKeyPress}
                 className="w-full outline-none bg-white"
               />
             </div>
@@ -158,7 +166,7 @@ function LoginPage() {
           >
             로그인
           </button>
-          <br></br>
+          <br />
           <div className="text-xs text-gray-500 mt-4 text-left">
             <ul>
               <li>
@@ -172,7 +180,7 @@ function LoginPage() {
                 바랍니다.
               </li>
             </ul>
-            <br></br>
+            <br />
           </div>
         </div>
       </div>
