@@ -20,8 +20,13 @@ public class AdminUserController {
 
     @PostMapping("/users")
     public ResponseEntity<String> createUser(@RequestBody UserCreateRequestDTO dto) {
-        adminUserService.createUser(dto);
-        return ResponseEntity.ok("사용자 생성 완료");
+        String result = adminUserService.createUser(dto);
+
+        if (!result.equals("성공")) {
+            return ResponseEntity.badRequest().body(result);
+        }
+
+        return ResponseEntity.ok("사용자 생성 완료!");
     }
 
     @GetMapping("/departments")
