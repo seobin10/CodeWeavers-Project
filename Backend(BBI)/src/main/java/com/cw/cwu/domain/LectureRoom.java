@@ -18,7 +18,7 @@ public class LectureRoom {
     private Integer id;
 
     @Column(name = "room_name", nullable = false, length = 50)
-    private String name;
+    private String roomName; // name => roomName
 
     @ManyToOne
     @JoinColumn(name = "building_id", nullable = false)

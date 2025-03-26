@@ -1,12 +1,20 @@
 import React, { useContext, useEffect, useState } from "react";
-import axios from "axios";
-import { AuthContext } from "../App";
+import { AuthContext, ModalContext } from "../App";
+import { useNavigate } from "react-router-dom";
+import {
+  getFilters,
+  searchCourses,
+  enrollCourse,
+  getEnrolledCourses,
+} from "../api/enrollmentApi";
 
 const EnrollmentPage = () => {
   const { userId, setUserId } = useContext(AuthContext);
+  const { showModal } = useContext(ModalContext); // 전역 모달 연결
+  const navigate = useNavigate();
+
   const [courses, setCourses] = useState([]);
   const [timetable, setTimetable] = useState([]);
-
   const [filters, setFilters] = useState({
     departments: [],
     courseTypes: [],
@@ -39,20 +47,7 @@ const EnrollmentPage = () => {
           classDaysRes,
           classTimesRes,
           creditsRes,
-        ] = await Promise.all([
-          axios.get(
-            "http://localhost:8080/api/students/enrollment/departments"
-          ),
-          axios.get(
-            "http://localhost:8080/api/students/enrollment/courseTypes"
-          ),
-          axios.get(
-            "http://localhost:8080/api/students/enrollment/courseYears"
-          ),
-          axios.get("http://localhost:8080/api/students/enrollment/classDays"),
-          axios.get("http://localhost:8080/api/students/enrollment/classTimes"),
-          axios.get("http://localhost:8080/api/students/enrollment/credits"),
-        ]);
+        ] = await getFilters();
 
         setFilters({
           departments: departmentsRes.data,
@@ -63,7 +58,7 @@ const EnrollmentPage = () => {
           credits: creditsRes.data,
         });
       } catch (error) {
-        console.error("필터 데이터 불러오기 실패:", error);
+        console.error("시간표 불러오기 실패:", error);
       }
     };
 
@@ -71,67 +66,69 @@ const EnrollmentPage = () => {
   }, [userId, setUserId]);
 
   useEffect(() => {
-    const fetchMyEnrollments = async () => {
+    const fetchEnrolled = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:8080/api/students/enrollment/${userId}/mycourses`
-        );
+        const response = await getEnrolledCourses(userId); // 수정됨
         setTimetable(response.data);
       } catch (error) {
         console.error("내 수강 목록 불러오기 실패:", error);
       }
     };
 
-    if (userId) {
-      fetchMyEnrollments();
-    }
+    if (userId) fetchEnrolled();
   }, [userId]);
 
-  //
-
-  // 버튼 검색: 모든 필터 반영
   const handleSearch = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:8080/api/students/enrollment/${userId}/enrollment`,
-        {
-          params: {
-            courseName: searchQuery !== "" ? searchQuery : null,
-            courseType: filterCategory !== "전체" ? filterCategory : null,
-            departmentName:
-              filterDepartment !== "전체" ? filterDepartment : null,
-            courseYear: filterYear !== "전체" ? parseInt(filterYear) : null,
-            classDay: filterDay !== "전체" ? filterDay : null,
-            classStart: filterTime !== "전체" ? parseInt(filterTime) : null,
-            credit: filterCredit !== "전체" ? parseInt(filterCredit) : null,
-          },
-        }
-      );
+      const response = await searchCourses(userId, {
+        courseName: searchQuery !== "" ? searchQuery : null,
+        courseType: filterCategory !== "전체" ? filterCategory : null,
+        departmentName: filterDepartment !== "전체" ? filterDepartment : null,
+        courseYear: filterYear !== "전체" ? parseInt(filterYear) : null,
+        classDay: filterDay !== "전체" ? filterDay : null,
+        classStart: filterTime !== "전체" ? parseInt(filterTime) : null,
+        credit: filterCredit !== "전체" ? parseInt(filterCredit) : null,
+      });
+
       setCourses(response.data);
     } catch (error) {
-      console.error("데이터 불러오기 실패:", error);
+      console.error("강의 검색 실패:", error);
+      showModal("강의 검색 중 오류가 발생했습니다.");
     }
   };
 
-  // 수강 신청 담기
-  const handleEnroll = (course) => {
+  const handleEnroll = async (course) => {
     const isAlreadyEnrolled = timetable.some(
       (c) => c.강의번호 === course.강의번호
     );
     if (isAlreadyEnrolled) {
-      // 중복시 팝업 알림 !
-      alert(" 이미 시간표에 추가된 강의입니다! ");
+      showModal("이미 신청된 강의입니다!");
       return;
     }
 
-    setTimetable((prev) => [...prev, course]); // 성공시 팝업 알림 !
-    alert(`"${course.강의명}" 강의가 시간표에 추가되었습니다.`);
+    try {
+      const response = await enrollCourse(userId, {
+        studentId: userId,
+        classId: course.강의번호,
+      });
+
+      const msg = response.data;
+      if (msg === "성공") {
+        showModal(`"${course.강의명}" 강의가 시간표에 추가되었습니다!`);
+        setTimeout(() => {
+          navigate("/main/schedule");
+        }, 1000);
+      } else {
+        showModal(msg);
+      }
+    } catch (error) {
+      console.error("수강 신청 실패:", error);
+      showModal("수강 신청 중 오류가 발생했습니다.");
+    }
   };
 
-  // 수강 신청 삭제
-
   return (
-    <div className="max-w-7xl mx-auto p-2 bg-white shadow-md mt-3 rounded-md">
+    <div className="max-w-7xl mx-auto p-2 bg-slate-50 bg-opacity-40 shadow-md mt-3 rounded-md">
       <h2 className="text-3xl font-bold text-center mb-6 mt-3">
         수강 신청 목록
       </h2>
@@ -175,7 +172,6 @@ const EnrollmentPage = () => {
               </option>
             ))}
           </select>
-
           <select
             className="bg-blue-50 border p-2 rounded w-full"
             value={filterDay}
@@ -188,7 +184,6 @@ const EnrollmentPage = () => {
               </option>
             ))}
           </select>
-
           <select
             className="bg-blue-50 border p-2 rounded w-full"
             value={filterTime}
@@ -201,7 +196,6 @@ const EnrollmentPage = () => {
               </option>
             ))}
           </select>
-
           <select
             className="bg-blue-50 border p-2 rounded w-full"
             value={filterCredit}
@@ -216,7 +210,7 @@ const EnrollmentPage = () => {
           </select>
         </div>
 
-        {/* 검색창 + 버튼 */}
+        {/* 검색창 */}
         <div className="grid grid-cols-4 gap-4 items-center">
           <div className="col-span-4 relative w-full">
             <input
@@ -235,7 +229,7 @@ const EnrollmentPage = () => {
           </div>
         </div>
 
-        {/* 검색 결과 */}
+        {/* 결과 테이블 */}
         <table className="w-full border-collapse border border-gray-300">
           <thead>
             <tr className="bg-gray-100 text-center">
@@ -267,7 +261,6 @@ const EnrollmentPage = () => {
                 <td className="border p-2">{course.강의학점}</td>
                 <td className="border p-2">{course.담당교수}</td>
                 <td className="border p-2">{course.수강인원}</td>
-
                 <td className="border p-2">
                   <button
                     onClick={() => handleEnroll(course)}

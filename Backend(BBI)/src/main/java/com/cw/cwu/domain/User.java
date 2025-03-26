@@ -41,4 +41,9 @@ public class User {
     @ManyToOne
     @JoinColumn(name = "department_id")
     private Department department;
+
+    // 교수이름 반환용 메서드
+    public Object getName() {
+        return this.userName;
+    }
 }
