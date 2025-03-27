@@ -32,5 +32,10 @@ public interface StudentEnrollmentService {
 
     List<Map<String, Object>> getCredits();
 
+    List<Map<String, Object>> getMyCourses(String studentId);
+    String deleteCourse(String studentId, Integer classId);
+
+    List<Map<String, Object>> getConfirmedCourses(String studentId);
+
     public String applyToClass(EnrollmentRequestDTO requestDTO);
 }
