@@ -106,8 +106,8 @@ const QnaDeletePage = () => {
     if (currentId == writerId || userRole === "ADMIN") {
       msg =
         userRole === "ADMIN" && currentId != writerId
-          ? "관리자 권한 확인, 글이 삭제되었습니다."
-          : "본인 확인 완료! 글을 삭제했습니다.";
+          ? "관리자 권한 확인, 삭제되었습니다"
+          : "본인 확인 완료! 삭제되었습니다";
       handleDelete();
       showModal(msg);
       await WaitModalClick();
