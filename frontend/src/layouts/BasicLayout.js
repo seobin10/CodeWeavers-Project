@@ -1,19 +1,20 @@
-import React, { useCallback, useContext } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import { Link, Outlet } from "react-router-dom";
 import UserInfo from "../components/UserInfo";
 import { AuthContext } from "../App";
 
 const BasicLayout = () => {
-  
   const { userId, setUserId, userRole } = useContext(AuthContext);
-  
+  // 수강 신청 메뉴의 하위 메뉴의 상태를 제어하는 상수
+  const [openEnrollmentMenu, setOpenEnrollmentMenu] = useState(false);
+
   const handleLogout = useCallback(() => {
     setUserId(null);
     localStorage.removeItem("id");
     localStorage.removeItem("pw");
     localStorage.removeItem("role");
   }, [setUserId]);
-  
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
       {/* 상단 헤더 */}
@@ -53,21 +54,91 @@ const BasicLayout = () => {
           <div className="flex flex-col space-y-8">
             {userRole === "STUDENT" && (
               <>
-                <Link to="/main/student" className="hover:bg-blue-500 px-6 py-3 mt-6">정보조회 ▶</Link>
-                <Link to="/main/courses" className="hover:bg-blue-500 px-6 py-3">강의목록 ▶</Link>
-                <Link to="/main/enrollment" className="hover:bg-blue-500 px-6 py-3">수강신청 ▶</Link>
-                <Link to="/main/schedule" className="hover:bg-blue-500 px-6 py-3">시간표 조회 ▶</Link>
-                <Link to="/main/grades" className="hover:bg-blue-500 px-6 py-3">성적조회 ▶</Link>
-                <Link to="/main/qnalist" className="hover:bg-blue-500 px-6 py-3">Q&A ▶</Link>
+                <Link
+                  to="/main/student"
+                  className="hover:bg-blue-500 px-6 py-3 mt-6"
+                >
+                  정보조회 ▶
+                </Link>
+                <Link
+                  to="/main/courses"
+                  className="hover:bg-blue-500 px-6 py-3"
+                >
+                  강의목록 ▶
+                </Link>
+                {/* 수강신청 드롭다운 메뉴 */}
+                <div className="flex flex-col mt-2 mb-2">
+                  <button
+                    className="hover:bg-blue-500 px-6 py-3 text-left w-full"
+                    onClick={() => setOpenEnrollmentMenu((prev) => !prev)}
+                  >
+                    수강신청 {openEnrollmentMenu ? "▼" : "▶"}
+                  </button>
+                  {openEnrollmentMenu && (
+                    <div className="pl-8 space-y-3 text-sm mt-5">
+                      <Link
+                        to="/main/enrollment"
+                        className="hover:underline block"
+                      >
+                        📋 수강신청 목록
+                      </Link>
+
+                      <Link
+                        to="/main/history"
+                        className="hover:underline block"
+                      >
+                        🗂 수강신청 내역
+                      </Link>
+
+                      <Link
+                        to="/main/schedule"
+                        className="hover:underline block"
+                      >
+                        🕒 시간표 조회
+                      </Link>
+                    </div>
+                  )}
+                </div>
+                <Link to="/main/grades" className="hover:bg-blue-500 px-6 py-3">
+                  성적조회 ▶
+                </Link>
+                <Link
+                  to="/main/qnalist"
+                  className="hover:bg-blue-500 px-6 py-3"
+                >
+                  Q&A ▶
+                </Link>
               </>
             )}
             {userRole === "ADMIN" && (
               <>
-              <Link to="/main/admin/create-user" className="hover:bg-blue-500 px-6 py-3">사용자 등록 ▶</Link>
-                <Link to="/main/admin" className="hover:bg-blue-500 px-6 py-3 mt-6">관리자 대시보드 ▶</Link>
-                <Link to="/main/users" className="hover:bg-blue-500 px-6 py-3">사용자 관리 ▶</Link>
-                <Link to="/main/classes" className="hover:bg-blue-500 px-6 py-3">강의 관리 ▶</Link>
-                <Link to="/main/qnalist" className="hover:bg-blue-500 px-6 py-3">Q&A ▶</Link>
+                <Link
+                  to="/main/admin/create-user"
+                  className="hover:bg-blue-500 px-6 py-3"
+                >
+                  사용자 등록 ▶
+                </Link>
+                <Link
+                  to="/main/admin"
+                  className="hover:bg-blue-500 px-6 py-3 mt-6"
+                >
+                  관리자 대시보드 ▶
+                </Link>
+                <Link to="/main/users" className="hover:bg-blue-500 px-6 py-3">
+                  사용자 관리 ▶
+                </Link>
+                <Link
+                  to="/main/classes"
+                  className="hover:bg-blue-500 px-6 py-3"
+                >
+                  강의 관리 ▶
+                </Link>
+                <Link
+                  to="/main/qnalist"
+                  className="hover:bg-blue-500 px-6 py-3"
+                >
+                  Q&A ▶
+                </Link>
               </>
             )}
           </div>
@@ -82,8 +153,10 @@ const BasicLayout = () => {
       {/* 하단 푸터 */}
       <footer className="bg-blue-900 text-white text-center py-4 text-sm w-full mt-auto">
         <div>
-          01212 서울특별시 한국구 한국산로 12(한국동) 이온대학교 02-123-1234<br />
-          webmaster@eon.ac.kr<br />
+          01212 서울특별시 한국구 한국산로 12(한국동) 이온대학교 02-123-1234
+          <br />
+          webmaster@eon.ac.kr
+          <br />
           COPYRIGHT © EON UNIVERSITY.ALL RIGHTS RESERVED.
         </div>
       </footer>
