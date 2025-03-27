@@ -1,14 +1,16 @@
 import axios from "axios";
 import React, { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../App";
+import { AuthContext, ModalContext } from "../App";
 import { Link, useNavigate } from "react-router-dom";
+
+import { WaitModalClick } from "../components/WaitModalClick";
 
 // 날짜 데이터 포맷팅
 let date = new Date();
 let year = date.getFullYear();
 let month = date.getMonth() + 1;
-if (month<10){
-    month = "0" + month;
+if (month < 10) {
+  month = "0" + month;
 }
 let day = date.getDate();
 let today = year + "-" + month + "-" + day;
@@ -17,6 +19,7 @@ console.log(today);
 const QnaWritePage = () => {
   const navigate = useNavigate();
   const { userId, setUserId } = useContext(AuthContext);
+  const { showModal } = useContext(ModalContext);
   const [userInfo, setUserInfo] = useState(null);
   const [message, setMessage] = useState("");
   const [formData, setFormData] = useState({
@@ -39,16 +42,29 @@ const QnaWritePage = () => {
     departmentName: "",
   });
 
+  const handleSecret = (title) => {
+    let isSecret = document.getElementById("secret");
+    const hasLock = /\u{1F512}/u.test(title);
+    title = hasLock ? title.replace(/\u{1F512}\s*/gu, "") : title;
+    console.log("\u{1F512} 포함 여부:", hasLock);
+    if (!isSecret.checked) {
+      console.log("체크X");
+      return title;
+    } else {
+      console.log("체크O");
+      return "\u{1F512} " + title;
+    }
+  };
   const localId = localStorage.getItem("id");
 
   const postAdd = async (textObj) => {
-      const headers = { "Content-Type": "application/json" };
-      const res = await axios.post(
-        "http://localhost:8080/api/user/qna/write?userId=" + userData.userId,
-        textObj,
-        {headers}
-      );
-      return res.data;
+    const headers = { "Content-Type": "application/json" };
+    const res = await axios.post(
+      "http://localhost:8080/api/user/qna/write?userId=" + userData.userId,
+      textObj,
+      { headers }
+    );
+    return res.data;
   };
 
   useEffect(() => {
@@ -85,10 +101,15 @@ const QnaWritePage = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleClickAdd = (e) => {
-    const obj = {
+  const handleClickAdd = async (e) => {
+    if (!formData.title.trim() || !formData.content.trim()) {
+      showModal("제목 혹은 내용을 입력해주세요");
+      return e.preventDefault();
+    } else {
+      const processdTitle = handleSecret(formData.title);
+      const obj = {
         questionId: null,
-        title: formData.title,
+        title: processdTitle,
         content: formData.content,
         userName: userData.userName,
         userId: userData.userId,
@@ -96,18 +117,15 @@ const QnaWritePage = () => {
         status: "OPEN",
         viewCount: 0,
       };
-
-      if(!formData.title.trim() || !formData.content.trim()){
-        alert("제목 혹은 내용을 입력해주세요")
-        return e.preventDefault();
-      } else{
-        postAdd(obj).then(() => {
-          alert(`질문이 등록되었습니다.`);
-          navigate("/main/qnalist");
-          window.location.reload();
-      });
+  
+      const result = await postAdd(obj);
+      showModal("질문이 등록되었습니다.");
+      await WaitModalClick();
+      navigate("/main/qnalist");
+      window.location.reload();
     }
   };
+  
 
   return (
     <div>
@@ -168,26 +186,28 @@ const QnaWritePage = () => {
         </tbody>
       </table>
       <div>
-          <br />
-          <div className="flex float-right">
-            <Link
-              to="/main/qnalist"
-              button
-              className=" bg-blue-500 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 px-3 rounded transition"
-            >
-              돌아가기
-            </Link>
-            &nbsp;
-            <Link
-              to="/main/qnalist"
-              button
-              className=" bg-green-500 hover:bg-green-700 text-white text-sm font-semibold py-2.5 px-3 rounded transition"
-              onClick={handleClickAdd}
-            >
-              작성하기
-            </Link>
-          </div>
-        {/* </p> */}
+        <br />
+        <p title="비밀 글을 작성하고 싶다면 체크하세요">
+          <input type="checkbox" id="secret" /> 비밀 글
+        </p>
+        <div className="flex float-right">
+          <Link
+            to="/main/qnalist"
+            button
+            className=" bg-blue-500 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 px-3 rounded transition"
+          >
+            돌아가기
+          </Link>
+          &nbsp;
+          <Link
+            to="/main/qnalist"
+            button
+            className=" bg-green-500 hover:bg-green-700 text-white text-sm font-semibold py-2.5 px-3 rounded transition"
+            onClick={handleClickAdd}
+          >
+            작성하기
+          </Link>
+        </div>
       </div>
     </div>
   );
