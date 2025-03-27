@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -104,6 +105,60 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
         return filterRepository.findDistinctCredits().stream()
                 .map(c -> Map.<String, Object>of("credit", c))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Map<String, Object>> getMyCourses(String studentId) {
+        User student = userRepository.findByUserId(studentId).orElseThrow();
+        List<Enrollment> enrollments = enrollmentRepository.findByStudent(student);
+        return enrollments.stream()
+                .map(e -> {
+                    ClassEntity c = e.getEnrolledClassEntity();
+                    Map<String, Object> courseMap = new HashMap<>();
+                    courseMap.put("강의번호", c.getId());
+                    courseMap.put("강의명", c.getCourse().getName());
+                    courseMap.put("강의요일", c.getDay());
+                    courseMap.put("강의시간", c.getStartTime() + "~" + c.getEndTime());
+                    courseMap.put("강의학점", c.getCourse().getCredit());
+                    courseMap.put("담당교수", c.getProfessor().getName());
+                    return courseMap;
+                }).collect(Collectors.toList());
+    }
+
+    @Override
+    public String deleteCourse(String studentId, Integer classId) {
+        User student = userRepository.findByUserId(studentId).orElseThrow();
+        ClassEntity classEntity = classRepository.findById(classId).orElseThrow();
+        Optional<Enrollment> optional = enrollmentRepository.findByStudentAndEnrolledClassEntity(student, classEntity);
+        if (optional.isPresent()) {
+            enrollmentRepository.delete(optional.get());
+            System.out.println("강의 삭제 완료: studentId=" + studentId + ", classId=" + classId);
+            // 수강 삭제 시, 수강 인원 1 감소하도록 수정
+            classEntity.setEnrolled(classEntity.getEnrolled() - 1);
+            return "수강 삭제되었습니다";
+        }
+        System.out.println("삭제 실패: 해당 강의 없음 - studentId=" + studentId + ", classId=" + classId);
+        return "삭제할 강의를 찾을 수 없습니다.";
+    }
+
+    @Override
+    public List<Map<String, Object>> getConfirmedCourses(String studentId) {
+        User student = userRepository.findByUserId(studentId).orElseThrow();
+        List<Enrollment> enrollments = enrollmentRepository.findByStudent(student);
+        return enrollments.stream()
+                .map(e -> {
+                    ClassEntity c = e.getEnrolledClassEntity();
+                    Map<String, Object> courseMap = new HashMap<>();
+                    courseMap.put("강의번호", c.getId());
+                    courseMap.put("courseName", c.getCourse().getName());
+                    courseMap.put("classDay", c.getDay());
+                    courseMap.put("classRoom", c.getLectureRoom() != null ? c.getLectureRoom().getName() : "미정");
+                    courseMap.put("professorName", c.getProfessor() != null ? c.getProfessor().getName() : "미정");
+                    courseMap.put("classStartPeriod", c.getStartTime());
+                    courseMap.put("classEndPeriod", c.getEndTime());
+                    courseMap.put("classCredit", c.getCourse().getCredit());
+                    return courseMap;
+                }).collect(Collectors.toList());
     }
 
     // 수강 신청 처리
