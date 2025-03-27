@@ -1,8 +1,13 @@
 package com.cw.cwu.controller.admin;
 
 import com.cw.cwu.domain.Department;
+import com.cw.cwu.domain.User;
+import com.cw.cwu.dto.PageRequestDTO;
+import com.cw.cwu.dto.PageResponseDTO;
 import com.cw.cwu.dto.UserCreateRequestDTO;
+import com.cw.cwu.dto.UserDTO;
 import com.cw.cwu.repository.admin.DepartmentRepository;
+import com.cw.cwu.repository.user.UserRepository;
 import com.cw.cwu.service.admin.AdminUserService;
 import com.cw.cwu.util.FileUploadUtil;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +25,7 @@ public class AdminUserController {
     private final AdminUserService adminUserService;
     private final DepartmentRepository departmentRepository;
     private final FileUploadUtil fileUploadUtil;
+    private final UserRepository userRepository;
 
 
     @PostMapping("/users")
@@ -46,5 +52,25 @@ public class AdminUserController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("업로드 실패: " + e.getMessage());
         }
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<PageResponseDTO<UserDTO>> getAllUsers(
+            PageRequestDTO pageRequestDTO,
+            @RequestParam(required = false) String keyword
+    ) {
+        PageResponseDTO<UserDTO> result = adminUserService.getAllUsers(keyword, pageRequestDTO);
+        return ResponseEntity.ok(result);
+    }
+
+    @DeleteMapping("/users/{userId}")
+    public ResponseEntity<String> deleteUser(@PathVariable String userId) {
+        String result = adminUserService.deleteUser(userId);
+
+        if (!result.equals("사용자가 삭제되었습니다.")) {
+            return ResponseEntity.badRequest().body(result);
+        }
+
+        return ResponseEntity.ok(result);
     }
 }
