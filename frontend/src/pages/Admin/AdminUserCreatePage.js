@@ -3,7 +3,9 @@ import {
   createUser,
   getDepartments,
   uploadProfileImage,
-} from "../../api/createUserApi";
+} from "../../api/adminUserApi";
+import { useContext } from "react";
+import { ModalContext } from "../../App";
 
 const initialForm = {
   userId: "",
@@ -32,6 +34,10 @@ const AdminUserCreatePage = () => {
   const [userIdMessage, setUserIdMessage] = useState("");
 
   const fileInputRef = useRef(null);
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  const { showModal } = useContext(ModalContext);
 
   useEffect(() => {
     getDepartments()
@@ -115,7 +121,7 @@ const AdminUserCreatePage = () => {
         typeof response.data === "string"
           ? response.data
           : response.data.message ?? "응답 메시지를 확인할 수 없습니다.";
-      alert(msg);
+      showModal(msg);
       setForm(initialForm);
       setPhoneParts({ part1: "010", part2: "", part3: "" });
       setEmailDomain("@naver.com");
@@ -130,7 +136,7 @@ const AdminUserCreatePage = () => {
       if (typeof errorData === "string") message = errorData;
       else if (typeof errorData === "object" && errorData.message)
         message = errorData.message;
-      alert(message);
+      showModal(message);
     }
   };
 
@@ -190,14 +196,23 @@ const AdminUserCreatePage = () => {
 
         <div>
           <label className="block mb-1 font-semibold">비밀번호 *</label>
-          <input
-            name="userPassword"
-            type="password"
-            className="w-full p-2 border rounded"
-            placeholder="기본값 : 생년월일 6자리 + !"
-            value={form.userPassword}
-            onChange={handleChange}
-          />
+          <div className="relative">
+            <input
+              name="userPassword"
+              type={showPassword ? "text" : "password"}
+              className="w-full p-2 border rounded pr-12"
+              placeholder="기본값 : 생년월일 6자리 + !"
+              value={form.userPassword}
+              onChange={handleChange}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-blue-700 hover:text-blue-900"
+            >
+              {showPassword ? "🔓" : "🔒"}
+            </button>
+          </div>
         </div>
 
         <div>
@@ -297,11 +312,7 @@ const AdminUserCreatePage = () => {
           ref={fileInputRef}
         />
         {uploadMsg && (
-          <p
-            className={`text-sm mt-1 ${
-              uploadMsg.startsWith("✔")
-            }`}
-          >
+          <p className={`text-sm mt-1 ${uploadMsg.startsWith("✔")}`}>
             {uploadMsg}
           </p>
         )}

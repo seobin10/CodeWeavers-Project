@@ -119,13 +119,13 @@ const BasicLayout = () => {
                   사용자 등록 ▶
                 </Link>
                 <Link
-                  to="/main/admin"
+                  to="/main/admin/user-list"
                   className="hover:bg-blue-500 px-6 py-3 mt-6"
                 >
-                  관리자 대시보드 ▶
+                  사용자 조회 / 삭제 ▶
                 </Link>
                 <Link to="/main/users" className="hover:bg-blue-500 px-6 py-3">
-                  사용자 관리 ▶
+                  관리자 대시보드 ▶
                 </Link>
                 <Link
                   to="/main/classes"
