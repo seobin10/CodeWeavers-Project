@@ -120,7 +120,7 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
                     courseMap.put("강의요일", c.getDay());
                     courseMap.put("강의시간", c.getStartTime() + "~" + c.getEndTime());
                     courseMap.put("강의학점", c.getCourse().getCredit());
-                    courseMap.put("담당교수", c.getProfessor().getName());
+                    courseMap.put("담당교수", c.getProfessor() != null ? c.getProfessor().getName() : "미정");
                     return courseMap;
                 }).collect(Collectors.toList());
     }
@@ -135,6 +135,7 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
             System.out.println("강의 삭제 완료: studentId=" + studentId + ", classId=" + classId);
             // 수강 삭제 시, 수강 인원 1 감소하도록 수정
             classEntity.setEnrolled(classEntity.getEnrolled() - 1);
+            classRepository.save(classEntity);
             return "수강 삭제되었습니다";
         }
         System.out.println("삭제 실패: 해당 강의 없음 - studentId=" + studentId + ", classId=" + classId);

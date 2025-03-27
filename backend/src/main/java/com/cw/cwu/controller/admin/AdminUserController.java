@@ -4,9 +4,11 @@ import com.cw.cwu.domain.Department;
 import com.cw.cwu.dto.UserCreateRequestDTO;
 import com.cw.cwu.repository.admin.DepartmentRepository;
 import com.cw.cwu.service.admin.AdminUserService;
+import com.cw.cwu.util.FileUploadUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -17,6 +19,8 @@ public class AdminUserController {
 
     private final AdminUserService adminUserService;
     private final DepartmentRepository departmentRepository;
+    private final FileUploadUtil fileUploadUtil;
+
 
     @PostMapping("/users")
     public ResponseEntity<String> createUser(@RequestBody UserCreateRequestDTO dto) {
@@ -26,11 +30,21 @@ public class AdminUserController {
             return ResponseEntity.badRequest().body(result);
         }
 
-        return ResponseEntity.ok("사용자 생성 완료!");
+        return ResponseEntity.ok("등록이 완료되었습니다.");
     }
 
     @GetMapping("/departments")
     public ResponseEntity<List<Department>> getDepartments() {
         return ResponseEntity.ok(departmentRepository.findAll());
+    }
+
+    @PostMapping("/profile")
+    public ResponseEntity<String> uploadProfile(@RequestParam("file") MultipartFile file) {
+        try {
+            String fileUrl = fileUploadUtil.saveFile(file);
+            return ResponseEntity.ok(fileUrl);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("업로드 실패: " + e.getMessage());
+        }
     }
 }
