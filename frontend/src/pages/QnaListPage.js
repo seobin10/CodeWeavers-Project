@@ -1,19 +1,20 @@
 import React, { useContext, useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../App";
 import axios from "axios";
 import PageComponent from "../components/PageComponent";
 
 const QnaListPage = () => {
+  const navigate = useNavigate();
   const { userId, setUserId } = useContext(AuthContext);
   const [message, setMessage] = useState("");
   const [qnaInfo, setQnaInfo] = useState([]);
+  const [writerId, setWriterId] = useState();
   const [currentPage, setCurrentPage] = useState(1);
   const itemCount = 15;
 
   const localId = localStorage.getItem("id");
-
-  let frontNum = 0;
+  const userRole = localStorage.getItem("role");
 
   useEffect(() => {
     if (userId) {
@@ -24,7 +25,7 @@ const QnaListPage = () => {
     }
   }, [userId, setUserId, localId]);
 
-  const fetchQnaInfo = async (userId) => {
+  const fetchQnaInfo = async () => {
     try {
       const response = await axios.get(
         "http://localhost:8080/api/user/qna/list"
@@ -32,6 +33,18 @@ const QnaListPage = () => {
       setQnaInfo(response.data);
     } catch (error) {
       setMessage("Q&A 정보를 불러올 수 없습니다.");
+    }
+  };
+
+  const fetchWriterId = async (questionId) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/api/user/qna/find/${questionId}`
+      );
+      setWriterId(response.data);
+      return response.data;
+    } catch (error) {
+      setMessage("작성자 정보를 불러올 수 없습니다.");
     }
   };
 
@@ -70,12 +83,38 @@ const QnaListPage = () => {
                     {firstItem + i + 1}
                   </td>
                   <td className="text-left border border-gray-400 px-4 py-2">
-                    <Link
-                      to="/main/qnadata"
-                      state={{ questionId: qna.questionId }}
-                    >
-                      {qna.title}
-                    </Link>
+                    {/\u{1F512}/u.test(qna.title) ? (
+                      <p
+                        className="text-gray-400"
+                        onClick={async () => {
+                          let writerId = await fetchWriterId(qna.questionId);
+                          let message = "";
+                          // 두 아이디의 타입이 다르므로 !== 대신 != 사용
+                          if (userId == writerId || userRole === "ADMIN") {
+                            message =
+                              userRole === "ADMIN"
+                                ? "관리자 권한 확인, 글을 조회합니다."
+                                : "본인 확인 완료! 글을 조회합니다.";
+                            alert(message);
+                            navigate("/main/qnadata", {
+                              state: { questionId: qna.questionId },
+                            });
+                          } else {
+                            message = "읽을 수 있는 권한이 없습니다.";
+                            alert(message);
+                          }
+                        }}
+                      >
+                        &#128274; 비밀글입니다.
+                      </p>
+                    ) : (
+                      <Link
+                        to="/main/qnadata"
+                        state={{ questionId: qna.questionId }}
+                      >
+                        {qna.title}
+                      </Link>
+                    )}
                   </td>
                   <td className="border border-gray-400 px-4 py-2">
                     {qna.userName}
@@ -107,12 +146,16 @@ const QnaListPage = () => {
         />
       </div>
       <br />
-      <Link
-        to="/main/qnawrite"
-        className=" bg-blue-500 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 px-3 rounded transition float-right"
-      >
-        &nbsp;등록&nbsp;
-      </Link>
+      {userRole === "ADMIN" ? (
+        <></>
+      ) : (
+        <Link
+          to="/main/qnawrite"
+          className="bg-blue-500 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 px-3 rounded transition float-right"
+        >
+          &nbsp;등록&nbsp;
+        </Link>
+      )}
     </div>
   );
 };

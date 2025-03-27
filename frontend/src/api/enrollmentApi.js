@@ -1,3 +1,4 @@
+// src/api/enrollmentApi.js
 import axios from "axios";
 
 export const API_SERVER_HOST = "http://localhost:8080";
@@ -14,19 +15,22 @@ export const getFilters = () => {
   ]);
 };
 
+// 수강 신청 가능한 강의 목록 (검색)
 export const searchCourses = (userId, params) => {
-  const { page, size, ...restParams } = params;
-
-  return axios.get(`${prefix}/${userId}/enrollment`, {
-    params: {
-      ...restParams,
-      page: Number(page),
-      size: Number(size),
-    },
-  });
+  return axios.get(`${prefix}/${userId}/enrollment`, { params });
 };
 
+// 수강 신청 (담기)
 export const enrollCourse = (userId, data) => {
   return axios.post(`${prefix}/${userId}/enrollment`, data);
 };
 
+// 수강 신청 내역 조회
+export const getEnrolledCourses = (userId) => {
+  return axios.get(`${prefix}/${userId}/history`);
+};
+
+// 수강 신청 내역에서 강의 삭제
+export const deleteCourse = (userId, classId) => {
+  return axios.delete(`${prefix}/${userId}/course/${classId}`);
+};
