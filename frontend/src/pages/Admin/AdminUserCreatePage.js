@@ -1,21 +1,29 @@
-import React, { useState, useEffect } from "react";
-import { createUser, getDepartments } from "../../api/createUserApi";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  createUser,
+  getDepartments,
+  uploadProfileImage,
+} from "../../api/createUserApi";
+
+const initialForm = {
+  userId: "",
+  userName: "",
+  userPassword: "",
+  userEmail: "",
+  userPhone: "",
+  userBirth: "",
+  userRole: "STUDENT",
+  departmentId: null,
+  userImgUrl: "",
+};
 
 const AdminUserCreatePage = () => {
-  const [form, setForm] = useState({
-    userId: "",
-    userName: "",
-    userPassword: "",
-    userEmail: "",
-    userPhone: "",
-    userBirth: "",
-    userRole: "STUDENT",
-    departmentId: null,
-  });
-
+  const [form, setForm] = useState(initialForm);
   const [departments, setDepartments] = useState([]);
+  const [emailId, setEmailId] = useState("");
   const [emailDomain, setEmailDomain] = useState("@naver.com");
   const [customEmailDomain, setCustomEmailDomain] = useState("");
+  const [uploadMsg, setUploadMsg] = useState("");
   const [phoneParts, setPhoneParts] = useState({
     part1: "010",
     part2: "",
@@ -23,32 +31,30 @@ const AdminUserCreatePage = () => {
   });
   const [userIdMessage, setUserIdMessage] = useState("");
 
+  const fileInputRef = useRef(null);
+
   useEffect(() => {
     getDepartments()
-      .then((res) => {
-        setDepartments(res.data);
-      })
+      .then((res) => setDepartments(res.data))
       .catch(() => setDepartments([]));
   }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     setForm((prev) => {
       const updated = { ...prev, [name]: value };
 
       if (name === "userId") {
-        if (/^\d{9}$/.test(value)) {
-          setUserIdMessage("✔ 올바른 형식입니다.");
-        } else {
-          setUserIdMessage("❌ 숫자 9자리여야 합니다.");
-        }
+        setUserIdMessage(
+          /^\d{9}$/.test(value)
+            ? "✔ 올바른 형식입니다."
+            : "❌ 숫자 9자리여약 합니다."
+        );
       }
 
-      // 생년월일 → 비밀번호 자동 생성
       if (name === "userBirth" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
         const formatted =
-          value.slice(2, 4) + value.slice(5, 7) + value.slice(8, 10); // YYMMDD
+          value.slice(2, 4) + value.slice(5, 7) + value.slice(8, 10);
         updated.userPassword = `${formatted}!`;
       }
 
@@ -58,6 +64,7 @@ const AdminUserCreatePage = () => {
 
   const handleEmailIdChange = (e) => {
     const emailId = e.target.value;
+    setEmailId(emailId);
     const domain = emailDomain === "custom" ? customEmailDomain : emailDomain;
     setForm((prev) => ({ ...prev, userEmail: emailId + domain }));
   };
@@ -66,14 +73,12 @@ const AdminUserCreatePage = () => {
     const selected = e.target.value;
     setEmailDomain(selected);
     const domain = selected === "custom" ? customEmailDomain : selected;
-    const emailId = form.userEmail.split("@")[0] || "";
     setForm((prev) => ({ ...prev, userEmail: emailId + domain }));
   };
 
   const handleCustomDomainChange = (e) => {
     const value = e.target.value;
     setCustomEmailDomain(value);
-    const emailId = form.userEmail.split("@")[0] || "";
     setForm((prev) => ({ ...prev, userEmail: emailId + "@" + value }));
   };
 
@@ -87,6 +92,22 @@ const AdminUserCreatePage = () => {
     });
   };
 
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      const res = await uploadProfileImage(file);
+      setForm((prev) => ({
+        ...prev,
+        userImgUrl: res.data,
+      }));
+      setUploadMsg("✔ 이미지 업로드에 성공하였습니다.");
+    } catch (err) {
+      setUploadMsg("❌ 이미지 업로드에 실패하였습니다.");
+    }
+  };
+
   const handleSubmit = async () => {
     try {
       const response = await createUser(form);
@@ -95,14 +116,20 @@ const AdminUserCreatePage = () => {
           ? response.data
           : response.data.message ?? "응답 메시지를 확인할 수 없습니다.";
       alert(msg);
+      setForm(initialForm);
+      setPhoneParts({ part1: "010", part2: "", part3: "" });
+      setEmailDomain("@naver.com");
+      setCustomEmailDomain("");
+      setEmailId("");
+      setUserIdMessage("");
+      setUploadMsg("");
+      fileInputRef.current.value = "";
     } catch (err) {
       const errorData = err.response?.data;
       let message = "알 수 없는 에러가 발생했습니다.";
-      if (typeof errorData === "string") {
-        message = errorData;
-      } else if (typeof errorData === "object" && errorData.message) {
+      if (typeof errorData === "string") message = errorData;
+      else if (typeof errorData === "object" && errorData.message)
         message = errorData.message;
-      }
       alert(message);
     }
   };
@@ -113,7 +140,6 @@ const AdminUserCreatePage = () => {
         학생/교수 등록
       </h2>
 
-      {/* 역할 */}
       <div>
         <label className="block mb-1 font-semibold">사용자 역할 *</label>
         <select
@@ -128,30 +154,29 @@ const AdminUserCreatePage = () => {
       </div>
 
       <div className="space-y-4">
-        {/* 학번 */}
         <div>
           <label className="block mb-1 font-semibold">학번 또는 ID *</label>
           <input
             name="userId"
             className="w-full p-2 border rounded"
             onChange={handleChange}
-            placeholder="예: 202410001"
+            value={form.userId}
+            placeholder="예: 202500101"
           />
           <p className="text-sm mt-1 text-gray-600">{userIdMessage}</p>
         </div>
 
-        {/* 이름 */}
         <div>
           <label className="block mb-1 font-semibold">이름 *</label>
           <input
             name="userName"
             className="w-full p-2 border rounded"
             onChange={handleChange}
+            value={form.userName}
             placeholder="예: 홍길동"
           />
         </div>
 
-        {/* 생년월일 */}
         <div>
           <label className="block mb-1 font-semibold">생년월일 *</label>
           <input
@@ -159,10 +184,10 @@ const AdminUserCreatePage = () => {
             type="date"
             className="w-full p-2 border rounded"
             onChange={handleChange}
+            value={form.userBirth}
           />
         </div>
 
-        {/* 비밀번호 */}
         <div>
           <label className="block mb-1 font-semibold">비밀번호 *</label>
           <input
@@ -175,13 +200,13 @@ const AdminUserCreatePage = () => {
           />
         </div>
 
-        {/* 이메일 */}
         <div>
           <label className="block mb-1 font-semibold">이메일 *</label>
           <div className="flex flex-wrap gap-2">
             <input
               className="flex-1 min-w-[120px] p-2 border rounded"
               placeholder="아이디"
+              value={emailId}
               onChange={handleEmailIdChange}
             />
             <span className="self-center">@</span>
@@ -198,13 +223,13 @@ const AdminUserCreatePage = () => {
               <input
                 className="flex-1 min-w-[120px] p-2 border rounded"
                 placeholder="직접입력"
+                value={customEmailDomain}
                 onChange={handleCustomDomainChange}
               />
             )}
           </div>
         </div>
 
-        {/* 전화번호 */}
         <div>
           <label className="block mb-1 font-semibold">전화번호 *</label>
           <div className="flex space-x-2">
@@ -232,7 +257,6 @@ const AdminUserCreatePage = () => {
           </div>
         </div>
 
-        {/* 학과 */}
         <div>
           <label className="block mb-1 font-semibold">소속 학과 *</label>
           <select
@@ -257,11 +281,37 @@ const AdminUserCreatePage = () => {
         </div>
       </div>
 
+      <div className="mt-4">
+        <label className="block mb-1 font-semibold">프로필 이미지</label>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          className="block w-full text-sm text-gray-500
+               file:mr-4 file:py-2 file:px-4
+               file:rounded file:border-0
+               file:text-sm file:font-semibold
+               file:bg-blue-600 file:text-white
+               hover:file:bg-blue-800
+               border rounded"
+          ref={fileInputRef}
+        />
+        {uploadMsg && (
+          <p
+            className={`text-sm mt-1 ${
+              uploadMsg.startsWith("✔")
+            }`}
+          >
+            {uploadMsg}
+          </p>
+        )}
+      </div>
+
       <button
         onClick={handleSubmit}
         className="mt-6 w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-800 transition"
       >
-        사용자 생성
+        등록
       </button>
     </div>
   );

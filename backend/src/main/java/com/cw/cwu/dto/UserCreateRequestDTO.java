@@ -17,4 +17,5 @@ public class UserCreateRequestDTO {
     private LocalDate userBirth;
     private UserRole userRole; // STUDENT, PROFESSOR
     private Integer departmentId;
+    private String userImgUrl;
 }

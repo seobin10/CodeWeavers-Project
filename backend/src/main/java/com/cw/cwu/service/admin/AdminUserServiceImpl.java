@@ -69,6 +69,7 @@ public class AdminUserServiceImpl implements AdminUserService {
                 .userBirth(dto.getUserBirth())
                 .userRole(dto.getUserRole())
                 .department(department)
+                .userImgUrl(dto.getUserImgUrl())
                 .build();
 
         userRepository.save(user);
