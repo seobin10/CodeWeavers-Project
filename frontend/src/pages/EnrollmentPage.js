@@ -1,17 +1,26 @@
 import React, { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../App";
-import { getFilters, searchCourses, enrollCourse } from "../api/enrollmentApi";
+import { AuthContext, ModalContext } from "../App";
+import { useNavigate } from "react-router-dom";
+import {
+  getFilters,
+  searchCourses,
+  enrollCourse,
+  getEnrolledCourses,
+} from "../api/enrollmentApi";
+
 import PageComponent from "../components/PageComponent";
 
 const EnrollmentPage = () => {
   const { userId, setUserId } = useContext(AuthContext);
+  const { showModal } = useContext(ModalContext); // 전역 모달 연결
+  const navigate = useNavigate();
   const [courses, setCourses] = useState({
     dtoList: [],
     totalPage: 0,
     current: 1,
     totalCount: 0,
   });
-
+  const [timetable, setTimetable] = useState([]);
   const [filters, setFilters] = useState({
     departments: [],
     courseTypes: [],
@@ -62,11 +71,17 @@ const EnrollmentPage = () => {
     fetchFilters();
   }, [userId, setUserId]);
 
-  // 페이지 첫화면에 바로 구현
   useEffect(() => {
-    if (userId) {
-      handleSearch(1);
-    }
+    const fetchEnrolled = async () => {
+      try {
+        const response = await getEnrolledCourses(userId);
+        setTimetable(response.data);
+      } catch (error) {
+        console.error("내 수강 목록 불러오기 실패:", error);
+      }
+    };
+
+    if (userId) fetchEnrolled();
   }, [userId]);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -90,23 +105,34 @@ const EnrollmentPage = () => {
       setCourses(response.data);
       setCurrentPage(page); // 현재 페이지 저장
     } catch (error) {
-      console.error("데이터 불러오기 실패:", error);
+      console.error("강의 검색 실패:", error);
+      showModal("강의 검색 중 오류가 발생했습니다.");
     }
   };
 
   const handleEnroll = async (course) => {
+    const isAlreadyEnrolled = timetable.some(
+      (c) => c.강의번호 === course.강의번호
+    );
+    if (isAlreadyEnrolled) {
+      showModal("이미 신청된 강의입니다!");
+      return;
+    }
     try {
       const response = await enrollCourse(userId, {
         studentId: userId,
         classId: course.강의번호,
       });
 
-      const msg =
-        typeof response.data === "string"
-          ? response.data
-          : response.data.message ?? "응답 메시지를 확인할 수 없습니다.";
-
-      alert(msg);
+      const msg = response.data;
+      if (msg === "성공") {
+        showModal(`"${course.강의명}" 강의가 시간표에 추가되었습니다!`);
+        setTimeout(() => {
+          navigate("/main/schedule");
+        }, 1000);
+      } else {
+        showModal(msg);
+      }
     } catch (error) {
       console.error("수강 신청 실패:", error);
 
@@ -114,7 +140,7 @@ const EnrollmentPage = () => {
         error.response?.data?.message ??
         error.response?.data ??
         error.message ??
-        "수강 신청 중 오류가 발생했습니다.";
+        showModal("수강 신청 중 오류가 발생했습니다.");
 
       alert(msg);
     } finally {
@@ -123,7 +149,7 @@ const EnrollmentPage = () => {
     }
   };
   return (
-    <div className="max-w-7xl mx-auto p-2 bg-white shadow-md mt-3 rounded-md">
+    <div className="max-w-7xl mx-auto p-2 bg-slate-50 bg-opacity-40 shadow-md mt-3 rounded-md">
       <h2 className="text-3xl font-bold text-center mb-6 mt-3">
         수강 신청 목록
       </h2>
@@ -208,7 +234,7 @@ const EnrollmentPage = () => {
           </select>
         </div>
 
-        {/* 검색창 + 버튼 */}
+        {/* 검색창 */}
         <div className="grid grid-cols-4 gap-4 items-center">
           <div className="col-span-4 relative w-full">
             <input

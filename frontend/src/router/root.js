@@ -9,6 +9,7 @@ const StudentPage = lazy(() => import("../pages/StudentPage"));
 const CoursePage = lazy(() => import("../pages/CoursePage"));
 const GradePage = lazy(() => import("../pages/GradePage"));
 const EnrollmentPage = lazy(() => import("../pages/EnrollmentPage"));
+const HistoryPage = lazy(() => import("../pages/HistoryPage"));
 const SchedulePage = lazy(() => import("../pages/SchedulePage"));
 const QnaListPage = lazy(() => import("../pages/QnaListPage"));
 const QnaDataPage = lazy(() => import("../pages/QnaDataPage"))
@@ -64,6 +65,14 @@ const root = createBrowserRouter([
         ),
       },
       {
+        path: "history",
+        element: (
+          <Suspense fallback={Loading}>
+            <HistoryPage />
+          </Suspense>
+        ),
+      },
+      {
         path: "schedule",
         element: (
           <RoleGuard allowedRoles={["STUDENT"]}>
@@ -92,9 +101,11 @@ const root = createBrowserRouter([
       {
         path: "qnawrite",
         element: (
+          <RoleGuard allowedRoles={["STUDENT", "PROFFESOR"]}>
           <Suspense fallback={Loading}>
             <QnaWritePage />
           </Suspense>
+          </RoleGuard>
         ),
       },
       {
