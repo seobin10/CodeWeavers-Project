@@ -1,13 +1,15 @@
 import React, { useContext, useState, useEffect, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { AuthContext } from "../App";
+import { AuthContext, ModalContext } from "../App";
 import axios from "axios";
+import { WaitModalClick } from "../components/WaitModalClick";
 
 const QnaDeletePage = () => {
   const location = useLocation();
   const questionId = location.state?.questionId;
   const [writerId, setWriterId] = useState();
   const { userId, setUserId } = useContext(AuthContext);
+  const { showModal } = useContext(ModalContext);
   const [userInfo, setUserInfo] = useState(null);
   const [userData, setUserData] = useState({
     userName: "",
@@ -97,15 +99,22 @@ const QnaDeletePage = () => {
       const fetched = await fetchUserInfo(userId);
       currentId = fetched?.userId;
     }
+
+    const userRole = localStorage.getItem("role");
+    let msg = "";
     // currentId와 writerId의 타입이 다르므로, === 대신 == 사용
-    if (currentId == writerId) {
-      alert("삭제되었습니다.");
+    if (currentId == writerId || userRole === "ADMIN") {
+      msg =
+        userRole === "ADMIN" && currentId != writerId
+          ? "관리자 권한 확인, 글이 삭제되었습니다."
+          : "본인 확인 완료! 글을 삭제했습니다.";
       handleDelete();
+      showModal(msg);
+      await WaitModalClick();
       navigate("/main/qnalist");
-      window.location.reload();
     } else {
-      alert("작성자만 삭제할 수 있습니다!");
-      navigate("/main/qnalist");
+      msg = "삭제할 수 있는 권한이 없습니다.";
+      showModal(msg);
     }
   };
 

@@ -1,13 +1,15 @@
 import React, { useContext, useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { AuthContext } from "../App";
+import { AuthContext, ModalContext } from "../App";
 import axios from "axios";
+import { WaitModalClick } from "../components/WaitModalClick";
 
 const QnaEditPage = () => {
   const location = useLocation();
   const questionId = location.state?.questionId;
   const [writerId, setWriterId] = useState();
   const { userId, setUserId } = useContext(AuthContext);
+  const { showModal } = useContext(ModalContext);
   const [userInfo, setUserInfo] = useState(null);
   const [userData, setUserData] = useState({
     userName: "",
@@ -111,6 +113,22 @@ const QnaEditPage = () => {
     }
   };
 
+  const cleanedTitle = (title) => {
+    const hasLock = /\u{1F512}/u.test(title);
+    title = hasLock ? title.replace(/\u{1F512}\s*/gu, "") : title;
+    return title;
+  };
+
+  const handleSecret = (title) => {
+    cleanedTitle(title);
+    let isSecret = document.getElementById("secret");
+    if (!isSecret.checked) {
+      return title;
+    } else {
+      return "\u{1F512} " + title;
+    }
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setContentData((prev) => ({
@@ -121,14 +139,21 @@ const QnaEditPage = () => {
 
   const handleEdit = async () => {
     try {
-      await updateQnaData({
-        questionId: questionId,
-        title: contentData.title,
-        content: contentData.content,
-      });
-      setMessage("정보가 업데이트되었습니다.");
+      if (!contentData.title.trim() || !contentData.content.trim()) {
+        // 제목 혹은 내용이 비어 있는 경우 false 반환
+        return false;
+      } else {
+        // 그 외의 경우 true 반환
+        const processedTitle = handleSecret(cleanedTitle(contentData.title));
+        await updateQnaData({
+          questionId: questionId,
+          title: processedTitle,
+          content: contentData.content,
+        });
+        return true;
+      }
     } catch (error) {
-      setMessage("정보 수정에 실패했습니다.");
+      return false;
     }
   };
 
@@ -140,21 +165,24 @@ const QnaEditPage = () => {
     }
     // currentId와 writerId의 타입이 다르므로, === 대신 == 사용
     if (currentId == writerId) {
-      alert("수정되었습니다.");
-      await handleEdit();
-        navigate("/main/qnadata", { state: { questionId } });
-        window.location.reload();
-        
+      let checkEditSuccess = (await handleEdit())
+        ? ["성공적으로 수정되었습니다.", "/main/qnadata"]
+        : ["제목 혹은 내용을 입력해주세요.", ""];
+      showModal(checkEditSuccess[0]);
+      await WaitModalClick();
+      navigate(checkEditSuccess[1], { state: { questionId } });
+      window.location.reload();
     } else {
-      alert("작성자만 수정할 수 있습니다!");
-      //   navigate("/main/qnalist");
+      showModal("작성자만 수정할 수 있습니다!");
+      await WaitModalClick();
+      navigate("/main/qnalist");
     }
   };
 
   return (
     <div>
       <h1 className="text-3xl font-bold text-left mb-6">Q&A 수정</h1>
-      {message && <p className="text-green-500 text-center">{message}</p>}
+      {message && <p className="text-red-500 text-center">{message}</p>}
       <hr />
       <br />
       <div className="bg-green-200 rounded-lg pt-4 pb-4 text-green-600 border border-green-300 flex justify-between items-center px-4">
@@ -177,10 +205,9 @@ const QnaEditPage = () => {
                   <th className="border border-gray-400 px-4 py-2">제목</th>
                   <td className="border border-gray-400 px-4 py-2 bg-white">
                     <input
-                      placeholder={qna.title}
                       name="title"
                       className="w-full focus-visible:outline-none"
-                      value={contentData.title}
+                      value={cleanedTitle(contentData.title)}
                       onChange={handleChange}
                     />
                   </td>
@@ -207,7 +234,6 @@ const QnaEditPage = () => {
                   <td colSpan={2} className="p-4 w-full">
                     <input
                       type="text"
-                      placeholder={qna.questionContent}
                       name="content"
                       className="w-full h-96 focus-visible:outline-none text-left px-4 py-2"
                       maxLength={255}
@@ -220,7 +246,20 @@ const QnaEditPage = () => {
             </table>
 
             <hr />
+            <p>
+              {/\u{1F512}/u.test(qna.title) ? (
+                <>
+                  <input type="checkbox" id="secret" defaultChecked={true} />{" "}
+                  비밀 글
+                </>
+              ) : (
+                <>
+                  <input type="checkbox" id="secret" /> 비밀 글
+                </>
+              )}
+            </p>
             <br />
+
             <table className="table-auto border-collapse border w-full text-left">
               <tfoot>
                 <tr>
