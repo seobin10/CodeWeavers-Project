@@ -72,6 +72,12 @@ const EnrollmentPage = () => {
   }, [userId, setUserId]);
 
   useEffect(() => {
+    if (userId && filters.departments.length > 0) {
+      handleSearch(1); 
+    }
+  }, [userId, filters]);
+
+  useEffect(() => {
     const fetchEnrolled = async () => {
       try {
         const response = await getEnrolledCourses(userId);
