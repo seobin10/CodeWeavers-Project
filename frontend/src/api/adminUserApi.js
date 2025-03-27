@@ -8,7 +8,7 @@ export const createUser = (userData) => {
 };
 
 export const getDepartments = () => {
-    return axios.get(`${prefix}/departments`);
+  return axios.get(`${prefix}/departments`);
 };
 
 export const uploadProfileImage = (file) => {
@@ -20,3 +20,24 @@ export const uploadProfileImage = (file) => {
     },
   });
 };
+
+export const getAllUsers = (
+  page = 1,
+  size = 10,
+  keyword = "",
+  sortField = "userId",
+  sortDir = "asc" 
+) => {
+  const safeSize = isNaN(Number(size)) || Number(size) <= 0 ? 10 : Number(size);
+  return axios.get(`${prefix}/users`, {
+    params: {
+      page,
+      size: safeSize,
+      keyword,
+      sortField,
+      sortDir, 
+    },
+  });
+};
+
+export const deleteUser = (userId) => axios.delete(`${prefix}/users/${userId}`);

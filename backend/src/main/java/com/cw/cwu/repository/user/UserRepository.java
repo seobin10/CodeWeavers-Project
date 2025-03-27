@@ -1,6 +1,8 @@
 package com.cw.cwu.repository.user;
 
 import com.cw.cwu.domain.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,6 +25,10 @@ public interface UserRepository extends JpaRepository<User, String> {
         boolean existsByUserEmail(String userEmail);
 
         boolean existsByUserPhone(String userPhone);
+
+        Page<User> findByUserIdContainingIgnoreCaseOrUserNameContainingIgnoreCase(
+                String userId, String userName, Pageable pageable
+        );
 }
 
 
