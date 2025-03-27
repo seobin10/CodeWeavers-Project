@@ -2,13 +2,22 @@ package com.cw.cwu.service.admin;
 
 import com.cw.cwu.domain.Department;
 import com.cw.cwu.domain.User;
+import com.cw.cwu.dto.PageRequestDTO;
+import com.cw.cwu.dto.PageResponseDTO;
 import com.cw.cwu.dto.UserCreateRequestDTO;
+import com.cw.cwu.dto.UserDTO;
 import com.cw.cwu.repository.admin.DepartmentRepository;
 import com.cw.cwu.repository.user.UserRepository;
+import com.cw.cwu.util.PageUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +27,7 @@ public class AdminUserServiceImpl implements AdminUserService {
     private final DepartmentRepository departmentRepository;
 
 
+    @Override
     public String createUser(UserCreateRequestDTO dto) {
         if (!dto.getUserId().matches("^\\d{9}$")) {
             return "사용자 ID는 9자리 숫자여야 합니다.";
@@ -75,5 +85,68 @@ public class AdminUserServiceImpl implements AdminUserService {
         userRepository.save(user);
 
         return "성공";
+    }
+
+    @Override
+    public PageResponseDTO<UserDTO> getAllUsers(String keyword, PageRequestDTO pageRequestDTO) {
+        // 정렬 기준 및 방향 설정
+        String sortField = pageRequestDTO.getSortField() != null ? pageRequestDTO.getSortField() : "userId";
+        String sortDir = pageRequestDTO.getSortDir() != null ? pageRequestDTO.getSortDir() : "asc";
+
+        if ("departmentName".equals(sortField)) {
+            sortField = "department.departmentName";
+        }
+
+        // 정렬 객체 생성
+        Sort sort = Sort.by(
+                "desc".equalsIgnoreCase(sortDir) ? Sort.Direction.DESC : Sort.Direction.ASC,
+                sortField
+        );
+
+        Pageable pageable = PageRequest.of(
+                pageRequestDTO.getPage() - 1,
+                pageRequestDTO.getSize(),
+                sort
+        );
+
+        Page<User> userPage;
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            userPage = userRepository.findByUserIdContainingIgnoreCaseOrUserNameContainingIgnoreCase(
+                    keyword, keyword, pageable
+            );
+        } else {
+            userPage = userRepository.findAll(pageable);
+        }
+
+        Page<UserDTO> dtoPage = userPage.map(user -> {
+            UserDTO dto = new UserDTO();
+            dto.setUserId(user.getUserId());
+            dto.setUserName(user.getUserName());
+            dto.setUserPassword(null);
+            dto.setUserBirth(user.getUserBirth());
+            dto.setUserEmail(user.getUserEmail());
+            dto.setUserPhone(user.getUserPhone());
+            dto.setUserRole(user.getUserRole().toString());
+            dto.setUserImgUrl(user.getUserImgUrl());
+
+            if (user.getDepartment() != null) {
+                dto.setDepartmentId(user.getDepartment().getDepartmentId());
+                dto.setDepartmentName(user.getDepartment().getDepartmentName());
+            }
+
+            return dto;
+        });
+
+        return PageUtil.toDTO(dtoPage, pageRequestDTO.getPage());
+    }
+
+    @Override
+    public String deleteUser(String userId) {
+        if (!userRepository.existsById(userId)) {
+            return "존재하지 않는 사용자입니다.";
+        }
+
+        userRepository.deleteById(userId);
+        return "사용자가 삭제되었습니다.";
     }
 }
