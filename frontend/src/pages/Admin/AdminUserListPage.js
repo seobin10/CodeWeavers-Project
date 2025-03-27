@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import { getAllUsers, deleteUser } from "../../api/adminUserApi";
 import { ModalContext } from "../../App";
 import PageComponent from "../../components/PageComponent";
+import AdminUserModal from "../../components/AdminUserModal";
 
 const AdminUserListPage = () => {
   const [users, setUsers] = useState({
@@ -14,6 +15,7 @@ const AdminUserListPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState("userId");
   const [sortDir, setsortDir] = useState("asc");
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { showModal, showConfirm } = useContext(ModalContext);
 
   const fetchUsers = async (page = 1) => {
@@ -62,19 +64,14 @@ const AdminUserListPage = () => {
 
   const handleSort = (field) => {
     if (sortField === field) {
-      // 같은 컬럼이면 방향만 토글
       setsortDir((prev) => (prev === "asc" ? "desc" : "asc"));
     } else {
-      // 새로운 컬럼이면 초기 asc로 설정
       setSortField(field);
       setsortDir("asc");
     }
   };
 
-  const getSortIcon = (field) => {
-    if (sortField !== field) return "↕️";
-    return sortDir === "asc" ? "⬆️" : "⬇️";
-  };
+  const getSortIcon = () => "↕️";
 
   const getRoleLabel = (role) => {
     switch (role) {
@@ -90,41 +87,52 @@ const AdminUserListPage = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-4 bg-white shadow-md mt-6 rounded-md">
-      <h2 className="text-2xl font-bold text-center mb-4">사용자 목록</h2>
+    <div className="max-w-6xl mx-auto p-6 bg-white shadow-lg mt-10 rounded-xl">
+      {/* 상단 영역 */}
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-3xl font-bold text-gray-800">📋 사용자 목록</h2>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="bg-blue-600 hover:bg-blue-800 text-white px-4 py-2 rounded-md shadow transition"
+        >
+          + 사용자 등록
+        </button>
+      </div>
 
-      <div className="mb-4 text-center">
+      {/* 검색창 */}
+      <div className="mb-6 flex justify-center">
         <input
           type="text"
           placeholder="이름 또는 ID 검색"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="border p-2 rounded w-1/2"
+          className="border border-gray-300 px-4 py-2 w-1/2 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
       </div>
 
+      {/* 사용자 목록 테이블 */}
       {users.dtoList.length > 0 ? (
         <>
-          <table className="w-full border border-gray-300 text-sm">
-            <thead>
-              <tr className="bg-gray-100 text-center">
+          <table className="w-full text-sm border border-gray-300 rounded-md overflow-hidden shadow">
+            <thead className="bg-gray-100 text-center text-gray-700">
+              <tr>
                 <th
                   className="border p-2 cursor-pointer"
                   onClick={() => handleSort("userId")}
                 >
-                  ID {getSortIcon("userId")}
+                  ID {getSortIcon()}
                 </th>
                 <th
                   className="border p-2 cursor-pointer"
                   onClick={() => handleSort("userName")}
                 >
-                  이름 {getSortIcon("userName")}
+                  이름 {getSortIcon()}
                 </th>
                 <th
                   className="border p-2 cursor-pointer"
                   onClick={() => handleSort("userBirth")}
                 >
-                  생년월일 {getSortIcon("userBirth")}
+                  생년월일 {getSortIcon()}
                 </th>
                 <th className="border p-2">이메일</th>
                 <th className="border p-2">전화번호</th>
@@ -132,20 +140,23 @@ const AdminUserListPage = () => {
                   className="border p-2 cursor-pointer"
                   onClick={() => handleSort("userRole")}
                 >
-                  구분 {getSortIcon("userRole")}
+                  구분 {getSortIcon()}
                 </th>
                 <th
                   className="border p-2 cursor-pointer"
                   onClick={() => handleSort("departmentName")}
                 >
-                  학과 {getSortIcon("departmentName")}
+                  학과 {getSortIcon()}
                 </th>
                 <th className="border p-2">삭제</th>
               </tr>
             </thead>
             <tbody>
               {users.dtoList.map((user) => (
-                <tr key={user.userId} className="text-center">
+                <tr
+                  key={user.userId}
+                  className="text-center hover:bg-gray-50 transition"
+                >
                   <td className="border p-2">{user.userId}</td>
                   <td className="border p-2">{user.userName}</td>
                   <td className="border p-2">{user.userBirth}</td>
@@ -158,9 +169,9 @@ const AdminUserListPage = () => {
                   <td className="border p-2">
                     <button
                       onClick={() => handleDelete(user)}
-                      className="bg-red-500 hover:bg-red-700 text-white px-3 py-1 rounded text-xs"
+                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-xs shadow-sm transition"
                     >
-                    삭제
+                      삭제
                     </button>
                   </td>
                 </tr>
@@ -179,6 +190,16 @@ const AdminUserListPage = () => {
           등록된 사용자가 없습니다.
         </p>
       )}
+
+      {/* 사용자 등록 모달 */}
+      <AdminUserModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={() => {
+          fetchUsers(currentPage);
+          setIsModalOpen(false);
+        }}
+      />
     </div>
   );
 };
