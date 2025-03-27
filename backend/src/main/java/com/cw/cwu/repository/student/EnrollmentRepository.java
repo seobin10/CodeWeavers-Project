@@ -25,7 +25,6 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
 
     boolean existsByStudentAndEnrolledClassEntity(User student, ClassEntity enrolledClassEntity);
 
-    Integer getTotalCreditsByStudent(User student);
 
     // 학생이 현재 신청한 총 학점 조회
     @Query("SELECT COALESCE(SUM(e.enrolledClassEntity.course.credit), 0) FROM Enrollment e WHERE e.student.userId = :studentId")
