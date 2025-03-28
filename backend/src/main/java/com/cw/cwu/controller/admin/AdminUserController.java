@@ -1,11 +1,7 @@
 package com.cw.cwu.controller.admin;
 
 import com.cw.cwu.domain.Department;
-import com.cw.cwu.domain.User;
-import com.cw.cwu.dto.PageRequestDTO;
-import com.cw.cwu.dto.PageResponseDTO;
-import com.cw.cwu.dto.UserCreateRequestDTO;
-import com.cw.cwu.dto.UserDTO;
+import com.cw.cwu.dto.*;
 import com.cw.cwu.repository.admin.DepartmentRepository;
 import com.cw.cwu.repository.user.UserRepository;
 import com.cw.cwu.service.admin.AdminUserService;
@@ -45,9 +41,10 @@ public class AdminUserController {
     }
 
     @PostMapping("/profile")
-    public ResponseEntity<String> uploadProfile(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<String> uploadProfile(@RequestParam("file") MultipartFile file,
+                                                @RequestParam("userId") String userId) {
         try {
-            String fileUrl = fileUploadUtil.saveFile(file);
+            String fileUrl = fileUploadUtil.saveFile(file, userId);
             return ResponseEntity.ok(fileUrl);
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("업로드 실패: " + e.getMessage());
@@ -73,4 +70,25 @@ public class AdminUserController {
 
         return ResponseEntity.ok(result);
     }
+
+    @PutMapping("/users")
+    public ResponseEntity<String> updateUser(@RequestBody UserUpdateRequestDTO dto) {
+        String result = adminUserService.updateUser(dto);
+        if (!result.equals("수정이 완료되었습니다.")) {
+            return ResponseEntity.badRequest().body(result);
+        }
+        return ResponseEntity.ok(result);
+    }
+
+    @PutMapping("/users/{userId}/reset-password")
+    public ResponseEntity<String> resetPassword(@PathVariable String userId) {
+        String result = adminUserService.resetPassword(userId);
+
+        if (!result.equals("비밀번호가 초기화되었습니다.")) {
+            return ResponseEntity.badRequest().body(result);
+        }
+
+        return ResponseEntity.ok(result);
+    }
+
 }

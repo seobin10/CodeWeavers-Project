@@ -2,24 +2,24 @@ package com.cw.cwu.service.admin;
 
 import com.cw.cwu.domain.Department;
 import com.cw.cwu.domain.User;
-import com.cw.cwu.dto.PageRequestDTO;
-import com.cw.cwu.dto.PageResponseDTO;
-import com.cw.cwu.dto.UserCreateRequestDTO;
-import com.cw.cwu.dto.UserDTO;
+import com.cw.cwu.domain.UserRole;
+import com.cw.cwu.dto.*;
 import com.cw.cwu.repository.admin.DepartmentRepository;
 import com.cw.cwu.repository.user.UserRepository;
 import com.cw.cwu.util.PageUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.time.LocalDate;
-import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class AdminUserServiceImpl implements AdminUserService {
 
@@ -146,7 +146,72 @@ public class AdminUserServiceImpl implements AdminUserService {
             return "존재하지 않는 사용자입니다.";
         }
 
+        User user = userRepository.findById(userId).orElse(null);
+
+        if (user != null && user.getUserImgUrl() != null) {
+            String userImgUrl = user.getUserImgUrl();
+
+            String filePath = "uploads/profiles" + userImgUrl.replace("/uploads/profiles", "");
+
+            File fileToDelete = new File(filePath);
+
+            if (fileToDelete.exists() && fileToDelete.isFile()) {
+                if (fileToDelete.delete()) {
+                    log.info("프로필 이미지 파일 삭제 성공: " + filePath);
+                } else {
+                    log.error("프로필 이미지 파일 삭제 실패: " + filePath);
+                }
+            }
+        }
+
+        // 사용자 삭제
         userRepository.deleteById(userId);
         return "사용자가 삭제되었습니다.";
+    }
+
+    @Override
+    public String updateUser(UserUpdateRequestDTO dto) {
+        User user = userRepository.findById(dto.getUserId())
+                .orElse(null);
+        if (user == null) {
+            return "존재하지 않는 사용자입니다.";
+        }
+
+        // 필드 업데이트
+        user.setUserName(dto.getUserName());
+        user.setUserBirth(dto.getUserBirth());
+        user.setUserEmail(dto.getUserEmail());
+        user.setUserPhone(dto.getUserPhone());
+        user.setUserRole(UserRole.valueOf(dto.getUserRole()));
+        user.setUserImgUrl(dto.getUserImgUrl());
+
+        if (dto.getDepartmentId() != null) {
+            Department dept = departmentRepository.findById(dto.getDepartmentId()).orElse(null);
+            user.setDepartment(dept);
+        }
+
+        userRepository.save(user);
+        return "수정이 완료되었습니다.";
+    }
+
+    @Override
+    public String resetPassword(String userId) {
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            return "존재하지 않는 사용자입니다.";
+        }
+
+        if (user.getUserBirth() == null) {
+            return "해당 사용자의 생년월일 정보가 없어 초기화할 수 없습니다.";
+        }
+
+        String birth = user.getUserBirth().toString(); // yyyy-MM-dd
+        String formatted = birth.substring(2, 4) + birth.substring(5, 7) + birth.substring(8, 10); // yyMMdd
+        String defaultPassword = formatted + "!";
+
+        user.setUserPassword(defaultPassword); // 추후 passwordEncoder.encode() 예정
+        userRepository.save(user);
+
+        return "비밀번호가 초기화되었습니다.";
     }
 }

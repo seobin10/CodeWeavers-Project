@@ -3,6 +3,8 @@ import { getAllUsers, deleteUser } from "../../api/adminUserApi";
 import { ModalContext } from "../../App";
 import PageComponent from "../../components/PageComponent";
 import AdminUserModal from "../../components/AdminUserModal";
+import AdminUserCreatePage from "./AdminUserCreatePage";
+import AdminUserEditPage from "./AdminUserEditPage";
 
 const AdminUserListPage = () => {
   const [users, setUsers] = useState({
@@ -17,6 +19,9 @@ const AdminUserListPage = () => {
   const [sortDir, setsortDir] = useState("asc");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { showModal, showConfirm } = useContext(ModalContext);
+  const [hoveredUser, setHoveredUser] = useState(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [editUser, setEditUser] = useState(null);
 
   const fetchUsers = async (page = 1) => {
     try {
@@ -86,6 +91,10 @@ const AdminUserListPage = () => {
     }
   };
 
+  const handleMouseMove = (e) => {
+    setMousePos({ x: e.clientX, y: e.clientY });
+  };
+
   return (
     <div className="max-w-6xl mx-auto p-6 bg-white shadow-lg mt-10 rounded-xl">
       {/* 상단 영역 */}
@@ -148,7 +157,7 @@ const AdminUserListPage = () => {
                 >
                   학과 {getSortIcon()}
                 </th>
-                <th className="border p-2">삭제</th>
+                <th className="border p-2">변경</th>
               </tr>
             </thead>
             <tbody>
@@ -156,6 +165,9 @@ const AdminUserListPage = () => {
                 <tr
                   key={user.userId}
                   className="text-center hover:bg-gray-50 transition"
+                  onMouseEnter={() => setHoveredUser(user)}
+                  onMouseLeave={() => setHoveredUser(null)}
+                  onMouseMove={handleMouseMove}
                 >
                   <td className="border p-2">{user.userId}</td>
                   <td className="border p-2">{user.userName}</td>
@@ -167,12 +179,20 @@ const AdminUserListPage = () => {
                     {user.departmentName || "없음"}
                   </td>
                   <td className="border p-2">
-                    <button
-                      onClick={() => handleDelete(user)}
-                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-xs shadow-sm transition"
-                    >
-                      삭제
-                    </button>
+                    <div className="flex justify-center space-x-2">
+                      <button
+                        onClick={() => setEditUser(user)}
+                        className="bg-green-400 hover:bg-green-500 text-white px-3 py-1 rounded-md text-xs shadow-sm transition"
+                      >
+                        수정
+                      </button>
+                      <button
+                        onClick={() => handleDelete(user)}
+                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-xs shadow-sm transition"
+                      >
+                        삭제
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -195,11 +215,47 @@ const AdminUserListPage = () => {
       <AdminUserModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSuccess={() => {
-          fetchUsers(currentPage);
-          setIsModalOpen(false);
-        }}
-      />
+      >
+        <AdminUserCreatePage
+          onSuccess={() => {
+            fetchUsers(currentPage); // 새로 고침
+          }}
+        />
+      </AdminUserModal>
+
+      {/* 사용자 수정 모달 */}
+      <AdminUserModal isOpen={!!editUser} onClose={() => setEditUser(null)}>
+        <AdminUserEditPage
+          user={editUser}
+          onSuccess={() => {
+            fetchUsers(currentPage);
+            setEditUser(null);
+          }}
+          onClose={() => setEditUser(null)}
+        />
+      </AdminUserModal>
+
+      {hoveredUser && (
+        <div
+          className="fixed z-50 pointer-events-none"
+          style={{
+            top: mousePos.y + 10 + "px",
+            left: mousePos.x + 10 + "px",
+          }}
+        >
+          <div className="bg-white border shadow-md rounded p-1 w-24">
+            <img
+              src={
+                hoveredUser.userImgUrl
+                  ? `http://localhost:8080${hoveredUser.userImgUrl}`
+                  : "/images/noImage.jpg"
+              }
+              alt="프로필"
+              className="w-full h-auto object-cover rounded"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -17,7 +17,6 @@ const QnaWritePage = lazy(() => import("../pages/QnaWritePage"));
 const QnaDeletePage = lazy(() => import("../pages/QnaDeletePage"));
 const QnaEditPage = lazy(() => import("../pages/QnaEditPage"));
 const UnauthorizedPage = lazy(() => import("../pages/UnauthorizedPage"));
-const AdminUserCreatePage = lazy(() => import("../pages/Admin/AdminUserCreatePage"));
 const AdminUserListPage = lazy(() => import("../pages/Admin/AdminUserListPage"));
 
 const root = createBrowserRouter([
@@ -132,16 +131,6 @@ const root = createBrowserRouter([
             <UnauthorizedPage />
           </Suspense>
         ),
-      },
-      {
-        path: "admin/create-user",
-        element: (
-          <RoleGuard allowedRoles={["ADMIN"]}>
-            <Suspense fallback={Loading}>
-              <AdminUserCreatePage />
-            </Suspense>
-          </RoleGuard>
-        )
       },
       {
         path: "admin/user-list",
