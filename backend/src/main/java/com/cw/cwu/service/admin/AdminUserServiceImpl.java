@@ -1,12 +1,10 @@
 package com.cw.cwu.service.admin;
 
-import com.cw.cwu.domain.Department;
-import com.cw.cwu.domain.User;
-import com.cw.cwu.dto.PageRequestDTO;
-import com.cw.cwu.dto.PageResponseDTO;
-import com.cw.cwu.dto.UserCreateRequestDTO;
-import com.cw.cwu.dto.UserDTO;
+import com.cw.cwu.domain.*;
+import com.cw.cwu.dto.*;
 import com.cw.cwu.repository.admin.DepartmentRepository;
+import com.cw.cwu.repository.user.AnswerRepository;
+import com.cw.cwu.repository.user.QuestionRepository;
 import com.cw.cwu.repository.user.UserRepository;
 import com.cw.cwu.util.PageUtil;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +23,6 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     private final UserRepository userRepository;
     private final DepartmentRepository departmentRepository;
-
 
     @Override
     public String createUser(UserCreateRequestDTO dto) {

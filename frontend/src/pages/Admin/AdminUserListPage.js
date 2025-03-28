@@ -148,7 +148,7 @@ const AdminUserListPage = () => {
                 >
                   학과 {getSortIcon()}
                 </th>
-                <th className="border p-2">삭제</th>
+                <th className="border p-2">관리</th>
               </tr>
             </thead>
             <tbody>
@@ -172,6 +172,12 @@ const AdminUserListPage = () => {
                       className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-xs shadow-sm transition"
                     >
                       삭제
+                    </button>&nbsp;&nbsp;
+                    <button
+                      onClick={() => handleDelete(user)}
+                      className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md text-xs shadow-sm transition"
+                    >
+                      수정
                     </button>
                   </td>
                 </tr>

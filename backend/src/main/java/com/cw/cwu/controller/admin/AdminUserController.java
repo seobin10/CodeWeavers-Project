@@ -73,4 +73,5 @@ public class AdminUserController {
 
         return ResponseEntity.ok(result);
     }
+
 }

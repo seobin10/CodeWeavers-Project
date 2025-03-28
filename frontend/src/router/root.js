@@ -19,7 +19,7 @@ const QnaEditPage = lazy(() => import("../pages/QnaEditPage"));
 const UnauthorizedPage = lazy(() => import("../pages/UnauthorizedPage"));
 const AdminUserCreatePage = lazy(() => import("../pages/Admin/AdminUserCreatePage"));
 const AdminUserListPage = lazy(() => import("../pages/Admin/AdminUserListPage"));
-
+const AnsWritePage = lazy(() => import("../pages/Admin/QnaAnswerWritePage"))
 const root = createBrowserRouter([
   {
     path: "/",
@@ -122,6 +122,14 @@ const root = createBrowserRouter([
         element: (
           <Suspense fallback={Loading}>
             <QnaEditPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "ansWrite",
+        element: (
+          <Suspense fallback={Loading}>
+            <AnsWritePage />
           </Suspense>
         ),
       },
