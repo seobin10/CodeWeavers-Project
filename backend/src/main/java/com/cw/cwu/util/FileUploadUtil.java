@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.UUID;
 
 // 이미지 파일 업로드 및 경로 생성 유틸리티 클래스
 
@@ -18,30 +17,29 @@ public class FileUploadUtil {
 
     private static final String UPLOAD_DIR = "uploads/profiles";
 
-    public String saveFile(MultipartFile file) {
+    public String saveFile(MultipartFile file, String userId) {
         if (file.isEmpty()) {
             throw new IllegalArgumentException("빈 파일은 저장할 수 없습니다.");
         }
 
         try {
-            // 저장 폴더 생성
             File dir = new File(UPLOAD_DIR);
             if (!dir.exists()) {
                 dir.mkdirs();
             }
 
-            // 파일명 생성 (UUID + 원본 파일명)
             String originalName = file.getOriginalFilename();
-            String uuid = UUID.randomUUID().toString();
-            String savedName = uuid + "_" + originalName;
 
-            // 저장 경로
+            if (originalName == null || !originalName.contains(".")) {
+                throw new IllegalArgumentException("파일 이름이 올바르지 않거나 확장자가 없습니다.");
+            }
+
+            String ext = originalName.substring(originalName.lastIndexOf("."));
+            String savedName = userId + "_profile" + ext;
             Path savePath = Paths.get(UPLOAD_DIR, savedName);
 
-            // 파일 저장
             file.transferTo(savePath);
 
-            // URL 경로 반환
             return "/uploads/profiles/" + savedName;
 
         } catch (IOException e) {
