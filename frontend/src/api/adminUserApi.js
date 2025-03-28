@@ -11,9 +11,7 @@ export const getDepartments = () => {
   return axios.get(`${prefix}/departments`);
 };
 
-export const uploadProfileImage = (file) => {
-  const formData = new FormData();
-  formData.append("file", file);
+export const uploadProfileImage = (formData) => {
   return axios.post(`${prefix}/profile`, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
@@ -41,3 +39,12 @@ export const getAllUsers = (
 };
 
 export const deleteUser = (userId) => axios.delete(`${prefix}/users/${userId}`);
+
+
+export const updateUser = (userData) => {
+  return axios.put(`${prefix}/users`, userData);
+};
+
+export const resetPassword = (userId) => {
+  return axios.put(`${prefix}/users/${userId}/reset-password`);
+};
