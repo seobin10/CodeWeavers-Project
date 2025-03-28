@@ -18,7 +18,7 @@ const initialForm = {
   userImgUrl: "",
 };
 
-const AdminUserCreatePage = ({onSuccess}) => {
+const AdminUserCreatePage = ({ onSuccess }) => {
   const [form, setForm] = useState(initialForm);
   const [departments, setDepartments] = useState([]);
   const [emailId, setEmailId] = useState("");
@@ -42,7 +42,7 @@ const AdminUserCreatePage = ({onSuccess}) => {
     setForm((prev) => {
       const updated = { ...prev, [name]: value };
       if (name === "userId") {
-        setUserIdMessage(/^\d{9}$/.test(value) ? "✔ 올바른 형식입니다." : "❌ 숫자 9자리여야 합니다.");
+        setUserIdMessage(/^[0-9]{9}$/.test(value) ? "✔ 올바른 형식입니다." : "❌ 숫자 9자리여야 합니다.");
       }
       if (name === "userBirth" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
         const formatted = value.slice(2, 4) + value.slice(5, 7) + value.slice(8, 10);
@@ -85,17 +85,17 @@ const AdminUserCreatePage = ({onSuccess}) => {
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-  
+
     if (!form.userId) {
       setUploadMsg("❌ 먼저 ID를 입력해주세요.");
       return;
     }
-  
+
     try {
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("userId", form.userId); 
-      
+      formData.append("userId", form.userId);
+
       const res = await uploadProfileImage(formData);
       setForm((prev) => ({ ...prev, userImgUrl: res.data }));
       setUploadMsg("✔ 이미지 업로드에 성공하였습니다.");
@@ -130,10 +130,10 @@ const AdminUserCreatePage = ({onSuccess}) => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto mt-8 p-6 bg-white shadow-md rounded-lg">
-      <h2 className="text-3xl font-bold text-center mb-6">학생/교수 등록</h2>
+    <div className="max-w-3xl mx-auto mt-8 p-6 bg-white shadow-md rounded-lg">
+      <h2 className="text-2xl font-bold text-center mb-6">학생 / 교수 등록</h2>
 
-      <div className="space-y-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block mb-1 text-sm font-medium text-gray-700">사용자 구분 *</label>
           <select name="userRole" className="w-full p-2 border rounded" value={form.userRole} onChange={handleChange}>
@@ -158,7 +158,7 @@ const AdminUserCreatePage = ({onSuccess}) => {
           <input name="userBirth" type="date" className="w-full p-2 border rounded" onChange={handleChange} value={form.userBirth} />
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <label className="block mb-1 text-sm font-medium text-gray-700">비밀번호 *</label>
           <div className="relative">
             <input
@@ -179,7 +179,7 @@ const AdminUserCreatePage = ({onSuccess}) => {
           </div>
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <label className="block mb-1 text-sm font-medium text-gray-700">이메일 *</label>
           <div className="flex flex-wrap gap-2">
             <input className="flex-1 min-w-[100px] p-2 border rounded" placeholder="아이디" value={emailId} onChange={handleEmailIdChange} />
@@ -200,7 +200,7 @@ const AdminUserCreatePage = ({onSuccess}) => {
           </div>
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <label className="block mb-1 text-sm font-medium text-gray-700">전화번호 *</label>
           <div className="flex space-x-2">
             <input name="part1" maxLength={3} className="w-1/3 p-2 border rounded" value={phoneParts.part1} onChange={handlePhoneChange} />
@@ -209,7 +209,7 @@ const AdminUserCreatePage = ({onSuccess}) => {
           </div>
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <label className="block mb-1 text-sm font-medium text-gray-700">소속 학과 *</label>
           <select
             name="departmentId"
@@ -232,30 +232,26 @@ const AdminUserCreatePage = ({onSuccess}) => {
           </select>
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <label className="block mb-1 text-sm font-medium text-gray-700">프로필 이미지</label>
           <input
             type="file"
             accept="image/*"
             onChange={handleFileChange}
-            className="block w-full text-sm text-gray-500
-              file:mr-4 file:py-2 file:px-4
-              file:rounded file:border-0
-              file:text-sm file:font-semibold
-              file:bg-blue-600 file:text-white
-              hover:file:bg-blue-800
-              border rounded"
+            className="block w-full text-sm text-gray-500 border rounded file:bg-blue-600 file:text-white file:px-4 file:py-2 file:rounded file:border-0 file:text-sm file:font-semibold hover:file:bg-blue-800"
             ref={fileInputRef}
           />
           {uploadMsg && <p className="text-sm mt-1">{uploadMsg}</p>}
         </div>
 
-        <button
-          onClick={handleSubmit}
-          className="w-full mt-4 bg-blue-600 hover:bg-blue-800 text-white font-semibold py-3 rounded-lg transition"
-        >
-          등록
-        </button>
+        <div className="md:col-span-2">
+          <button
+            onClick={handleSubmit}
+            className="w-full mt-4 bg-blue-600 hover:bg-blue-800 text-white font-semibold py-3 rounded-lg transition"
+          >
+            등록
+          </button>
+        </div>
       </div>
     </div>
   );

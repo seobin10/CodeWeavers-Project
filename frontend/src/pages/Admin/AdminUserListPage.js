@@ -16,23 +16,15 @@ const AdminUserListPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState("userId");
-  const [sortDir, setsortDir] = useState("asc");
+  const [sortDir, setSortDir] = useState("asc");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { showModal, showConfirm } = useContext(ModalContext);
-  const [hoveredUser, setHoveredUser] = useState(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [editUser, setEditUser] = useState(null);
+  const [hoveredUser, setHoveredUser] = useState(null);
 
   const fetchUsers = async (page = 1) => {
     try {
-      const safeSortField = sortField || "userId";
-      const res = await getAllUsers(
-        page,
-        10,
-        searchQuery,
-        safeSortField,
-        sortDir
-      );
+      const res = await getAllUsers(page, 10, searchQuery, sortField, sortDir);
       setUsers(res.data);
       setCurrentPage(page);
     } catch (err) {
@@ -46,15 +38,7 @@ const AdminUserListPage = () => {
 
   const handleDelete = (user) => {
     showConfirm({
-      message: (
-        <>
-          ID: {user.userId}
-          <br />
-          이름: {user.userName}
-          <br />
-          <br />이 사용자를 삭제하시겠습니까?
-        </>
-      ),
+      message: `ID: ${user.userId}\n이름: ${user.userName}\n\n이 사용자를 삭제하시겠습니까?`,
       onConfirm: async () => {
         try {
           await deleteUser(user.userId);
@@ -68,15 +52,9 @@ const AdminUserListPage = () => {
   };
 
   const handleSort = (field) => {
-    if (sortField === field) {
-      setsortDir((prev) => (prev === "asc" ? "desc" : "asc"));
-    } else {
-      setSortField(field);
-      setsortDir("asc");
-    }
+    setSortDir(sortField === field && sortDir === "asc" ? "desc" : "asc");
+    setSortField(field);
   };
-
-  const getSortIcon = () => "↕️";
 
   const getRoleLabel = (role) => {
     switch (role) {
@@ -91,171 +69,128 @@ const AdminUserListPage = () => {
     }
   };
 
-  const handleMouseMove = (e) => {
-    setMousePos({ x: e.clientX, y: e.clientY });
-  };
-
   return (
-    <div className="max-w-6xl mx-auto p-6 bg-white shadow-lg mt-10 rounded-xl">
-      {/* 상단 영역 */}
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold text-gray-800">📋 사용자 목록</h2>
+    <div className="max-w-7xl mx-auto p-8 bg-white shadow-md rounded-md mt-10">
+      <div className="flex justify-between items-center border-b pb-3 mb-6">
+        <h2 className="text-2xl font-semibold text-gray-700">사용자 관리</h2>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="bg-blue-600 hover:bg-blue-800 text-white px-4 py-2 rounded-md shadow transition"
+          className="px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800 transition"
         >
-          + 사용자 등록
+          사용자 추가
         </button>
       </div>
 
-      {/* 검색창 */}
-      <div className="mb-6 flex justify-center">
+      <div className="flex justify-end mb-4">
         <input
           type="text"
-          placeholder="이름 또는 ID 검색"
+          placeholder="ID 또는 이름으로 검색"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="border border-gray-300 px-4 py-2 w-1/2 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="border-gray-300 rounded px-3 py-2 shadow-sm w-64 focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
 
-      {/* 사용자 목록 테이블 */}
-      {users.dtoList.length > 0 ? (
-        <>
-          <table className="w-full text-sm border border-gray-300 rounded-md overflow-hidden shadow">
-            <thead className="bg-gray-100 text-center text-gray-700">
-              <tr>
-                <th
-                  className="border p-2 cursor-pointer"
-                  onClick={() => handleSort("userId")}
-                >
-                  ID {getSortIcon()}
-                </th>
-                <th
-                  className="border p-2 cursor-pointer"
-                  onClick={() => handleSort("userName")}
-                >
-                  이름 {getSortIcon()}
-                </th>
-                <th
-                  className="border p-2 cursor-pointer"
-                  onClick={() => handleSort("userBirth")}
-                >
-                  생년월일 {getSortIcon()}
-                </th>
-                <th className="border p-2">이메일</th>
-                <th className="border p-2">전화번호</th>
-                <th
-                  className="border p-2 cursor-pointer"
-                  onClick={() => handleSort("userRole")}
-                >
-                  구분 {getSortIcon()}
-                </th>
-                <th
-                  className="border p-2 cursor-pointer"
-                  onClick={() => handleSort("departmentName")}
-                >
-                  학과 {getSortIcon()}
-                </th>
-                <th className="border p-2">변경</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.dtoList.map((user) => (
-                <tr
-                  key={user.userId}
-                  className="text-center hover:bg-gray-50 transition"
-                  onMouseEnter={() => setHoveredUser(user)}
-                  onMouseLeave={() => setHoveredUser(null)}
-                  onMouseMove={handleMouseMove}
-                >
-                  <td className="border p-2">{user.userId}</td>
-                  <td className="border p-2">{user.userName}</td>
-                  <td className="border p-2">{user.userBirth}</td>
-                  <td className="border p-2">{user.userEmail}</td>
-                  <td className="border p-2">{user.userPhone}</td>
-                  <td className="border p-2">{getRoleLabel(user.userRole)}</td>
-                  <td className="border p-2">
-                    {user.departmentName || "없음"}
-                  </td>
-                  <td className="border p-2">
-                    <div className="flex justify-center space-x-2">
-                      <button
-                        onClick={() => setEditUser(user)}
-                        className="bg-green-400 hover:bg-green-500 text-white px-3 py-1 rounded-md text-xs shadow-sm transition"
-                      >
-                        수정
-                      </button>
-                      <button
-                        onClick={() => handleDelete(user)}
-                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-xs shadow-sm transition"
-                      >
-                        삭제
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <table className="min-w-full table-auto shadow-sm border border-gray-200 rounded-md">
+        <thead className="bg-gray-50 text-gray-600 uppercase text-sm leading-normal">
+          <tr>
+            {[
+              { label: "학번/교번", field: "userId" },
+              { label: "이름", field: "userName" },
+              { label: "생년월일", field: "userBirth" },
+              { label: "이메일" },
+              { label: "전화번호" },
+              { label: "구분", field: "userRole" },
+              { label: "학과", field: "departmentName" },
+              { label: "관리" },
+            ].map(({ label, field }) => (
+              <th
+                key={label}
+                className="py-3 px-4 cursor-pointer border-b"
+                onClick={() => field && handleSort(field)}
+              >
+                {label}
+                {field &&
+                  (sortField === field
+                    ? sortDir === "asc"
+                      ? " ▲"
+                      : " ▼"
+                    : " ▲")}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="text-gray-700 text-sm">
+          {users.dtoList.map((user) => (
+            <tr
+              key={user.userId}
+              className="hover:bg-gray-100 border-b text-center"
+            >
+              <td className="py-3 px-4">{user.userId}</td>
+              <td
+                className="py-3 px-4 text-center relative"
+                onMouseEnter={() => setHoveredUser(user)}
+                onMouseLeave={() => setHoveredUser(null)}
+              >
+                {user.userName}
 
-          <PageComponent
-            currentPage={users.current}
-            totalPage={users.totalPage}
-            onPageChange={(page) => fetchUsers(page)}
-          />
-        </>
-      ) : (
-        <p className="text-center text-gray-500 mt-10">
-          등록된 사용자가 없습니다.
-        </p>
-      )}
+                {hoveredUser?.userId === user.userId && (
+                  <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 w-24 h-24 bg-white border rounded shadow z-10">
+                    <img
+                      src={
+                        hoveredUser.userImgUrl
+                          ? `http://localhost:8080${hoveredUser.userImgUrl}`
+                          : "/images/noImage.jpg"
+                      }
+                      alt="프로필 이미지"
+                      className="w-full h-full object-cover rounded"
+                    />
+                  </div>
+                )}
+              </td>
+              <td className="py-3 px-4">{user.userBirth}</td>
+              <td className="py-3 px-4">{user.userEmail}</td>
+              <td className="py-3 px-4">{user.userPhone}</td>
+              <td className="py-3 px-4">{getRoleLabel(user.userRole)}</td>
+              <td className="py-3 px-4">{user.departmentName || "-"}</td>
+              <td className="py-3 px-4 space-x-2">
+                <button
+                  onClick={() => setEditUser(user)}
+                  className="text-white bg-green-600 px-2 py-1 rounded hover:bg-green-700 transition"
+                >
+                  수정
+                </button>
+                <button
+                  onClick={() => handleDelete(user)}
+                  className="text-white bg-red-600 px-2 py-1 rounded hover:bg-red-700 transition"
+                >
+                  삭제
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
 
-      {/* 사용자 등록 모달 */}
+      <PageComponent
+        currentPage={users.current}
+        totalPage={users.totalPage}
+        onPageChange={(page) => fetchUsers(page)}
+      />
+
       <AdminUserModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       >
-        <AdminUserCreatePage
-          onSuccess={() => {
-            fetchUsers(currentPage); // 새로 고침
-          }}
-        />
+        <AdminUserCreatePage onSuccess={() => fetchUsers(currentPage)} />
       </AdminUserModal>
 
-      {/* 사용자 수정 모달 */}
       <AdminUserModal isOpen={!!editUser} onClose={() => setEditUser(null)}>
         <AdminUserEditPage
           user={editUser}
-          onSuccess={() => {
-            fetchUsers(currentPage);
-            setEditUser(null);
-          }}
-          onClose={() => setEditUser(null)}
+          onSuccess={() => fetchUsers(currentPage)}
         />
       </AdminUserModal>
-
-      {hoveredUser && (
-        <div
-          className="fixed z-50 pointer-events-none"
-          style={{
-            top: mousePos.y + 10 + "px",
-            left: mousePos.x + 10 + "px",
-          }}
-        >
-          <div className="bg-white border shadow-md rounded p-1 w-24">
-            <img
-              src={
-                hoveredUser.userImgUrl
-                  ? `http://localhost:8080${hoveredUser.userImgUrl}`
-                  : "/images/noImage.jpg"
-              }
-              alt="프로필"
-              className="w-full h-auto object-cover rounded"
-            />
-          </div>
-        </div>
-      )}
     </div>
   );
 };
