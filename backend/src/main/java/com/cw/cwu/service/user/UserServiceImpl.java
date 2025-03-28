@@ -1,18 +1,21 @@
 package com.cw.cwu.service.user;
 
+import com.cw.cwu.domain.Answer;
 import com.cw.cwu.domain.Question;
 import com.cw.cwu.domain.Status;
 import com.cw.cwu.dto.AnswerDTO;
+import com.cw.cwu.dto.QnADTO;
 import com.cw.cwu.dto.QuestionDTO;
 import com.cw.cwu.dto.UserDTO;
 import com.cw.cwu.domain.User;
-import com.cw.cwu.repository.user.QnaRepository;
+import com.cw.cwu.repository.user.AnswerRepository;
+import com.cw.cwu.repository.user.QuestionRepository;
 import com.cw.cwu.repository.user.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
@@ -24,10 +27,12 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
-    private final QnaRepository qnaRepository;
+    private final QuestionRepository questionRepository;
+    private final AnswerRepository answerRepository;
     // 로그인
     public UserDTO login(UserDTO request) {
         User user = userRepository.findById(request.getUserId())
@@ -85,7 +90,7 @@ public class UserServiceImpl implements UserService {
 
     // QnA 게시판 리스트를 조회
     public List<QuestionDTO> findAllQna() {
-        return qnaRepository.findAllQna()
+        return questionRepository.findAllQna()
                 .stream()
                 .map(row -> {
                     LocalDate createdAt;
@@ -112,10 +117,10 @@ public class UserServiceImpl implements UserService {
     }
 
     // QnA 내용을 조회
-    public List<AnswerDTO> findAnswer(Integer questionId) {
-        return qnaRepository.findAnswer(questionId)
+    public List<QnADTO> findAnswer(Integer questionId) {
+        return questionRepository.findAnswer(questionId)
                 .stream()
-                .map(row -> new AnswerDTO(
+                .map(row -> new QnADTO(
                         ((Integer) row[0]),
                         ((Integer) row[1]),
                         (String) row[2],
@@ -129,12 +134,12 @@ public class UserServiceImpl implements UserService {
 
     // 조회수 업데이트
     public QuestionDTO updateCount(Integer questionId) {
-        Question question = qnaRepository.findById(questionId)
+        Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new RuntimeException("데이터를 찾을 수 없습니다."));
         int updateCount = question.getViewCount() + 1;
         question.setViewCount(updateCount);
 
-        qnaRepository.save(question);
+        questionRepository.save(question);
 
         QuestionDTO dto = new QuestionDTO();
         dto.setQuestionId(question.getQuestionId());
@@ -161,33 +166,34 @@ public class UserServiceImpl implements UserService {
                 .viewCount(dto.getViewCount())
                 .build();
 
-        Question result = qnaRepository.save(question);
+        Question result = questionRepository.save(question);
         return result.getQuestionId();
     }
 
     // Q&A 삭제
     @Override
     public void deleteQna(Integer questionId) {
-        qnaRepository.deleteById(questionId);
+        questionRepository.deleteById(questionId);
     }
 
     // Q&A 작성자 Id 가져오기
     @Override
     public String findQnaId(Integer questionId) {
-        Question question = qnaRepository.findById(questionId)
+        Question question = questionRepository.findById(questionId)
                 .orElseThrow(() -> new RuntimeException("게시글 아이디 데이터를 찾을 수 없습니다."));
         return question.getUserId().getUserId();
     }
 
+    // Q&A 수정
     @Override
     public void editQna(QuestionDTO dto) {
-        Optional<Question> result = qnaRepository.findById(dto.getQuestionId());
+        Optional<Question> result = questionRepository.findById(dto.getQuestionId());
 
         Question question = result.orElseThrow();
         question.editTitle(dto.getTitle());
         question.editContent(dto.getContent());
 
-        qnaRepository.save(question);
+        questionRepository.save(question);
     }
 }
 

@@ -1,6 +1,7 @@
 package com.cw.cwu.controller.user;
 
 import com.cw.cwu.dto.AnswerDTO;
+import com.cw.cwu.dto.QnADTO;
 import com.cw.cwu.dto.QuestionDTO;
 import com.cw.cwu.dto.UserDTO;
 import com.cw.cwu.service.user.UserServiceImpl;
@@ -69,8 +70,8 @@ public class UserController {
 
     //질의응답 게시판 내용을 출력
     @GetMapping("/qna/{questionId}")
-    public ResponseEntity<List<AnswerDTO>> findQnaContent(@PathVariable("questionId") Integer questionId) {
-        List<AnswerDTO> qnaContent = userService.findAnswer(questionId);
+    public ResponseEntity<List<QnADTO>> findQnaContent(@PathVariable("questionId") Integer questionId) {
+        List<QnADTO> qnaContent = userService.findAnswer(questionId);
         return ResponseEntity.ok(qnaContent);
     }
 

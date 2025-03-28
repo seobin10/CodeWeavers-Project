@@ -1,12 +1,14 @@
 import React, { useContext, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { AuthContext } from "../App";
+import { AuthContext, ModalContext } from "../App";
 import axios from "axios";
 import PageComponent from "../components/PageComponent";
+import { WaitModalClick } from "../components/WaitModalClick";
 
 const QnaListPage = () => {
   const navigate = useNavigate();
   const { userId, setUserId } = useContext(AuthContext);
+  const { showModal } = useContext(ModalContext);
   const [message, setMessage] = useState("");
   const [qnaInfo, setQnaInfo] = useState([]);
   const [writerId, setWriterId] = useState();
@@ -15,7 +17,7 @@ const QnaListPage = () => {
 
   const localId = localStorage.getItem("id");
   const userRole = localStorage.getItem("role");
-
+console.log(userRole);
   useEffect(() => {
     if (userId) {
       fetchQnaInfo(userId);
@@ -85,23 +87,25 @@ const QnaListPage = () => {
                   <td className="text-left border border-gray-400 px-4 py-2">
                     {/\u{1F512}/u.test(qna.title) ? (
                       <p
-                        className="text-gray-400"
+                        className="text-gray-400 cursor-pointer"
                         onClick={async () => {
                           let writerId = await fetchWriterId(qna.questionId);
-                          let message = "";
                           // 두 아이디의 타입이 다르므로 !== 대신 != 사용
-                          if (userId == writerId || userRole === "ADMIN") {
-                            message =
-                              userRole === "ADMIN"
-                                ? "관리자 권한 확인, 글을 조회합니다."
-                                : "본인 확인 완료! 글을 조회합니다.";
-                            alert(message);
+                          if (userId == writerId) {
+                            showModal("본인 확인 완료! 글을 조회합니다.");
+                            await WaitModalClick();
                             navigate("/main/qnadata", {
                               state: { questionId: qna.questionId },
                             });
-                          } else {
-                            message = "읽을 수 있는 권한이 없습니다.";
-                            alert(message);
+                          } else if (userRole === ("ADMIN" || "PROFESSOR")){
+                            showModal("권한 확인 완료! 글을 조회합니다.");
+                            await WaitModalClick();
+                            navigate("/main/qnadata", {
+                              state: { questionId: qna.questionId },
+                            });
+                          }
+                          else {
+                            showModal("읽을 수 있는 권한이 없습니다.");
                           }
                         }}
                       >

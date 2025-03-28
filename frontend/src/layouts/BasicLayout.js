@@ -113,16 +113,10 @@ const BasicLayout = () => {
             {userRole === "ADMIN" && (
               <>
                 <Link
-                  to="/main/admin/create-user"
-                  className="hover:bg-blue-500 px-6 py-3"
-                >
-                  사용자 등록 ▶
-                </Link>
-                <Link
                   to="/main/admin/user-list"
                   className="hover:bg-blue-500 px-6 py-3 mt-6"
                 >
-                  사용자 조회 / 삭제 ▶
+                  사용자 관리 ▶
                 </Link>
                 <Link to="/main/users" className="hover:bg-blue-500 px-6 py-3">
                   관리자 대시보드 ▶
@@ -133,6 +127,16 @@ const BasicLayout = () => {
                 >
                   강의 관리 ▶
                 </Link>
+                <Link
+                  to="/main/qnalist"
+                  className="hover:bg-blue-500 px-6 py-3"
+                >
+                  Q&A ▶
+                </Link>
+              </>
+            )}
+                        {userRole === "PROFESSOR" && (
+              <>
                 <Link
                   to="/main/qnalist"
                   className="hover:bg-blue-500 px-6 py-3"

@@ -1,13 +1,27 @@
 import React, { useContext, useState, useEffect, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { AuthContext } from "../App";
+import { AuthContext, ModalContext } from "../App";
 import axios from "axios";
+import QnaAnswerModal from "../components/QnaAnswerModal";
+import QnaAnswerWritePage from "../pages/Admin/QnaAnswerWritePage";
 
 const QnaDataPage = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const isOpen = isModalOpen;
+  const handleClose = () => setIsModalOpen(false);
+  const refetchData = () => {
+    if (questionId) {
+      fetchContentInfo(questionId);
+      fetchWriterId(questionId);
+    }
+  };
+
+  const userRole = localStorage.getItem("role");
   const location = useLocation();
   const questionId = location.state?.questionId;
-
+  const [writerId, setWriterId] = useState();
   const { userId, setUserId } = useContext(AuthContext);
+  const { showModal } = useContext(ModalContext);
   const [message, setMessage] = useState("");
   const [contentInfo, setContentInfo] = useState([]);
 
@@ -30,11 +44,12 @@ const QnaDataPage = () => {
     if (questionId) {
       localStorage.setItem("No.", questionId);
       fetchContentInfo(questionId);
+      fetchWriterId(questionId);
     } else if (localQnaNumber) {
-      setUserId(localQnaNumber);
       fetchContentInfo(localQnaNumber);
+      fetchWriterId(localQnaNumber);
     }
-  }, [questionId, userId, setUserId, handleView]);
+  }, [questionId, userId, setUserId, writerId, setWriterId, handleView]);
 
   const fetchContentInfo = async (id) => {
     try {
@@ -45,6 +60,18 @@ const QnaDataPage = () => {
       setContentInfo(response.data);
     } catch (error) {
       setMessage("게시물 정보를 불러올 수 없습니다.");
+    }
+  };
+
+  const fetchWriterId = async (questionId) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/api/user/qna/find/${questionId}`
+      );
+      setWriterId(response.data);
+      return response.data;
+    } catch (error) {
+      setMessage("작성자 정보를 불러올 수 없습니다.");
     }
   };
 
@@ -68,7 +95,7 @@ const QnaDataPage = () => {
                       <div className="relative">
                         <button
                           onClick={() => setMenuOpen(!menuOpen)}
-                          className="text-blue-300 hover:text-blue-500  text-xl px-2"
+                          className="text-gray-700 hover:text-gray-950  text-xl px-2"
                         >
                           ⋮
                         </button>
@@ -76,28 +103,48 @@ const QnaDataPage = () => {
                         {menuOpen && (
                           <div className="absolute right-0 mt-2 w-24 bg-white border rounded shadow z-10 text-sm ">
                             <Link
-                              to="/main/qnadelete"
+                              to={
+                                userId == writerId || userRole == "ADMIN"
+                                  ? "/main/qnadelete"
+                                  : ""
+                              }
+                              onClick={
+                                userId == writerId || userRole == "ADMIN"
+                                  ? ""
+                                  : () => {
+                                      showModal("작성자만 삭제할 수 있습니다!");
+                                    }
+                              }
                               state={{ questionId }}
-                              className="block px-4 py-2 hover:bg-blue-100 hover:text-blue-600 text-blue-400 border border-solid border-blue-300"
+                              className="block px-4 py-2 hover:bg-gray-100 text-gray-800 border border-solid border-black-300"
                             >
                               삭제
                             </Link>
                             {qna.answerContent ? (
                               <button
                                 onClick={() =>
-                                  alert(
-                                    "답변 완료된 게시글은 수정할 수 없습니다"
+                                  showModal(
+                                    "답변 완료 게시글은 수정 불가입니다."
                                   )
                                 }
-                                className="block w-full text-left px-4 py-2 hover:bg-blue-100 hover:text-blue-600 text-blue-400 border border-solid border-blue-300 border-t-0"
+                                className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-gray-800 border border-solid border-black-300 border-t-0"
                               >
                                 수정불가
                               </button>
                             ) : (
                               <Link
-                                to="/main/qnaedit"
+                                to={userId == writerId ? "/main/qnaedit" : ""}
+                                onClick={
+                                  userId == writerId
+                                    ? ""
+                                    : () => {
+                                        showModal(
+                                          "작성자만 수정할 수 있습니다!"
+                                        );
+                                      }
+                                }
                                 state={{ questionId }}
-                                className="block px-4 py-2 hover:bg-blue-100 hover:text-blue-600 text-blue-400 border border-solid border-blue-300 border-t-0"
+                                className="block px-4 py-2 hover:bg-gray-100 text-gray-800 border border-solid border-black-300 border-t-0"
                               >
                                 수정
                               </Link>
@@ -163,6 +210,43 @@ const QnaDataPage = () => {
       >
         목록
       </Link>
+      <div className="float-right">
+      {userRole !== "STUDENT" && contentInfo.length > 0 && (
+        <button
+          onClick={() => {
+            const qna = contentInfo[0];
+            if (!qna.answerContent || qna.answerContent.trim() === "") {
+              setIsModalOpen(true);
+            } else {
+              showModal("이미 답변이 작성되었습니다.");
+            }
+          }}
+          className="bg-green-500 hover:bg-green-700 text-white text-sm font-semibold py-2.5 px-3 rounded transition"
+        >
+          답변 작성
+        </button>
+      )}&nbsp;
+              <button
+          onClick={() => {
+            const qna = contentInfo[0];
+            if (!qna.answerContent || qna.answerContent.trim() === "") {
+              setIsModalOpen(true);
+            } else {
+              showModal("이미 답변이 작성되었습니다.");
+            }
+          }}
+          className="bg-red-500 hover:bg-red-700 text-white text-sm font-semibold py-2.5 px-3 rounded transition"
+        >
+          답변 삭제
+        </button>
+
+      <QnaAnswerModal
+        isOpen={isOpen}
+        onClose={handleClose}
+        onSuccess={refetchData}
+        pageProps={<QnaAnswerWritePage />}
+      />
+      </div>
     </div>
   );
 };
