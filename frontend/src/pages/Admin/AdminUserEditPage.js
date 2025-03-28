@@ -8,8 +8,7 @@ import {
 import { ModalContext } from "../../App";
 import ConfirmModal from "../../components/ConfirmModal";
 
-const AdminUserEditPage = ({user, onSuccess, onClose}) => {
-
+const AdminUserEditPage = ({ user, onSuccess, onClose }) => {
   const [form, setForm] = useState({ ...user });
   const [departments, setDepartments] = useState([]);
   const [emailId, setEmailId] = useState("");
@@ -19,8 +18,7 @@ const AdminUserEditPage = ({user, onSuccess, onClose}) => {
   const [phoneParts, setPhoneParts] = useState({ part1: "", part2: "", part3: "" });
   const fileInputRef = useRef(null);
   const { showModal } = useContext(ModalContext);
-  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false); 
-  
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   useEffect(() => {
     getDepartments()
@@ -96,10 +94,8 @@ const AdminUserEditPage = ({user, onSuccess, onClose}) => {
       const response = await updateUser(form);
       const msg = typeof response.data === "string" ? response.data : response.data.message ?? "응답 메시지를 확인할 수 없습니다.";
       showModal(msg);
-
-
-      onSuccess();  
-      onClose();    
+      onSuccess();
+      onClose();
     } catch (err) {
       const errorData = err.response?.data;
       let message = "알 수 없는 에러가 발생했습니다.";
@@ -118,22 +114,22 @@ const AdminUserEditPage = ({user, onSuccess, onClose}) => {
       const response = await resetPassword(form.userId);
       const msg = response.data;
       showModal(msg);
-      setIsConfirmModalOpen(false); 
+      setIsConfirmModalOpen(false);
     } catch (err) {
       const errorData = err.response?.data;
       let message = "알 수 없는 에러가 발생했습니다.";
       if (typeof errorData === "string") message = errorData;
       else if (typeof errorData === "object" && errorData.message) message = errorData.message;
       showModal(message);
-      setIsConfirmModalOpen(false); 
+      setIsConfirmModalOpen(false);
     }
   };
 
   return (
-    <div className="max-w-2xl mx-auto mt-8 p-6 bg-white shadow-md rounded-lg">
-      <h2 className="text-3xl font-bold text-center mb-6">학생/교수 정보 수정</h2>
+    <div className="max-w-3xl mx-auto mt-8 p-6 bg-white shadow-md rounded-lg">
+      <h2 className="text-2xl font-bold text-center mb-6">학생 / 교수 정보 수정</h2>
 
-      <div className="space-y-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <label className="block mb-1 text-sm font-medium text-gray-700">사용자 구분 *</label>
           <select name="userRole" className="w-full p-2 border rounded" value={form.userRole} onChange={handleChange}>
@@ -157,16 +153,16 @@ const AdminUserEditPage = ({user, onSuccess, onClose}) => {
           <input name="userBirth" type="date" className="w-full p-2 border rounded" onChange={handleChange} value={form.userBirth} />
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <button
             onClick={handleResetPassword}
-            className="w-full mt-4 bg-yellow-600 hover:bg-yellow-800 text-white font-semibold py-3 rounded-lg transition"
+            className="w-full mt-2 bg-yellow-600 hover:bg-yellow-800 text-white font-semibold py-3 rounded-lg transition"
           >
             비밀번호 초기화
           </button>
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <label className="block mb-1 text-sm font-medium text-gray-700">이메일 *</label>
           <div className="flex flex-wrap gap-2">
             <input className="flex-1 min-w-[100px] p-2 border rounded" placeholder="아이디" value={emailId} onChange={handleEmailIdChange} />
@@ -182,7 +178,7 @@ const AdminUserEditPage = ({user, onSuccess, onClose}) => {
           </div>
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <label className="block mb-1 text-sm font-medium text-gray-700">전화번호 *</label>
           <div className="flex space-x-2">
             <input name="part1" maxLength={3} className="w-1/3 p-2 border rounded" value={phoneParts.part1} onChange={handlePhoneChange} />
@@ -191,7 +187,7 @@ const AdminUserEditPage = ({user, onSuccess, onClose}) => {
           </div>
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <label className="block mb-1 text-sm font-medium text-gray-700">소속 학과 *</label>
           <select
             name="departmentId"
@@ -214,36 +210,34 @@ const AdminUserEditPage = ({user, onSuccess, onClose}) => {
           </select>
         </div>
 
-        <div>
+        <div className="md:col-span-2">
           <label className="block mb-1 text-sm font-medium text-gray-700">프로필 이미지</label>
           <input
             type="file"
             accept="image/*"
             onChange={handleFileChange}
-            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-800 border rounded"
+            className="block w-full text-sm text-gray-500 border rounded file:bg-blue-600 file:text-white file:px-4 file:py-2 file:rounded file:border-0 file:text-sm file:font-semibold hover:file:bg-blue-800"
             ref={fileInputRef}
           />
           {uploadMsg && <p className="text-sm mt-1">{uploadMsg}</p>}
         </div>
 
-        <button
-          onClick={handleSubmit}
-          className="w-full mt-4 bg-blue-600 hover:bg-blue-800 text-white font-semibold py-3 rounded-lg transition"
-        >
-          수정
-        </button>
+        <div className="md:col-span-2">
+          <button
+            onClick={handleSubmit}
+            className="w-full mt-4 bg-blue-600 hover:bg-blue-800 text-white font-semibold py-3 rounded-lg transition"
+          >
+            수정
+          </button>
+        </div>
       </div>
-      
-       {/* 비밀번호 초기화 모달 */}
-       <ConfirmModal
+
+      <ConfirmModal
         isOpen={isConfirmModalOpen}
         message="비밀번호를 초기화하시겠습니까?"
         onConfirm={handleConfirmResetPassword}
         onCancel={() => setIsConfirmModalOpen(false)}
       />
-
-
-
     </div>
   );
 };
