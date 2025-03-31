@@ -154,6 +154,7 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
         User student = userRepository.findByUserId(studentId).orElseThrow();
         List<Enrollment> enrollments = enrollmentRepository.findByStudent(student);
         return enrollments.stream()
+                .filter(e -> e.getEnrolledClassEntity() != null) // Null 방지
                 .map(e -> {
                     ClassEntity c = e.getEnrolledClassEntity();
                     Map<String, Object> courseMap = new HashMap<>();
