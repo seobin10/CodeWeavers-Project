@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 
 const ProfessorGradePage = () => {
-  const [lectures, setLectures] = useState([]);
+  const [] = useState([]);
 
   useEffect(() => {
   }, []);
