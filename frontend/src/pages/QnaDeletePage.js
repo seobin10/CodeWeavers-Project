@@ -10,7 +10,6 @@ const QnaDeletePage = () => {
   const [writerId, setWriterId] = useState();
   const { userId, setUserId } = useContext(AuthContext);
   const { showModal } = useContext(ModalContext);
-  const [userInfo, setUserInfo] = useState(null);
   const [userData, setUserData] = useState({
     userName: "",
     userId: "",
@@ -55,7 +54,6 @@ const QnaDeletePage = () => {
       const response = await axios.get(
         `http://localhost:8080/api/user/${userId}`
       );
-      setUserInfo(response.data);
       setUserData({
         userName: response.data.userName,
         userId: response.data.userId,

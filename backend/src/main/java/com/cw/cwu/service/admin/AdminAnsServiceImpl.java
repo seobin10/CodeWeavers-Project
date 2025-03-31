@@ -54,6 +54,11 @@ public class AdminAnsServiceImpl implements AdminAnsService{
                 .orElseThrow(()-> new RuntimeException("해당하는 질문을 찾을 수 없습니다."));
         Answer answer = answerRepository.findByQuestionId(question)
                         .orElseThrow(()->new RuntimeException("해당하는 답변을 찾을 수 없습니다."));
+
+        // 미답변 상태로 변경
+        question.setStatus(Status.OPEN);
+        questionRepository.save(question);
+
         answerRepository.deleteById(answer.getAnswerId());
     }
 }

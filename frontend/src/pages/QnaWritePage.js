@@ -122,7 +122,9 @@ const QnaWritePage = () => {
       showModal("질문이 등록되었습니다.");
       await WaitModalClick();
       navigate("/main/qnalist");
-      window.location.reload();
+      setTimeout(() => {
+        window.location.reload();
+      }, 0);
     }
   };
   

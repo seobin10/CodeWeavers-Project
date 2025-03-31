@@ -1,6 +1,6 @@
 import axios from "axios";
-import React, { useContext, useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useContext, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { WaitModalClick } from "../../components/WaitModalClick";
 import { AuthContext, ModalContext } from "../../App";
 
@@ -13,15 +13,13 @@ if (month < 10) {
 }
 let day = date.getDate();
 let today = year + "-" + month + "-" + day;
-console.log(today);
 
-const userId = localStorage.getItem("id");
-const qno = localStorage.getItem("No.");
-
-const QnaAnswerWritePage = () => {
+const QnaAnswerWritePage = ({ qno }) => {
+  const { userId } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
+  const currentPage = location.state?.page;
   const { showModal } = useContext(ModalContext);
-  const [message, setMessage] = useState("");
   const [formData, setFormData] = useState({
     answerId: null,
     questionId: null,
@@ -36,7 +34,6 @@ const QnaAnswerWritePage = () => {
   };
 
   const handleClickAdd = async (e) => {
-    console.log("폼 데이터 확인:", formData);
     if (!formData.answer.trim()) {
       showModal("내용을 입력해주세요");
       return e.preventDefault();
@@ -48,12 +45,15 @@ const QnaAnswerWritePage = () => {
         answer: formData.answer,
         answerDate: today,
       };
-      console.log("객체 확인:", obj);
-      const result = await postAdd(obj);
+      await postAdd(obj);
       showModal("답변이 등록되었습니다.");
       await WaitModalClick();
-      navigate("/main/qnaData");
-      window.location.reload();
+      navigate("/main/qnaData", {
+        state: { questionId: qno, page: currentPage },
+      });
+      setTimeout(() => {
+        window.location.reload();
+      }, 0);
     }
   };
 
@@ -70,7 +70,6 @@ const QnaAnswerWritePage = () => {
     <div className="border border-solid shadow-md p-10 rounded-md bg-white">
       <div>
         <h1 className="text-3xl font-bold text-left mb-6">Q&A 답변</h1>
-        {message && <p className="text-red-500 text-center">{message}</p>}
         <hr />
         <br />
         <table className="table-auto border-collapse border border-gray-400 w-full">
@@ -113,7 +112,8 @@ const QnaAnswerWritePage = () => {
             </tr>
           </tbody>
         </table>
-        <tr className="w-full block">
+
+        <div className="w-full block">
           <br />
           <button
             type="button"
@@ -122,7 +122,7 @@ const QnaAnswerWritePage = () => {
           >
             답변하기
           </button>
-        </tr>
+        </div>
       </div>
     </div>
   );

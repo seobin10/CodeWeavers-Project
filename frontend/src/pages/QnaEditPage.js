@@ -10,7 +10,6 @@ const QnaEditPage = () => {
   const [writerId, setWriterId] = useState();
   const { userId, setUserId } = useContext(AuthContext);
   const { showModal } = useContext(ModalContext);
-  const [userInfo, setUserInfo] = useState(null);
   const [userData, setUserData] = useState({
     userName: "",
     userId: "",
@@ -71,7 +70,6 @@ const QnaEditPage = () => {
       const response = await axios.get(
         `http://localhost:8080/api/user/${userId}`
       );
-      setUserInfo(response.data);
       setUserData({
         userName: response.data.userName,
         userId: response.data.userId,
@@ -171,7 +169,9 @@ const QnaEditPage = () => {
       showModal(checkEditSuccess[0]);
       await WaitModalClick();
       navigate(checkEditSuccess[1], { state: { questionId } });
-      window.location.reload();
+      setTimeout(() => {
+        window.location.reload();
+      }, 0);
     } else {
       showModal("작성자만 수정할 수 있습니다!");
       await WaitModalClick();
