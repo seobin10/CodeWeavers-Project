@@ -10,9 +10,7 @@ import com.cw.cwu.util.PageUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -89,25 +87,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     @Override
     public PageResponseDTO<UserDTO> getAllUsers(String keyword, PageRequestDTO pageRequestDTO) {
-        // 정렬 기준 및 방향 설정
-        String sortField = pageRequestDTO.getSortField() != null ? pageRequestDTO.getSortField() : "userId";
-        String sortDir = pageRequestDTO.getSortDir() != null ? pageRequestDTO.getSortDir() : "asc";
-
-        if ("departmentName".equals(sortField)) {
-            sortField = "department.departmentName";
-        }
-
-        // 정렬 객체 생성
-        Sort sort = Sort.by(
-                "desc".equalsIgnoreCase(sortDir) ? Sort.Direction.DESC : Sort.Direction.ASC,
-                sortField
-        );
-
-        Pageable pageable = PageRequest.of(
-                pageRequestDTO.getPage() - 1,
-                pageRequestDTO.getSize(),
-                sort
-        );
+        Pageable pageable = PageUtil.toPageable(pageRequestDTO, "userId");
 
         Page<User> userPage;
         if (keyword != null && !keyword.trim().isEmpty()) {

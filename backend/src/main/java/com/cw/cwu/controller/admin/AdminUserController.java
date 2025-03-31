@@ -21,7 +21,6 @@ public class AdminUserController {
     private final AdminUserService adminUserService;
     private final DepartmentRepository departmentRepository;
     private final FileUploadUtil fileUploadUtil;
-    private final UserRepository userRepository;
 
 
     @PostMapping("/users")

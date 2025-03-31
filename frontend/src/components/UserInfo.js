@@ -38,12 +38,10 @@ const UserInfo = () => {
       <span className="font-semibold">
         성명: {processedUserInfo.userName} ({processedUserInfo.userId})
       </span>
-      {userRole === "STUDENT" && (
+      {(userRole === "STUDENT" || userRole === "PROFESSOR") && (
         <>
-          {" "}
           {"|"}
           <span className="font-semibold">
-            {" "}
             학과: {processedUserInfo.departmentName || "N/A"}
           </span>
         </>

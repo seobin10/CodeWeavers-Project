@@ -42,6 +42,7 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
     private final StudentInfoService studentInfoService;
 
     // 학생이 수강 신청 가능한 강의 목록 조회
+    @Override
     public PageResponseDTO<Map<String, Object>> getAvailableCoursesPaged(
             String studentId,
             String courseType,
@@ -65,6 +66,7 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
     }
 
     // 학과 목록 필터링
+    @Override
     public List<Map<String, Object>> getDepartments() {
         return filterRepository.findDistinctDepartments().stream()
                 .map(d -> Map.<String, Object>of("departmentName", d))
@@ -72,6 +74,7 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
     }
 
     // 강의 구분 필터링
+    @Override
     public List<Map<String, Object>> getCourseTypes() {
         return filterRepository.findDistinctCourseTypes().stream()
                 .map(ct -> Map.<String, Object>of("courseType",
@@ -80,6 +83,7 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
     }
 
     // 강의 학년 필터링
+    @Override
     public List<Map<String, Object>> getCourseYears() {
         return filterRepository.findDistinctCourseYears().stream()
                 .map(y -> Map.<String, Object>of("courseYear", y))
@@ -87,6 +91,7 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
     }
 
     // 강의 요일 필터링
+    @Override
     public List<Map<String, Object>> getClassDays() {
         return filterRepository.findDistinctClassDays().stream()
                 .map(cd -> Map.<String, Object>of("classDay", cd))
@@ -94,6 +99,7 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
     }
 
     // 강의 시작 시간 필터링
+    @Override
     public List<Map<String, Object>> getClassTimes() {
         return filterRepository.findDistinctClassTimes().stream()
                 .map(ct -> Map.<String, Object>of("classTime", ct))
@@ -101,6 +107,7 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
     }
 
     // 학점 목록 조회 필터링
+    @Override
     public List<Map<String, Object>> getCredits() {
         return filterRepository.findDistinctCredits().stream()
                 .map(c -> Map.<String, Object>of("credit", c))
@@ -163,6 +170,7 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
     }
 
     // 수강 신청 처리
+    @Override
     public String applyToClass(EnrollmentRequestDTO requestDTO) {
         System.out.println("service applyToClass : " + requestDTO);
         User student = userRepository.getReferenceById(requestDTO.getStudentId());

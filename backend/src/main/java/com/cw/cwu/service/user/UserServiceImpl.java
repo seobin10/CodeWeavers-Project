@@ -28,7 +28,9 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final QnaRepository qnaRepository;
+
     // 로그인
+    @Override
     public UserDTO login(UserDTO request) {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
@@ -42,6 +44,7 @@ public class UserServiceImpl implements UserService {
     }
 
     // 정보 조회
+    @Override
     public UserDTO getUserInfo(String userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
@@ -71,7 +74,7 @@ public class UserServiceImpl implements UserService {
         return response;
     }
 
-    // 이메일과 전화번호 업데이트 (ModelMapper 적용)
+    // 이메일과 전화번호 업데이트
     public UserDTO updateUser(String userId, UserDTO request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
@@ -84,6 +87,7 @@ public class UserServiceImpl implements UserService {
     }
 
     // QnA 게시판 리스트를 조회
+    @Override
     public List<QuestionDTO> findAllQna() {
         return qnaRepository.findAllQna()
                 .stream()
@@ -112,6 +116,7 @@ public class UserServiceImpl implements UserService {
     }
 
     // QnA 내용을 조회
+    @Override
     public List<AnswerDTO> findAnswer(Integer questionId) {
         return qnaRepository.findAnswer(questionId)
                 .stream()
@@ -128,6 +133,7 @@ public class UserServiceImpl implements UserService {
     }
 
     // 조회수 업데이트
+    @Override
     public QuestionDTO updateCount(Integer questionId) {
         Question question = qnaRepository.findById(questionId)
                 .orElseThrow(() -> new RuntimeException("데이터를 찾을 수 없습니다."));
@@ -147,6 +153,7 @@ public class UserServiceImpl implements UserService {
     }
 
     // Q&A 작성
+    @Override
     public Integer writeQna(QuestionDTO dto, String userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("userId 데이터를 찾을 수 없습니다."));
