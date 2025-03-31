@@ -40,7 +40,7 @@ const UserInfo = () => {
       </span>
       {(userRole === "STUDENT" || userRole === "PROFESSOR") && (
         <>
-          {"|"}
+          {" | "}
           <span className="font-semibold">
             학과: {processedUserInfo.departmentName || "N/A"}
           </span>

@@ -138,7 +138,7 @@ const BasicLayout = () => {
             {userRole === "PROFESSOR" && (
               <>
                 <Link
-                  to="/main/professor/lectures"
+                  to="/main/professor/classes"
                   className="hover:bg-blue-500 px-6 py-3 mt-6"
                 >
                   강의 관리 ▶

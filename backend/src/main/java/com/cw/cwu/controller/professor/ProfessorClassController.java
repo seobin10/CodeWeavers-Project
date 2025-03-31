@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/professor")
 @RequiredArgsConstructor
@@ -47,5 +49,17 @@ public class ProfessorClassController {
             return ResponseEntity.badRequest().body(result);
         }
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/courses")
+    public ResponseEntity<List<CourseSimpleDTO>> getAllCourses() {
+        List<CourseSimpleDTO> list = professorClassService.getAllCourses();
+        return ResponseEntity.ok(list);
+    }
+
+    @GetMapping("/lecture-rooms")
+    public ResponseEntity<List<LectureRoomSimpleDTO>> getAllLectureRooms() {
+        List<LectureRoomSimpleDTO> list = professorClassService.getAllLectureRooms();
+        return ResponseEntity.ok(list);
     }
 }

@@ -1,6 +1,6 @@
 import React from "react";
 
-const AdminUserModal = ({ isOpen, onClose, children }) => {
+const BaseModal = ({ isOpen, onClose, children }) => {
   if (!isOpen) return null;
 
   return (
@@ -18,4 +18,4 @@ const AdminUserModal = ({ isOpen, onClose, children }) => {
   );
 };
 
-export default AdminUserModal;
+export default BaseModal;
