@@ -2,6 +2,8 @@ package com.cw.cwu.service.professor;
 
 import com.cw.cwu.dto.*;
 
+import java.util.List;
+
 public interface ProfessorClassService {
 
     /**
@@ -32,4 +34,16 @@ public interface ProfessorClassService {
      * @return 성공 또는 실패 메시지
      */
     String deleteClass(Integer classId);
+
+    /**
+     * [전체 과목 목록 조회]
+     * @return 과목 ID와 이름을 담은 CourseSimpleDTO 리스트
+     */
+    List<CourseSimpleDTO> getAllCourses();
+
+    /**
+     * [전체 강의실 목록 조회]
+     * @return 강의실 ID, 이름, 건물명을 담은 LectureRoomSimpleDTO 리스트
+     */
+    List<LectureRoomSimpleDTO> getAllLectureRooms();
 }
