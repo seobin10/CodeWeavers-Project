@@ -22,6 +22,7 @@ public class StudentGradeServiceImpl implements StudentGradeService {
 
     // 학생 성적 조회
     // ConvertToDb로 ENUM 데이터 String으로 변환 (예시> A_PLUS -> A+)
+    @Override
     public List<GradeDTO> getStudentGrade(String studentId) {
         return studentRepository.findGrade(studentId)
                 .stream()
@@ -35,6 +36,7 @@ public class StudentGradeServiceImpl implements StudentGradeService {
     }
 
     // 학생 성적 기록 업데이트 (학점, 취득 학점, GPA 계산 후 저장)
+    @Override
     public void updateStudentRecords(String studentId) {
         List<Enrollment> enrollments = studentRepository.findEnrollmentsByStudentId(studentId);
 

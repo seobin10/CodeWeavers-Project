@@ -189,6 +189,7 @@ const AdminUserListPage = () => {
         <AdminUserEditPage
           user={editUser}
           onSuccess={() => fetchUsers(currentPage)}
+          onClose={() => setEditUser(null)}
         />
       </AdminUserModal>
     </div>
