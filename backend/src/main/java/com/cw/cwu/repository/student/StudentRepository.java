@@ -17,7 +17,7 @@ public interface StudentRepository extends JpaRepository<StudentRecord, Long> {
     Integer findTotalEarnedCreditsByStudent(@Param("studentId") String studentId);
 
     // 특정 학생이 수강한 모든 과목 조회
-    @Query("SELECT e FROM Enrollment e WHERE e.student.userId = :studentId")
+    @Query("SELECT e FROM Enrollment e WHERE e.student.userId = :studentId AND e.enrolledClassEntity IS NOT NULL")
     List<Enrollment> findEnrollmentsByStudentId(@Param("studentId") String studentId);
 
     // 학생 성적 조회 기능 추가 (기존 GradeRepository에서 가져옴)
