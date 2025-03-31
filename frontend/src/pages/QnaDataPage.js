@@ -4,9 +4,11 @@ import { AuthContext, ModalContext } from "../App";
 import axios from "axios";
 import QnaAnswerModal from "../components/QnaAnswerModal";
 import QnaAnswerWritePage from "../pages/Admin/QnaAnswerWritePage";
+import QnaAnswerDeletePage from "./Admin/QnaAnswerDeletePage";
 
 const QnaDataPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [props, setProps] = useState();
   const isOpen = isModalOpen;
   const handleClose = () => setIsModalOpen(false);
   const refetchData = () => {
@@ -19,6 +21,7 @@ const QnaDataPage = () => {
   const userRole = localStorage.getItem("role");
   const location = useLocation();
   const questionId = location.state?.questionId;
+  const currentPage = location.state?.page;
   const [writerId, setWriterId] = useState();
   const { userId, setUserId } = useContext(AuthContext);
   const { showModal } = useContext(ModalContext);
@@ -205,47 +208,52 @@ const QnaDataPage = () => {
       <br />
       <Link
         to="/main/qnalist"
-        button
         className=" bg-blue-500 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 px-3 rounded transition"
+        state={{ page: currentPage }}
       >
         목록
       </Link>
       <div className="float-right">
-      {userRole !== "STUDENT" && contentInfo.length > 0 && (
-        <button
-          onClick={() => {
-            const qna = contentInfo[0];
-            if (!qna.answerContent || qna.answerContent.trim() === "") {
-              setIsModalOpen(true);
-            } else {
-              showModal("이미 답변이 작성되었습니다.");
-            }
-          }}
-          className="bg-green-500 hover:bg-green-700 text-white text-sm font-semibold py-2.5 px-3 rounded transition"
-        >
-          답변 작성
-        </button>
-      )}&nbsp;
-              <button
-          onClick={() => {
-            const qna = contentInfo[0];
-            if (!qna.answerContent || qna.answerContent.trim() === "") {
-              setIsModalOpen(true);
-            } else {
-              showModal("이미 답변이 작성되었습니다.");
-            }
-          }}
-          className="bg-red-500 hover:bg-red-700 text-white text-sm font-semibold py-2.5 px-3 rounded transition"
-        >
-          답변 삭제
-        </button>
+        {userRole == "ADMIN" && contentInfo.length > 0 && (
+          <>
+            <button
+              onClick={() => {
+                const qna = contentInfo[0];
+                if (!qna.answerContent || qna.answerContent.trim() === "") {
+                  setProps(<QnaAnswerWritePage qno={questionId} page={currentPage}/>);
+                  setIsModalOpen(true);
+                } else {
+                  showModal("이미 답변이 작성되었습니다.");
+                }
+              }}
+              className="bg-green-500 hover:bg-green-700 text-white text-sm font-semibold py-2.5 px-3 rounded transition"
+            >
+              답변 작성
+            </button>
+            &nbsp;
+            <button
+              onClick={() => {
+                const qna = contentInfo[0];
+                if (qna.answerContent) {
+                  setProps(<QnaAnswerDeletePage qno={questionId} page={currentPage} />);
+                  setIsModalOpen(true);
+                } else {
+                  showModal("삭제할 답변이 없습니다.");
+                }
+              }}
+              className="bg-red-500 hover:bg-red-700 text-white text-sm font-semibold py-2.5 px-3 rounded transition"
+            >
+              답변 삭제
+            </button>
+          </>
+        )}
 
-      <QnaAnswerModal
-        isOpen={isOpen}
-        onClose={handleClose}
-        onSuccess={refetchData}
-        pageProps={<QnaAnswerWritePage />}
-      />
+        <QnaAnswerModal
+          isOpen={isOpen}
+          onClose={handleClose}
+          onSuccess={refetchData}
+          pageProps={props}
+        />
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AuthContext, ModalContext } from "../App";
 import axios from "axios";
 import PageComponent from "../components/PageComponent";
@@ -11,13 +11,13 @@ const QnaListPage = () => {
   const { showModal } = useContext(ModalContext);
   const [message, setMessage] = useState("");
   const [qnaInfo, setQnaInfo] = useState([]);
-  const [writerId, setWriterId] = useState();
-  const [currentPage, setCurrentPage] = useState(1);
+  const location = useLocation();
+  const checkPage = location.state?.page ?? 1
+  const [currentPage, setCurrentPage] = useState(checkPage);
   const itemCount = 15;
 
   const localId = localStorage.getItem("id");
   const userRole = localStorage.getItem("role");
-console.log(userRole);
   useEffect(() => {
     if (userId) {
       fetchQnaInfo(userId);
@@ -43,7 +43,6 @@ console.log(userRole);
       const response = await axios.get(
         `http://localhost:8080/api/user/qna/find/${questionId}`
       );
-      setWriterId(response.data);
       return response.data;
     } catch (error) {
       setMessage("작성자 정보를 불러올 수 없습니다.");
@@ -58,7 +57,6 @@ console.log(userRole);
   const firstItem = lastItem - itemCount;
   const currentItem = qnaInfo.slice(firstItem, lastItem);
   const totalPage = Math.ceil(qnaInfo.length / itemCount);
-
   return (
     <div>
       <h1 className="text-3xl font-bold text-center mb-6">Q&A</h1>
@@ -95,16 +93,16 @@ console.log(userRole);
                             showModal("본인 확인 완료! 글을 조회합니다.");
                             await WaitModalClick();
                             navigate("/main/qnadata", {
-                              state: { questionId: qna.questionId },
+                              state: { questionId: qna.questionId, page: currentPage },
+                              
                             });
-                          } else if (userRole === ("ADMIN" || "PROFESSOR")){
+                          } else if (userRole === ("ADMIN" || "PROFESSOR")) {
                             showModal("권한 확인 완료! 글을 조회합니다.");
                             await WaitModalClick();
                             navigate("/main/qnadata", {
-                              state: { questionId: qna.questionId },
+                              state: { questionId: qna.questionId, page: currentPage },
                             });
-                          }
-                          else {
+                          } else {
                             showModal("읽을 수 있는 권한이 없습니다.");
                           }
                         }}
@@ -114,7 +112,7 @@ console.log(userRole);
                     ) : (
                       <Link
                         to="/main/qnadata"
-                        state={{ questionId: qna.questionId }}
+                        state={{ questionId: qna.questionId, page: currentPage }}
                       >
                         {qna.title}
                       </Link>
