@@ -15,6 +15,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class ProfessorClassServiceImpl implements ProfessorClassService {
@@ -109,5 +112,25 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
 
         classRepository.deleteById(classId);
         return "삭제 완료";
+    }
+
+    @Override
+    public List<CourseSimpleDTO> getAllCourses() {
+        List<Course> courses = courseRepository.findAll();
+        return courses.stream()
+                .map(c -> new CourseSimpleDTO(c.getId(), c.getName()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<LectureRoomSimpleDTO> getAllLectureRooms() {
+        List<LectureRoom> rooms = lectureRoomRepository.findAll();
+        return rooms.stream()
+                .map(r -> new LectureRoomSimpleDTO(
+                        r.getId(),
+                        r.getName(),
+                        r.getBuilding().getName()
+                ))
+                .collect(Collectors.toList());
     }
 }

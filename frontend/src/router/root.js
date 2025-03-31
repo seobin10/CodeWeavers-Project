@@ -18,7 +18,7 @@ const QnaDeletePage = lazy(() => import("../pages/QnaDeletePage"));
 const QnaEditPage = lazy(() => import("../pages/QnaEditPage"));
 const UnauthorizedPage = lazy(() => import("../pages/UnauthorizedPage"));
 const AdminUserListPage = lazy(() => import("../pages/Admin/AdminUserListPage"));
-const ProfessorLecturePage = lazy(() => import("../pages/Professor/ProfessorLecturePage"));
+const ProfessorClassPage = lazy(() => import("../pages/Professor/ProfessorClassPage"));
 const ProfessorGradePage = lazy(() => import("../pages/Professor/ProfessorGradePage"));
 
 const root = createBrowserRouter([
@@ -145,11 +145,11 @@ const root = createBrowserRouter([
         )
       },
       {
-        path: "professor/lectures",
+        path: "professor/classes",
         element: (
           <RoleGuard allowedRoles={["PROFESSOR"]}>
             <Suspense fallback={Loading}>
-              <ProfessorLecturePage />
+              <ProfessorClassPage />
             </Suspense>
           </RoleGuard>
         ),

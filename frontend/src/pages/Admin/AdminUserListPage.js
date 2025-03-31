@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import { getAllUsers, deleteUser } from "../../api/adminUserApi";
 import { ModalContext } from "../../App";
 import PageComponent from "../../components/PageComponent";
-import AdminUserModal from "../../components/AdminUserModal";
+import BaseModal from "../../components/BaseModal";
 import AdminUserCreatePage from "./AdminUserCreatePage";
 import AdminUserEditPage from "./AdminUserEditPage";
 
@@ -178,20 +178,17 @@ const AdminUserListPage = () => {
         onPageChange={(page) => fetchUsers(page)}
       />
 
-      <AdminUserModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      >
+      <BaseModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <AdminUserCreatePage onSuccess={() => fetchUsers(currentPage)} />
-      </AdminUserModal>
+      </BaseModal>
 
-      <AdminUserModal isOpen={!!editUser} onClose={() => setEditUser(null)}>
+      <BaseModal isOpen={!!editUser} onClose={() => setEditUser(null)}>
         <AdminUserEditPage
           user={editUser}
           onSuccess={() => fetchUsers(currentPage)}
           onClose={() => setEditUser(null)}
         />
-      </AdminUserModal>
+      </BaseModal>
     </div>
   );
 };
