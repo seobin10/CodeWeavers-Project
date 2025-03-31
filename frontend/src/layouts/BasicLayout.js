@@ -135,6 +135,22 @@ const BasicLayout = () => {
                 </Link>
               </>
             )}
+            {userRole === "PROFESSOR" && (
+              <>
+                <Link
+                  to="/main/professor/lectures"
+                  className="hover:bg-blue-500 px-6 py-3 mt-6"
+                >
+                  강의 관리 ▶
+                </Link>
+                <Link
+                  to="/main/professor/grades"
+                  className="hover:bg-blue-500 px-6 py-3"
+                >
+                  성적 관리 ▶
+                </Link>
+              </>
+            )}
           </div>
         </nav>
 
