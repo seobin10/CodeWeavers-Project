@@ -1,12 +1,15 @@
 import React, { useEffect, useState, useContext } from "react";
 import { getMyClasses, deleteClass } from "../../api/professorClassApi";
-import { ModalContext } from "../../App";
+import { AuthContext, ModalContext } from "../../App";
 import PageComponent from "../../components/PageComponent";
-import ProfessorClassModal from "../../components/ProfessorClassModal";
+import BaseModal from "../../components/BaseModal";
 import ProfessorClassCreatePage from "./ProfessorClassCreatePage";
 import ProfessorClassEditPage from "./ProfessorClassEditPage";
 
-const ProfessorClassPage = ({ professorId }) => {
+const ProfessorClassPage = () => {
+  const { showModal, showConfirm } = useContext(ModalContext);
+  const { userId, setUserId } = useContext(AuthContext);
+
   const [classes, setClasses] = useState({
     dtoList: [],
     totalPage: 0,
@@ -15,12 +18,19 @@ const ProfessorClassPage = ({ professorId }) => {
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { showModal, showConfirm } = useContext(ModalContext);
   const [editClass, setEditClass] = useState(null);
 
+  useEffect(() => {
+    const localId = localStorage.getItem("id");
+    if (!userId && localId) {
+      setUserId(localId);
+    }
+  }, [userId, setUserId]);
+
   const fetchClasses = async (page = 1) => {
+    if (!userId) return;
     try {
-      const res = await getMyClasses(professorId, page, 10);
+      const res = await getMyClasses(userId, page, 10);
       setClasses(res.data);
       setCurrentPage(page);
     } catch (err) {
@@ -29,12 +39,12 @@ const ProfessorClassPage = ({ professorId }) => {
   };
 
   useEffect(() => {
-    fetchClasses(1);
-  }, []);
+    if (userId) fetchClasses(1);
+  }, [userId]);
 
   const handleDelete = (classData) => {
     showConfirm({
-      message: `과목: ${classData.courseName}\n학기: ${classData.semester}\n삭제하시겠습니까?`,
+      message: `과목: ${classData.courseName}\n학기: ${classData.semester}\n\n 삭제하시겠습니까?`,
       onConfirm: async () => {
         try {
           await deleteClass(classData.classId);
@@ -73,11 +83,14 @@ const ProfessorClassPage = ({ professorId }) => {
         </thead>
         <tbody className="text-gray-700 text-sm">
           {classes.dtoList.map((c) => (
-            <tr key={c.classId} className="hover:bg-gray-100 border-b text-center">
+            <tr
+              key={c.classId}
+              className="hover:bg-gray-100 border-b text-center"
+            >
               <td className="py-3 px-4">{c.courseName}</td>
               <td className="py-3 px-4">{c.semester}</td>
               <td className="py-3 px-4">{c.day}</td>
-              <td className="py-3 px-4">{`${c.startTime} ~ ${c.endTime}`}</td>
+              <td className="py-3 px-4">{`${c.startTime} ~ ${c.endTime}교시`}</td>
               <td className="py-3 px-4">{`${c.buildingName} ${c.lectureRoomName}`}</td>
               <td className="py-3 px-4">{`${c.enrolled} / ${c.capacity}`}</td>
               <td className="py-3 px-4 space-x-2">
@@ -105,20 +118,20 @@ const ProfessorClassPage = ({ professorId }) => {
         onPageChange={(page) => fetchClasses(page)}
       />
 
-      <ProfessorClassModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+      <BaseModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <ProfessorClassCreatePage
-          professorId={professorId}
+          professorId={userId}
           onSuccess={() => fetchClasses(currentPage)}
         />
-      </ProfessorClassModal>
+      </BaseModal>
 
-      <ProfessorClassModal isOpen={!!editClass} onClose={() => setEditClass(null)}>
+      <BaseModal isOpen={!!editClass} onClose={() => setEditClass(null)}>
         <ProfessorClassEditPage
           classData={editClass}
           onSuccess={() => fetchClasses(currentPage)}
           onClose={() => setEditClass(null)}
         />
-      </ProfessorClassModal>
+      </BaseModal>
     </div>
   );
 };
