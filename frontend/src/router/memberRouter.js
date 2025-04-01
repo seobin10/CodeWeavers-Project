@@ -1,8 +1,7 @@
 import { lazy, Suspense } from "react";
-
 import Loading from "../components/Loading";
-const LoginPage = lazy(() => import("../pages/LoginPage"));
 
+const LoginPage = lazy(() => import("../pages/LoginPage"));
 const FindidPage = lazy(() => import("../pages/FindidPage"));
 const FindpwPage = lazy(() => import("../pages/FindpwPage"));
 
@@ -11,7 +10,7 @@ const memberRouter = () => {
     {
       path: "login",
       element: (
-        <Suspense fallback={Loading}>
+        <Suspense fallback={<Loading />}>
           <LoginPage />
         </Suspense>
       ),
@@ -19,7 +18,7 @@ const memberRouter = () => {
     {
       path: "findid",
       element: (
-        <Suspense fallback={Loading}>
+        <Suspense fallback={<Loading />}>
           <FindidPage />
         </Suspense>
       ),
@@ -27,7 +26,7 @@ const memberRouter = () => {
     {
       path: "findpw",
       element: (
-        <Suspense fallback={Loading}>
+        <Suspense fallback={<Loading />}>
           <FindpwPage />
         </Suspense>
       ),

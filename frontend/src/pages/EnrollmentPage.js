@@ -112,7 +112,7 @@ const EnrollmentPage = () => {
       setCurrentPage(page); // 현재 페이지 저장
     } catch (error) {
       console.error("강의 검색 실패:", error);
-      showModal("강의 검색 중 오류가 발생했습니다.");
+      showModal("강의 검색 중 오류가 발생했습니다.", "error");
     }
   };
 
@@ -121,39 +121,38 @@ const EnrollmentPage = () => {
       (c) => c.강의번호 === course.강의번호
     );
     if (isAlreadyEnrolled) {
-      showModal("이미 신청된 강의입니다!");
+      showModal("이미 신청된 강의입니다!", "error");
       return;
     }
+  
     try {
       const response = await enrollCourse(userId, {
         studentId: userId,
         classId: course.강의번호,
       });
-
+  
       const msg = response.data;
-      if (msg === "성공") {
-        showModal(`"${course.강의명}" 강의가 시간표에 추가되었습니다!`);
-        setTimeout(() => {
-          navigate("/main/schedule");
-        }, 1000);
+  
+      if (msg.includes("성공")) {
+        showModal(msg); //
       } else {
-        showModal(msg);
+        showModal(msg, "error"); 
       }
     } catch (error) {
       console.error("수강 신청 실패:", error);
-
+  
       const msg =
         error.response?.data?.message ??
         error.response?.data ??
         error.message ??
-        showModal("수강 신청 중 오류가 발생했습니다.");
-
-      alert(msg);
+        "수강 신청 중 오류가 발생했습니다.";
+  
+      showModal(msg, "error");
     } finally {
-      // 강의 목록 최신화
       handleSearch(currentPage);
     }
   };
+
   return (
     <div className="max-w-7xl mx-auto p-2 bg-slate-50 bg-opacity-40 shadow-md mt-3 rounded-md">
       <h2 className="text-3xl font-bold text-center mb-6 mt-3">

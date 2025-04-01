@@ -5,6 +5,7 @@ import BasicLayout from "../layouts/BasicLayout";
 import RoleGuard from "../components/RoleGuard";
 
 import Loading from "../components/Loading";
+
 const StudentPage = lazy(() => import("../pages/StudentPage"));
 const GradePage = lazy(() => import("../pages/GradePage"));
 const CurrentPage = lazy(() => import("../pages/CurrentPage"));
@@ -12,7 +13,7 @@ const EnrollmentPage = lazy(() => import("../pages/EnrollmentPage"));
 const HistoryPage = lazy(() => import("../pages/HistoryPage"));
 const SchedulePage = lazy(() => import("../pages/SchedulePage"));
 const QnaListPage = lazy(() => import("../pages/QnaListPage"));
-const QnaDataPage = lazy(() => import("../pages/QnaDataPage"))
+const QnaDataPage = lazy(() => import("../pages/QnaDataPage"));
 const QnaWritePage = lazy(() => import("../pages/QnaWritePage"));
 const QnaDeletePage = lazy(() => import("../pages/QnaDeletePage"));
 const QnaEditPage = lazy(() => import("../pages/QnaEditPage"));
@@ -33,7 +34,7 @@ const root = createBrowserRouter([
       {
         path: "student",
         element: (
-          <Suspense fallback={Loading}>
+          <Suspense fallback={<Loading />}>
             <StudentPage />
           </Suspense>
         ),
@@ -42,24 +43,14 @@ const root = createBrowserRouter([
         path: "grades",
         element: (
           <RoleGuard allowedRoles={["STUDENT"]}>
-          <Suspense fallback={Loading}>
-            <GradePage />
-          </Suspense>
-          </RoleGuard>
-        ),
-      },
-      {
-        path: "grades",
-        element: (
-          <RoleGuard allowedRoles={["STUDENT"]}>
-            <Suspense fallback={Loading}>
+            <Suspense fallback={<Loading />}>
               <GradePage />
             </Suspense>
           </RoleGuard>
         ),
       },
       {
-        path: "currentgrades", // 현재학기성적조회
+        path: "currentgrades",
         element: (
           <Suspense fallback={<Loading />}>
             <CurrentPage />
@@ -70,16 +61,16 @@ const root = createBrowserRouter([
         path: "enrollment",
         element: (
           <RoleGuard allowedRoles={["STUDENT"]}>
-          <Suspense fallback={Loading}>
-            <EnrollmentPage />
-          </Suspense>
+            <Suspense fallback={<Loading />}>
+              <EnrollmentPage />
+            </Suspense>
           </RoleGuard>
         ),
       },
       {
         path: "history",
         element: (
-          <Suspense fallback={Loading}>
+          <Suspense fallback={<Loading />}>
             <HistoryPage />
           </Suspense>
         ),
@@ -88,16 +79,16 @@ const root = createBrowserRouter([
         path: "schedule",
         element: (
           <RoleGuard allowedRoles={["STUDENT"]}>
-          <Suspense fallback={Loading}>
-            <SchedulePage />
-          </Suspense>
+            <Suspense fallback={<Loading />}>
+              <SchedulePage />
+            </Suspense>
           </RoleGuard>
         ),
       },
       {
         path: "qnalist",
         element: (
-          <Suspense fallback={Loading}>
+          <Suspense fallback={<Loading />}>
             <QnaListPage />
           </Suspense>
         ),
@@ -105,7 +96,7 @@ const root = createBrowserRouter([
       {
         path: "qnadata",
         element: (
-          <Suspense fallback={Loading}>
+          <Suspense fallback={<Loading />}>
             <QnaDataPage />
           </Suspense>
         ),
@@ -113,17 +104,17 @@ const root = createBrowserRouter([
       {
         path: "qnawrite",
         element: (
-          <RoleGuard allowedRoles={["STUDENT", "PROFFESOR"]}>
-          <Suspense fallback={Loading}>
-            <QnaWritePage />
-          </Suspense>
+          <RoleGuard allowedRoles={["STUDENT", "PROFESSOR"]}>
+            <Suspense fallback={<Loading />}>
+              <QnaWritePage />
+            </Suspense>
           </RoleGuard>
         ),
       },
       {
         path: "qnadelete",
         element: (
-          <Suspense fallback={Loading}>
+          <Suspense fallback={<Loading />}>
             <QnaDeletePage />
           </Suspense>
         ),
@@ -131,7 +122,7 @@ const root = createBrowserRouter([
       {
         path: "qnaedit",
         element: (
-          <Suspense fallback={Loading}>
+          <Suspense fallback={<Loading />}>
             <QnaEditPage />
           </Suspense>
         ),
@@ -139,7 +130,7 @@ const root = createBrowserRouter([
       {
         path: "unauthorized",
         element: (
-          <Suspense fallback={Loading}>
+          <Suspense fallback={<Loading />}>
             <UnauthorizedPage />
           </Suspense>
         ),
@@ -148,17 +139,17 @@ const root = createBrowserRouter([
         path: "admin/user-list",
         element: (
           <RoleGuard allowedRoles={["ADMIN"]}>
-            <Suspense fallback={Loading}>
+            <Suspense fallback={<Loading />}>
               <AdminUserListPage />
             </Suspense>
           </RoleGuard>
-        )
+        ),
       },
       {
         path: "professor/classes",
         element: (
           <RoleGuard allowedRoles={["PROFESSOR"]}>
-            <Suspense fallback={Loading}>
+            <Suspense fallback={<Loading />}>
               <ProfessorClassPage />
             </Suspense>
           </RoleGuard>
@@ -168,7 +159,7 @@ const root = createBrowserRouter([
         path: "professor/grades",
         element: (
           <RoleGuard allowedRoles={["PROFESSOR"]}>
-            <Suspense fallback={Loading}>
+            <Suspense fallback={<Loading />}>
               <ProfessorGradePage />
             </Suspense>
           </RoleGuard>
