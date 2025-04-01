@@ -4,10 +4,10 @@ import memberRouter from "./memberRouter";
 import BasicLayout from "../layouts/BasicLayout";
 import RoleGuard from "../components/RoleGuard";
 
-const Loading = <div>Loading</div>;
+import Loading from "../components/Loading";
 const StudentPage = lazy(() => import("../pages/StudentPage"));
-const CoursePage = lazy(() => import("../pages/CoursePage"));
 const GradePage = lazy(() => import("../pages/GradePage"));
+const CurrentPage = lazy(() => import("../pages/CurrentPage"));
 const EnrollmentPage = lazy(() => import("../pages/EnrollmentPage"));
 const HistoryPage = lazy(() => import("../pages/HistoryPage"));
 const SchedulePage = lazy(() => import("../pages/SchedulePage"));
@@ -39,14 +39,6 @@ const root = createBrowserRouter([
         ),
       },
       {
-        path: "courses",
-        element: (
-          <Suspense fallback={Loading}>
-            <CoursePage />
-          </Suspense>
-        ),
-      },
-      {
         path: "grades",
         element: (
           <RoleGuard allowedRoles={["STUDENT"]}>
@@ -54,6 +46,24 @@ const root = createBrowserRouter([
             <GradePage />
           </Suspense>
           </RoleGuard>
+        ),
+      },
+      {
+        path: "grades",
+        element: (
+          <RoleGuard allowedRoles={["STUDENT"]}>
+            <Suspense fallback={Loading}>
+              <GradePage />
+            </Suspense>
+          </RoleGuard>
+        ),
+      },
+      {
+        path: "currentgrades", // 현재학기성적조회
+        element: (
+          <Suspense fallback={<Loading />}>
+            <CurrentPage />
+          </Suspense>
         ),
       },
       {
