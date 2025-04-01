@@ -2,8 +2,10 @@ package com.cw.cwu.service.student;
 
 import com.cw.cwu.domain.*;
 import com.cw.cwu.dto.GradeDTO;
-import com.cw.cwu.repository.student.StudentRepository;
-import com.cw.cwu.repository.user.UserRepository;
+import com.cw.cwu.repository.GradeRepository;
+import com.cw.cwu.repository.EnrollmentRepository;
+import com.cw.cwu.repository.StudentRecordRepository;
+import com.cw.cwu.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -16,7 +18,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class StudentGradeServiceImpl implements StudentGradeService {
 
-    private final StudentRepository studentRepository;
+    private final StudentRecordRepository studentRecordRepository;
+    private final GradeRepository gradeRepository;
+    private final EnrollmentRepository enrollmentRepository;
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
 
@@ -24,7 +28,7 @@ public class StudentGradeServiceImpl implements StudentGradeService {
     // ConvertToDb로 ENUM 데이터 String으로 변환 (예시> A_PLUS -> A+)
     @Override
     public List<GradeDTO> getStudentGrade(String studentId) {
-        return studentRepository.findGrade(studentId)
+        return gradeRepository.findGrade(studentId)
                 .stream()
                 .map(grade -> {
                     GradeDTO dto = modelMapper.map(grade, GradeDTO.class);
@@ -38,7 +42,7 @@ public class StudentGradeServiceImpl implements StudentGradeService {
     // 학생 성적 기록 업데이트 (학점, 취득 학점, GPA 계산 후 저장)
     @Override
     public void updateStudentRecords(String studentId) {
-        List<Enrollment> enrollments = studentRepository.findEnrollmentsByStudentId(studentId);
+        List<Enrollment> enrollments = enrollmentRepository.findEnrollmentsByStudentId(studentId);
 
         int totalEnrolled = 0;
         int totalEarned = 0;
@@ -71,7 +75,7 @@ public class StudentGradeServiceImpl implements StudentGradeService {
         studentRecord.setEarned(totalEarned);
         studentRecord.setGpa(gpa);
 
-        studentRepository.save(studentRecord);
+        studentRecordRepository.save(studentRecord);
     }
 
     private double convertGradeToPoint(StudentGrade grade) {
