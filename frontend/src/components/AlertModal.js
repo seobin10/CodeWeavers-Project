@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 
-const AlertModal = ({ isOpen, message, onClose }) => {
+const AlertModal = ({ isOpen, message, onClose, type = "success" }) => {
   const buttonRef = useRef(null);
 
   useEffect(() => {
@@ -8,12 +8,12 @@ const AlertModal = ({ isOpen, message, onClose }) => {
 
     const handleKeyDown = (e) => {
       if (e.key === "Enter") {
-        e.preventDefault(); // 기본 동작 방지
-        onClose(); // 닫기 실행
+        e.preventDefault();
+        onClose();
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown, { once: true }); // 한 번만 실행
+    window.addEventListener("keydown", handleKeyDown, { once: true });
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
@@ -22,10 +22,14 @@ const AlertModal = ({ isOpen, message, onClose }) => {
 
   if (!isOpen) return null;
 
+  const modalType = type === "success" ? "success" : "error";
+  const gifSrc = `/images/${modalType}.gif`;
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg text-center w-80">
-        <p className="mb-4">{message}</p>
+        <img src={gifSrc} alt={modalType} className="w-20 h-20 mx-auto mb-4" />
+        <p className="mb-4 whitespace-pre-line">{message}</p>
         <button
           ref={buttonRef}
           autoFocus

@@ -7,6 +7,8 @@ const BasicLayout = () => {
   const { userId, setUserId, userRole } = useContext(AuthContext);
   // 수강 신청 메뉴의 하위 메뉴의 상태를 제어하는 상수
   const [openEnrollmentMenu, setOpenEnrollmentMenu] = useState(false);
+  // 성적 메뉴의 하위 메뉴의 상태를 제어하는 상수
+  const [openGradeMenu, setOpenGradeMenu] = useState(false);
 
   const handleLogout = useCallback(() => {
     setUserId(null);
@@ -60,19 +62,13 @@ const BasicLayout = () => {
                 >
                   정보조회 ▶
                 </Link>
-                <Link
-                  to="/main/courses"
-                  className="hover:bg-blue-500 px-6 py-3"
-                >
-                  강의목록 ▶
-                </Link>
                 {/* 수강신청 드롭다운 메뉴 */}
                 <div className="flex flex-col mt-2 mb-2">
                   <button
                     className="hover:bg-blue-500 px-6 py-3 text-left w-full"
                     onClick={() => setOpenEnrollmentMenu((prev) => !prev)}
                   >
-                    수강신청 {openEnrollmentMenu ? "▼" : "▶"}
+                    수강 신청 {openEnrollmentMenu ? "▼" : "▶"}
                   </button>
                   {openEnrollmentMenu && (
                     <div className="pl-8 space-y-3 text-sm mt-5">
@@ -85,23 +81,42 @@ const BasicLayout = () => {
 
                       <Link
                         to="/main/history"
-                        className="hover:underline block"
+                        className="hover:underline block pt-4"
                       >
                         🗂 수강신청 내역
                       </Link>
 
                       <Link
                         to="/main/schedule"
-                        className="hover:underline block"
+                        className="hover:underline block pt-4"
                       >
-                        🕒 시간표 조회
+                        ⏰ 시간표 조회
                       </Link>
                     </div>
                   )}
                 </div>
-                <Link to="/main/grades" className="hover:bg-blue-500 px-6 py-3">
-                  성적조회 ▶
-                </Link>
+                <div className="flex flex-col mt-2 mb-2">
+                  <button
+                    className="hover:bg-blue-500 px-6 py-3 text-left w-full"
+                    onClick={() => setOpenGradeMenu((prev) => !prev)}
+                  >
+                    성적 조회 {openGradeMenu ? "▼" : "▶"}
+                  </button>
+                  {openGradeMenu && (
+                    <div className="pl-8 space-y-3 text-sm mt-5">
+                      <Link to="/main/grades" className="hover:underline block">
+                        📄 전체성적 조회
+                      </Link>
+
+                      <Link
+                        to="/main/currentgrades"
+                        className="hover:underline block pt-4"
+                      >
+                        📑 현재학기 성적 조회
+                      </Link>
+                    </div>
+                  )}
+                </div>
                 <Link
                   to="/main/qnalist"
                   className="hover:bg-blue-500 px-6 py-3"
