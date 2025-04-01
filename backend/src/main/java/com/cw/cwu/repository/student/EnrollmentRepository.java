@@ -62,4 +62,7 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
         """)
     Integer countMajorCoursesByStudent(@Param("studentId") String studentId);
 
+    // 특정 강의에 수강 신청한 모든 학생 조회
+    List<Enrollment> findByEnrolledClassEntity_Id(Integer classId);
+
 }

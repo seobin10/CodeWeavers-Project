@@ -15,7 +15,7 @@ public class Grade {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "grade_id")
-    private Long gradeId;
+    private Integer gradeId;
 
     @OneToOne
     @JoinColumn(name = "enrollment_id")
