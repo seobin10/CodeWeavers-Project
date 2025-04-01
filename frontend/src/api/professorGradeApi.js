@@ -4,8 +4,10 @@ export const API_SERVER_HOST = "http://localhost:8080";
 const prefix = `${API_SERVER_HOST}/api/professor`;
 
 // 강의별 성적 조회
-export const getGradesByClass = (classId) => {
-  return axios.get(`${prefix}/grades/class/${classId}`);
+export const getGradesByClass = (classId, page = 1, size = 10) => {
+  return axios.get(`${prefix}/grades/class/${classId}`, {
+    params: { page, size },
+  });
 };
 
 // 성적 등록

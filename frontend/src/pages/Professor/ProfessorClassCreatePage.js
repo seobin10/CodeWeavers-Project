@@ -44,7 +44,7 @@ const ProfessorClassCreatePage = ({ onSuccess, professorId }) => {
       onSuccess?.();
       setForm({ ...initialForm, professorId });
     } catch (err) {
-      showModal(err.response?.data || "강의 등록 실패");
+      showModal(err.response?.data, "error" || "강의 등록 실패", "error");
     }
   };
 

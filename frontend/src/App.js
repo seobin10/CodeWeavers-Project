@@ -18,6 +18,7 @@ function App() {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [confirmMessage, setConfirmMessage] = useState("");
   const [onConfirmAction, setOnConfirmAction] = useState(() => () => {});
+  const [modalType, setModalType] = useState("success");
 
   useEffect(() => {
     if (userId) {
@@ -35,8 +36,9 @@ function App() {
     }
   }, [userRole]);
 
-  const showModal = (msg) => {
+  const showModal = (msg, type = "success") => {
     setModalMessage(msg);
+    setModalType(type);
     setIsModalOpen(true);
   };
 
@@ -68,6 +70,7 @@ function App() {
             isOpen={isModalOpen}
             message={modalMessage}
             onClose={closeModal}
+            type={modalType}
           />
 
           <ConfirmModal

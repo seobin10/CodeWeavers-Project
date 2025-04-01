@@ -1,4 +1,4 @@
-package com.cw.cwu.repository.user;
+package com.cw.cwu.repository;
 
 import com.cw.cwu.domain.User;
 import org.springframework.data.domain.Page;
