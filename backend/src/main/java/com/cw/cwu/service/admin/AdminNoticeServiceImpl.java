@@ -1,13 +1,10 @@
 package com.cw.cwu.service.admin;
 import com.cw.cwu.dto.NoticeDTO;
-import com.cw.cwu.repository.admin.NoticeRepository;
+import com.cw.cwu.repository.NoticeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

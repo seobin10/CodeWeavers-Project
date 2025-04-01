@@ -1,8 +1,10 @@
-package com.cw.cwu.repository.student;
+package com.cw.cwu.repository;
 
 import com.cw.cwu.domain.Enrollment;
 import com.cw.cwu.domain.User;
 import com.cw.cwu.domain.ClassEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -61,5 +63,12 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
         AND e.enrolledClassEntity.course.type = 'MAJOR'
         """)
     Integer countMajorCoursesByStudent(@Param("studentId") String studentId);
+
+
+    // 특정 학생이 수강한 모든 과목 조회
+    @Query("SELECT e FROM Enrollment e WHERE e.student.userId = :studentId AND e.enrolledClassEntity IS NOT NULL")
+    List<Enrollment> findEnrollmentsByStudentId(@Param("studentId") String studentId);
+
+    Page<Enrollment> findByEnrolledClassEntity_Id(Integer classId, Pageable pageable);
 
 }
