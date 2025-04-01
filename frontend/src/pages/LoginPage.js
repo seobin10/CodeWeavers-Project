@@ -16,6 +16,7 @@ function LoginPage() {
     localStorage.getItem("savedUserId") || ""
   );
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
   const [rememberUserId, setRememberUserId] = useState(
     !!localStorage.getItem("savedUserId")
@@ -71,6 +72,12 @@ function LoginPage() {
     }
   };
 
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      handleLogin();
+    }
+  };
+
   return (
     <div className="relative w-full h-screen overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-full">
@@ -104,11 +111,13 @@ function LoginPage() {
                 alt="User Icon"
                 className="w-6 h-6 mr-2"
               />
+              {/* 학번 */}
               <input
                 type="text"
                 placeholder="학번"
                 value={userId}
                 onChange={(e) => setLocalUserId(e.target.value)}
+                onKeyDown={handleKeyPress}
                 className="w-3/4 outline-none bg-white"
               />
               <label className="flex items-center gap-2 whitespace-nowrap">
@@ -121,20 +130,34 @@ function LoginPage() {
                 <span className="text-sm text-gray-500">학번 저장</span>
               </label>
             </div>
-
-            <div className="w-full bg-white border border-gray-300 rounded px-3 py-2 mb-3 flex items-center">
+            {/* 비밀번호 입력 + 이미지 토글 */}
+            <div className="w-full bg-white border border-gray-300 rounded px-3 py-2 mb-3 flex items-center relative">
               <img
                 src="/images/pw.jpg"
                 alt="Lock Icon"
                 className="w-6 h-6 mr-2"
               />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 placeholder="비밀번호"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full outline-none bg-white"
+                onKeyDown={handleKeyPress}
+                className="w-full outline-none bg-white pr-8"
               />
+                            <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2"
+              >
+                <img
+                  src={
+                    showPassword ? "/images/showPw.png" : "/images/HidePw.png"
+                  }
+                  alt="비밀번호 보기 토글"
+                  className="w-5 h-5 opacity-70 hover:opacity-100"
+                />
+              </button>
             </div>
           </div>
 
@@ -162,21 +185,21 @@ function LoginPage() {
           >
             로그인
           </button>
-          <br></br>
+          <br />
           <div className="text-xs text-gray-500 mt-4 text-left">
             <ul>
               <li>
                 * 최초 로그인 시 반드시 비밀번호를 변경해 주시기 바랍니다.
               </li>
               <li>
-                * 신입생의 경우, 초기 비밀번호는 주민등록번호 앞자리입니다.
+                * 신입생의 경우, 초기 비밀번호는 생년월일 6자리 + ! 입니다.
               </li>
               <li>
                 * 비밀번호를 분실한 경우에는 ‘비밀번호 찾기’를 이용하시기
                 바랍니다.
               </li>
             </ul>
-            <br></br>
+            <br />
           </div>
         </div>
       </div>

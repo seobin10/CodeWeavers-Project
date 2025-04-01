@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface QnaRepository extends JpaRepository<Question, Integer> {
+public interface QuestionRepository extends JpaRepository<Question, Integer> {
     // 전체 리스트를 조회하는 쿼리
     @Query(value = """
     SELECT q.question_id AS questionId, q.title, q.content, u.user_name AS userName, 
