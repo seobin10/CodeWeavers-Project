@@ -5,9 +5,9 @@ import com.cw.cwu.domain.Question;
 import com.cw.cwu.domain.Status;
 import com.cw.cwu.domain.User;
 import com.cw.cwu.dto.AnswerDTO;
-import com.cw.cwu.repository.user.AnswerRepository;
-import com.cw.cwu.repository.user.QuestionRepository;
-import com.cw.cwu.repository.user.UserRepository;
+import com.cw.cwu.repository.AnswerRepository;
+import com.cw.cwu.repository.QuestionRepository;
+import com.cw.cwu.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -2,8 +2,7 @@ package com.cw.cwu.controller.admin;
 
 import com.cw.cwu.domain.Department;
 import com.cw.cwu.dto.*;
-import com.cw.cwu.repository.admin.DepartmentRepository;
-import com.cw.cwu.repository.user.UserRepository;
+import com.cw.cwu.repository.DepartmentRepository;
 import com.cw.cwu.service.admin.AdminUserService;
 import com.cw.cwu.util.FileUploadUtil;
 import lombok.RequiredArgsConstructor;

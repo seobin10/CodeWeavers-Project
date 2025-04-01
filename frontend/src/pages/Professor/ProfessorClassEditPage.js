@@ -26,7 +26,7 @@ const ProfessorClassEditPage = ({ classData, onSuccess, onClose }) => {
       onClose();
     } catch (err) {
       const message = err.response?.data || "수정 중 오류가 발생했습니다.";
-      showModal(message);
+      showModal(message, "error");
     }
   };
 

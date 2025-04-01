@@ -1,7 +1,9 @@
 package com.cw.cwu.controller.professor;
 
-import com.cw.cwu.dto.GradeDTO;
+import com.cw.cwu.dto.GradeDetailDTO;
 import com.cw.cwu.dto.GradeRegisterDTO;
+import com.cw.cwu.dto.PageRequestDTO;
+import com.cw.cwu.dto.PageResponseDTO;
 import com.cw.cwu.service.professor.ProfessorGradeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +40,10 @@ public class ProfessorGradeController {
     }
 
     @GetMapping("/class/{classId}")
-    public ResponseEntity<List<GradeDTO>> getGradesByClass(@PathVariable Integer classId) {
-        return ResponseEntity.ok(gradeService.getGradesByClass(classId));
+    public ResponseEntity<PageResponseDTO<GradeDetailDTO>> getGradesByClass(
+            @PathVariable Integer classId,
+            PageRequestDTO pageRequestDTO // 자동으로 쿼리 파라미터 바인딩됨
+    ) {
+        return ResponseEntity.ok(gradeService.getGradesByClass(classId, pageRequestDTO));
     }
 }

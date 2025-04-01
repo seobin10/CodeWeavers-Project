@@ -7,11 +7,10 @@ import com.cw.cwu.domain.User;
 import com.cw.cwu.dto.EnrollmentRequestDTO;
 import com.cw.cwu.dto.PageRequestDTO;
 import com.cw.cwu.dto.PageResponseDTO;
-import com.cw.cwu.repository.student.ClassRepository;
-import com.cw.cwu.repository.student.EnrollmentRepository;
-import com.cw.cwu.repository.student.FilterRepository;
-import com.cw.cwu.repository.student.StudentRepository;
-import com.cw.cwu.repository.user.UserRepository;
+import com.cw.cwu.repository.ClassEntityRepository;
+import com.cw.cwu.repository.EnrollmentRepository;
+import com.cw.cwu.repository.StudentRecordRepository;
+import com.cw.cwu.repository.UserRepository;
 import com.cw.cwu.util.PageUtil;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -33,12 +32,10 @@ import java.util.stream.Collectors;
 @Transactional
 public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
 
-    private final StudentRepository studentRepository;
-    private final FilterRepository filterRepository;
     private final ModelMapper modelMapper;
     private final EnrollmentRepository enrollmentRepository;
     private final UserRepository userRepository;
-    private final ClassRepository classRepository;
+    private final ClassEntityRepository classEntityRepository;
     private final StudentInfoService studentInfoService;
 
     // 학생이 수강 신청 가능한 강의 목록 조회
@@ -57,7 +54,7 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
 
         Pageable pageable = PageRequest.of(pageRequestDTO.getPage() - 1, pageRequestDTO.getSize()); // 0이 베이스이므로
 
-        Page<Map<String, Object>> result = studentRepository.findAvailableCoursesPaged(
+        Page<Map<String, Object>> result = classEntityRepository.findAvailableCoursesPaged(
                 studentId, courseType, departmentName, courseYear,
                 classDay, classStart, credit, courseName, pageable
         );
@@ -68,7 +65,7 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
     // 학과 목록 필터링
     @Override
     public List<Map<String, Object>> getDepartments() {
-        return filterRepository.findDistinctDepartments().stream()
+        return classEntityRepository.findDistinctDepartments().stream()
                 .map(d -> Map.<String, Object>of("departmentName", d))
                 .collect(Collectors.toList());
     }
@@ -76,7 +73,7 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
     // 강의 구분 필터링
     @Override
     public List<Map<String, Object>> getCourseTypes() {
-        return filterRepository.findDistinctCourseTypes().stream()
+        return classEntityRepository.findDistinctCourseTypes().stream()
                 .map(ct -> Map.<String, Object>of("courseType",
                         ct.equals("MAJOR") ? "전공" : "교양"))
                 .collect(Collectors.toList());
@@ -85,7 +82,7 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
     // 강의 학년 필터링
     @Override
     public List<Map<String, Object>> getCourseYears() {
-        return filterRepository.findDistinctCourseYears().stream()
+        return classEntityRepository.findDistinctCourseYears().stream()
                 .map(y -> Map.<String, Object>of("courseYear", y))
                 .collect(Collectors.toList());
     }
@@ -93,7 +90,7 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
     // 강의 요일 필터링
     @Override
     public List<Map<String, Object>> getClassDays() {
-        return filterRepository.findDistinctClassDays().stream()
+        return classEntityRepository.findDistinctClassDays().stream()
                 .map(cd -> Map.<String, Object>of("classDay", cd))
                 .collect(Collectors.toList());
     }
@@ -101,7 +98,7 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
     // 강의 시작 시간 필터링
     @Override
     public List<Map<String, Object>> getClassTimes() {
-        return filterRepository.findDistinctClassTimes().stream()
+        return classEntityRepository.findDistinctClassTimes().stream()
                 .map(ct -> Map.<String, Object>of("classTime", ct))
                 .collect(Collectors.toList());
     }
@@ -109,7 +106,7 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
     // 학점 목록 조회 필터링
     @Override
     public List<Map<String, Object>> getCredits() {
-        return filterRepository.findDistinctCredits().stream()
+        return classEntityRepository.findDistinctCredits().stream()
                 .map(c -> Map.<String, Object>of("credit", c))
                 .collect(Collectors.toList());
     }
@@ -135,14 +132,14 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
     @Override
     public String deleteCourse(String studentId, Integer classId) {
         User student = userRepository.findByUserId(studentId).orElseThrow();
-        ClassEntity classEntity = classRepository.findById(classId).orElseThrow();
+        ClassEntity classEntity = classEntityRepository.findById(classId).orElseThrow();
         Optional<Enrollment> optional = enrollmentRepository.findByStudentAndEnrolledClassEntity(student, classEntity);
         if (optional.isPresent()) {
             enrollmentRepository.delete(optional.get());
             System.out.println("강의 삭제 완료: studentId=" + studentId + ", classId=" + classId);
             // 수강 삭제 시, 수강 인원 1 감소하도록 수정
             classEntity.setEnrolled(classEntity.getEnrolled() - 1);
-            classRepository.save(classEntity);
+            classEntityRepository.save(classEntity);
             return "수강 삭제되었습니다";
         }
         System.out.println("삭제 실패: 해당 강의 없음 - studentId=" + studentId + ", classId=" + classId);
@@ -176,7 +173,7 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
         System.out.println("service applyToClass : " + requestDTO);
         User student = userRepository.getReferenceById(requestDTO.getStudentId());
 
-        ClassEntity classEntity = classRepository.getReferenceById(requestDTO.getClassId());
+        ClassEntity classEntity = classEntityRepository.getReferenceById(requestDTO.getClassId());
 
         // 중복 신청 방지
         if (enrollmentRepository.existsByStudentAndEnrolledClassEntity(student, classEntity)) {
@@ -231,7 +228,7 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
 
         // 학생 수 1 증가
         classEntity.setEnrolled(classEntity.getEnrolled() + 1);
-        classRepository.save(classEntity);
+        classEntityRepository.save(classEntity);
         return "수강 신청에 성공하였습니다";
     }
 }
