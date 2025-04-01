@@ -8,19 +8,21 @@ import { WaitModalClick } from "../components/WaitModalClick";
 // 날짜 데이터 포맷팅
 let date = new Date();
 let year = date.getFullYear();
+
 let month = date.getMonth() + 1;
-if (month < 10) {
-  month = "0" + month;
-}
+month = month < 10 ? "0" + month : month;
+
 let day = date.getDate();
+day = day < 10 ? "0" + day : day;
+
 let today = year + "-" + month + "-" + day;
-console.log(today);
+
 
 const QnaWritePage = () => {
   const navigate = useNavigate();
   const { userId, setUserId } = useContext(AuthContext);
   const { showModal } = useContext(ModalContext);
-  const [userInfo, setUserInfo] = useState(null);
+  const [setUserInfo] = useState(null);
   const [message, setMessage] = useState("");
   const [formData, setFormData] = useState({
     questionId: null,
@@ -118,11 +120,13 @@ const QnaWritePage = () => {
         viewCount: 0,
       };
   
-      const result = await postAdd(obj);
+      await postAdd(obj);
       showModal("질문이 등록되었습니다.");
       await WaitModalClick();
       navigate("/main/qnalist");
-      window.location.reload();
+      setTimeout(() => {
+        window.location.reload();
+      }, 0);
     }
   };
   

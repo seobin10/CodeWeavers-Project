@@ -29,5 +29,5 @@ public class Answer {
     private String answer;
 
     @Column(name = "created_at")
-    private LocalDate AnswerDate;
+    private LocalDate answerDate;
 }
