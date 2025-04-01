@@ -1,4 +1,4 @@
-package com.cw.cwu.repository.admin;
+package com.cw.cwu.repository;
 
 import com.cw.cwu.domain.Department;
 import org.springframework.data.jpa.repository.JpaRepository;

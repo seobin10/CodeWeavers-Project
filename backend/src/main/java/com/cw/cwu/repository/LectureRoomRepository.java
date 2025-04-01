@@ -1,4 +1,4 @@
-package com.cw.cwu.repository.professor;
+package com.cw.cwu.repository;
 
 import com.cw.cwu.domain.LectureRoom;
 import org.springframework.data.repository.CrudRepository;

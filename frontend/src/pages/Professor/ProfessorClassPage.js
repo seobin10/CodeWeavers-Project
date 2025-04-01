@@ -34,7 +34,7 @@ const ProfessorClassPage = () => {
       setClasses(res.data);
       setCurrentPage(page);
     } catch (err) {
-      showModal("강의 목록을 불러오지 못했습니다.");
+      showModal("강의 목록을 불러오지 못했습니다.", "error");
     }
   };
 
@@ -51,7 +51,7 @@ const ProfessorClassPage = () => {
           showModal("강의가 성공적으로 삭제되었습니다.");
           fetchClasses(currentPage);
         } catch (err) {
-          showModal("삭제 중 오류 발생");
+          showModal("삭제 중 오류 발생", "error");
         }
       },
     });

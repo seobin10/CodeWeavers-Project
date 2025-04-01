@@ -2,15 +2,19 @@ package com.cw.cwu.service.professor;
 
 import com.cw.cwu.domain.Enrollment;
 import com.cw.cwu.domain.Grade;
-import com.cw.cwu.dto.GradeDTO;
+import com.cw.cwu.dto.GradeDetailDTO;
 import com.cw.cwu.dto.GradeRegisterDTO;
-import com.cw.cwu.repository.professor.GradeRepository;
-import com.cw.cwu.repository.student.EnrollmentRepository;
+import com.cw.cwu.dto.PageRequestDTO;
+import com.cw.cwu.dto.PageResponseDTO;
+import com.cw.cwu.repository.GradeRepository;
+import com.cw.cwu.repository.EnrollmentRepository;
+import com.cw.cwu.util.PageUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +28,7 @@ public class ProfessorGradeServiceImpl implements ProfessorGradeService {
         Enrollment enrollment = enrollmentRepository.findById(dto.getEnrollmentId()).orElse(null);
         if (enrollment == null) return "수강 정보가 존재하지 않습니다.";
 
-        if (enrollment.getGrade() != null) return "이미 성적이 등록된 수강입니다.";
+        if (enrollment.getGrade() != null) return "이미 성적 등록된 수강입니다.";
 
         Grade grade = Grade.builder()
                 .enrollment(enrollment)
@@ -57,7 +61,7 @@ public class ProfessorGradeServiceImpl implements ProfessorGradeService {
         Enrollment enrollment = grade.getEnrollment();
         if (enrollment != null) {
             enrollment.setGrade(null);
-            enrollmentRepository.save(enrollment); // 연관관계 변경 감지 확실히 반영
+            enrollmentRepository.save(enrollment);
         }
 
         gradeRepository.delete(grade);
@@ -65,19 +69,24 @@ public class ProfessorGradeServiceImpl implements ProfessorGradeService {
     }
 
     @Override
-    public List<GradeDTO> getGradesByClass(Integer classId) {
-        List<Enrollment> enrollments = enrollmentRepository.findByEnrolledClassEntity_Id(classId);
+    public PageResponseDTO<GradeDetailDTO> getGradesByClass(Integer classId, PageRequestDTO pageRequestDTO) {
+        Pageable pageable = PageUtil.toPageable(pageRequestDTO, "enrollment");
 
-        return enrollments.stream()
-                .map(e -> {
-                    Grade grade = e.getGrade();
-                    return new GradeDTO(
-                            e.getStudent().getUserId(),
-                            e.getEnrolledClassEntity().getCourse().getName(),
-                            e.getEnrolledClassEntity().getCourse().getCredit(),
-                            grade != null ? grade.getGrade().name() : null
-                    );
-                })
-                .toList();
+        Page<Enrollment> page = enrollmentRepository.findByEnrolledClassEntity_Id(classId, pageable);
+
+        Page<GradeDetailDTO> dtoPage = page.map(e -> {
+            Grade grade = e.getGrade();
+            return new GradeDetailDTO(
+                    e.getStudent().getUserId(),
+                    e.getStudent().getUserName(),
+                    e.getEnrolledClassEntity().getCourse().getName(),
+                    e.getEnrolledClassEntity().getCourse().getCredit(),
+                    grade != null ? grade.getGrade().name() : null,
+                    e.getEnrollment(),
+                    grade != null ? grade.getGradeId() : null
+            );
+        });
+
+        return PageUtil.toDTO(dtoPage, pageRequestDTO.getPage());
     }
 }
