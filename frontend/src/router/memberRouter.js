@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react";
 
-const Loading = <div>Loading</div>;
+import Loading from "../components/Loading";
 const LoginPage = lazy(() => import("../pages/LoginPage"));
 
 const FindidPage = lazy(() => import("../pages/FindidPage"));
