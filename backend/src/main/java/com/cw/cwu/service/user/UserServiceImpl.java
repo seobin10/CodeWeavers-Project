@@ -2,17 +2,16 @@ package com.cw.cwu.service.user;
 
 import com.cw.cwu.domain.Question;
 import com.cw.cwu.domain.Status;
-import com.cw.cwu.dto.AnswerDTO;
+import com.cw.cwu.dto.QnADTO;
 import com.cw.cwu.dto.QuestionDTO;
 import com.cw.cwu.dto.UserDTO;
 import com.cw.cwu.domain.User;
-import com.cw.cwu.repository.user.QnaRepository;
+import com.cw.cwu.repository.user.QuestionRepository;
 import com.cw.cwu.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
@@ -27,7 +26,7 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
-    private final QnaRepository qnaRepository;
+    private final QuestionRepository qnaRepository;
 
     // 로그인
     @Override
@@ -117,10 +116,10 @@ public class UserServiceImpl implements UserService {
 
     // QnA 내용을 조회
     @Override
-    public List<AnswerDTO> findAnswer(Integer questionId) {
+    public List<QnADTO> findAnswer(Integer questionId) {
         return qnaRepository.findAnswer(questionId)
                 .stream()
-                .map(row -> new AnswerDTO(
+                .map(row -> new QnADTO(
                         ((Integer) row[0]),
                         ((Integer) row[1]),
                         (String) row[2],
