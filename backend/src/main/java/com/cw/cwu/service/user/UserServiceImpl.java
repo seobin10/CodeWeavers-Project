@@ -42,6 +42,12 @@ public class UserServiceImpl implements UserService {
         return modelMapper.map(user, UserDTO.class);
     }
 
+    @Override
+    public Optional<User> findByUserId(String userId) {
+        System.out.println("service user userId:" +userId);
+        return userRepository.findByUserId(userId);
+    }
+
     // 정보 조회
     @Override
     public UserDTO getUserInfo(String userId) {
