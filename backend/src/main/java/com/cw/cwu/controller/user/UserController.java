@@ -1,14 +1,21 @@
 package com.cw.cwu.controller.user;
 
+import com.cw.cwu.domain.User;
+import com.cw.cwu.dto.LoginResponseDTO;
 import com.cw.cwu.dto.QnADTO;
 import com.cw.cwu.dto.QuestionDTO;
 import com.cw.cwu.dto.UserDTO;
 import com.cw.cwu.service.user.UserServiceImpl;
+import com.cw.cwu.util.JWTUtil;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,12 +25,55 @@ import java.util.Map;
 public class UserController {
 
     private final UserServiceImpl userService;
+    private final PasswordEncoder passwordEncoder;
+    private final JWTUtil jwtUtil;
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<UserDTO> login(@RequestBody UserDTO dto) {
-        System.out.println("login controller: " +dto);
-        return ResponseEntity.ok(userService.login(dto));
+    public ResponseEntity<?> login(@RequestBody UserDTO loginRequestDTO) {
+        // 사용자 DB 조회
+        User user = userService.findByUserId(loginRequestDTO.getUserId())
+                .orElseThrow(() -> new UsernameNotFoundException("해당 사용자가 존재하지 않습니다."));
+
+        // 비밀번호 검증
+        if (!passwordEncoder.matches(loginRequestDTO.getUserPassword(), user.getUserPassword())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "비밀번호가 일치하지 않습니다."));
+        }
+
+        // 토큰 발급을 위한 claims 생성
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", user.getUserId());
+        claims.put("email", user.getUserEmail());
+        claims.put("name", user.getUserName());
+        claims.put("phone", user.getUserPhone());
+        claims.put("roleNames", user.getUserRole().name());
+
+        // 토큰 발급
+        String accessToken = jwtUtil.generateToken(user.getUserId(), claims, 60); // 60분 유효
+
+        // 응답용 DTO 생성
+        UserDTO userDTO = new UserDTO(
+                user.getUserId(),
+                user.getUserName(),
+                user.getUserEmail(),
+                null,
+                user.getUserPhone(),
+                user.getUserRole().name(),
+                user.getUserImgUrl()
+        );
+
+        return ResponseEntity.ok(new LoginResponseDTO("로그인 성공", accessToken, userDTO));
+    }
+
+    // 로그아웃
+    @GetMapping("/logout")
+    public ResponseEntity<String> logout(HttpSession session) {
+        System.out.println(
+                "controller logout 들어왔어요 "
+        );
+        session.invalidate(); // 세션 종료
+        return ResponseEntity.ok("로그아웃 완료");
     }
 
     // 학번 찾기
