@@ -6,10 +6,12 @@ import com.cw.cwu.dto.QuestionDTO;
 import com.cw.cwu.dto.UserDTO;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserService {
     public UserDTO login(UserDTO request);
     public UserDTO getUserInfo(String userId);
+    Optional<User> findByUserId(String email);
     public String findUserIdByUserName(String username);
     //Qna
     public List<QuestionDTO> findAllQna();
