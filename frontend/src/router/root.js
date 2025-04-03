@@ -1,168 +1,31 @@
-import { lazy, Suspense } from "react";
-import { createBrowserRouter, Navigate } from "react-router-dom";
-import memberRouter from "./memberRouter";
+// 📁 src/routers/index.js
+import { Navigate, createBrowserRouter } from "react-router-dom";
 import BasicLayout from "../layouts/BasicLayout";
-import RoleGuard from "../components/RoleGuard";
-
+import memberRouter from "./memberRouter";
+import studentRouter from "./studentRouter";
+import adminRouter from "./adminRouter";
+import professorRouter from "./professorRouter";
+import qnaRouter from "./qnaRouter";
+import UnauthorizedPage from "../pages/UnauthorizedPage";
 import Loading from "../components/Loading";
-
-const StudentPage = lazy(() => import("../pages/StudentPage"));
-const GradePage = lazy(() => import("../pages/GradePage"));
-const CurrentPage = lazy(() => import("../pages/CurrentPage"));
-const EnrollmentPage = lazy(() => import("../pages/EnrollmentPage"));
-const HistoryPage = lazy(() => import("../pages/HistoryPage"));
-const SchedulePage = lazy(() => import("../pages/SchedulePage"));
-const QnaListPage = lazy(() => import("../pages/QnaListPage"));
-const QnaDataPage = lazy(() => import("../pages/QnaDataPage"));
-const QnaWritePage = lazy(() => import("../pages/QnaWritePage"));
-const QnaDeletePage = lazy(() => import("../pages/QnaDeletePage"));
-const QnaEditPage = lazy(() => import("../pages/QnaEditPage"));
-const UnauthorizedPage = lazy(() => import("../pages/UnauthorizedPage"));
-const AdminUserListPage = lazy(() => import("../pages/Admin/AdminUserListPage"));
-const ProfessorClassPage = lazy(() => import("../pages/Professor/ProfessorClassPage"));
-const ProfessorGradePage = lazy(() => import("../pages/Professor/ProfessorGradePage"));
+import { Suspense, lazy } from "react";
 
 const root = createBrowserRouter([
-  {
-    path: "/",
-    element: <Navigate to="member/login" />,
-  },
+  { path: "/", element: <Navigate to="/member/login" /> },
   {
     path: "/main",
     element: <BasicLayout />,
     children: [
-      {
-        path: "student",
-        element: (
-          <Suspense fallback={<Loading />}>
-            <StudentPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: "grades",
-        element: (
-          <RoleGuard allowedRoles={["STUDENT"]}>
-            <Suspense fallback={<Loading />}>
-              <GradePage />
-            </Suspense>
-          </RoleGuard>
-        ),
-      },
-      {
-        path: "currentgrades",
-        element: (
-          <Suspense fallback={<Loading />}>
-            <CurrentPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: "enrollment",
-        element: (
-          <RoleGuard allowedRoles={["STUDENT"]}>
-            <Suspense fallback={<Loading />}>
-              <EnrollmentPage />
-            </Suspense>
-          </RoleGuard>
-        ),
-      },
-      {
-        path: "history",
-        element: (
-          <Suspense fallback={<Loading />}>
-            <HistoryPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: "schedule",
-        element: (
-          <RoleGuard allowedRoles={["STUDENT"]}>
-            <Suspense fallback={<Loading />}>
-              <SchedulePage />
-            </Suspense>
-          </RoleGuard>
-        ),
-      },
-      {
-        path: "qnalist",
-        element: (
-          <Suspense fallback={<Loading />}>
-            <QnaListPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: "qnadata",
-        element: (
-          <Suspense fallback={<Loading />}>
-            <QnaDataPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: "qnawrite",
-        element: (
-          <RoleGuard allowedRoles={["STUDENT", "PROFESSOR"]}>
-            <Suspense fallback={<Loading />}>
-              <QnaWritePage />
-            </Suspense>
-          </RoleGuard>
-        ),
-      },
-      {
-        path: "qnadelete",
-        element: (
-          <Suspense fallback={<Loading />}>
-            <QnaDeletePage />
-          </Suspense>
-        ),
-      },
-      {
-        path: "qnaedit",
-        element: (
-          <Suspense fallback={<Loading />}>
-            <QnaEditPage />
-          </Suspense>
-        ),
-      },
+      ...studentRouter,
+      ...adminRouter,
+      ...professorRouter,
+      ...qnaRouter,
       {
         path: "unauthorized",
         element: (
           <Suspense fallback={<Loading />}>
             <UnauthorizedPage />
           </Suspense>
-        ),
-      },
-      {
-        path: "admin/user-list",
-        element: (
-          <RoleGuard allowedRoles={["ADMIN"]}>
-            <Suspense fallback={<Loading />}>
-              <AdminUserListPage />
-            </Suspense>
-          </RoleGuard>
-        ),
-      },
-      {
-        path: "professor/classes",
-        element: (
-          <RoleGuard allowedRoles={["PROFESSOR"]}>
-            <Suspense fallback={<Loading />}>
-              <ProfessorClassPage />
-            </Suspense>
-          </RoleGuard>
-        ),
-      },
-      {
-        path: "professor/grades",
-        element: (
-          <RoleGuard allowedRoles={["PROFESSOR"]}>
-            <Suspense fallback={<Loading />}>
-              <ProfessorGradePage />
-            </Suspense>
-          </RoleGuard>
         ),
       },
     ],

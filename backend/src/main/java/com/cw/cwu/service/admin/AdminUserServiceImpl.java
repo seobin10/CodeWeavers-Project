@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -23,6 +24,7 @@ public class AdminUserServiceImpl implements AdminUserService {
 
     private final UserRepository userRepository;
     private final DepartmentRepository departmentRepository;
+    private final PasswordEncoder passwordEncoder;
 
 
     @Override
@@ -71,7 +73,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         User user = User.builder()
                 .userId(dto.getUserId())
                 .userName(dto.getUserName())
-                .userPassword(dto.getUserPassword()) // 추후 암호화 필요
+                .userPassword(passwordEncoder.encode(dto.getUserPassword()))
                 .userEmail(dto.getUserEmail())
                 .userPhone(dto.getUserPhone())
                 .userBirth(dto.getUserBirth())
@@ -189,7 +191,7 @@ public class AdminUserServiceImpl implements AdminUserService {
         String formatted = birth.substring(2, 4) + birth.substring(5, 7) + birth.substring(8, 10); // yyMMdd
         String defaultPassword = formatted + "!";
 
-        user.setUserPassword(defaultPassword); // 추후 passwordEncoder.encode() 예정
+        user.setUserPassword(passwordEncoder.encode(defaultPassword));
         userRepository.save(user);
 
         return "비밀번호가 초기화되었습니다.";

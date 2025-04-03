@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   createUser,
   getDepartments,
   uploadProfileImage,
 } from "../../api/adminUserApi";
-import { ModalContext } from "../../App";
+import { useDispatch } from "react-redux";
+import { showModal } from "../../slices/modalSlice"; // Redux 액션
 
 const initialForm = {
   userId: "",
@@ -21,15 +22,19 @@ const initialForm = {
 const AdminUserCreatePage = ({ onSuccess }) => {
   const [form, setForm] = useState(initialForm);
   const [departments, setDepartments] = useState([]);
+  const dispatch = useDispatch();
   const [emailId, setEmailId] = useState("");
   const [emailDomain, setEmailDomain] = useState("@naver.com");
   const [customEmailDomain, setCustomEmailDomain] = useState("");
   const [uploadMsg, setUploadMsg] = useState("");
-  const [phoneParts, setPhoneParts] = useState({ part1: "010", part2: "", part3: "" });
+  const [phoneParts, setPhoneParts] = useState({
+    part1: "010",
+    part2: "",
+    part3: "",
+  });
   const [userIdMessage, setUserIdMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const fileInputRef = useRef(null);
-  const { showModal } = useContext(ModalContext);
 
   useEffect(() => {
     getDepartments()
@@ -42,10 +47,15 @@ const AdminUserCreatePage = ({ onSuccess }) => {
     setForm((prev) => {
       const updated = { ...prev, [name]: value };
       if (name === "userId") {
-        setUserIdMessage(/^[0-9]{9}$/.test(value) ? "✔ 올바른 형식입니다." : "❌ 숫자 9자리여야 합니다.");
+        setUserIdMessage(
+          /^[0-9]{9}$/.test(value)
+            ? "✔ 올바른 형식입니다."
+            : "❌ 숫자 9자리여야 합니다."
+        );
       }
       if (name === "userBirth" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
-        const formatted = value.slice(2, 4) + value.slice(5, 7) + value.slice(8, 10);
+        const formatted =
+          value.slice(2, 4) + value.slice(5, 7) + value.slice(8, 10);
         updated.userPassword = `${formatted}!`;
       }
       return updated;
@@ -107,8 +117,11 @@ const AdminUserCreatePage = ({ onSuccess }) => {
   const handleSubmit = async () => {
     try {
       const response = await createUser(form);
-      const msg = typeof response.data === "string" ? response.data : response.data.message ?? "응답 메시지를 확인할 수 없습니다.";
-      showModal(msg);
+      const msg =
+        typeof response.data === "string"
+          ? response.data
+          : response.data.message ?? "응답 메시지를 확인할 수 없습니다.";
+      dispatch(showModal(msg));
 
       onSuccess();
 
@@ -124,8 +137,9 @@ const AdminUserCreatePage = ({ onSuccess }) => {
       const errorData = err.response?.data;
       let message = "알 수 없는 에러가 발생했습니다.";
       if (typeof errorData === "string") message = errorData;
-      else if (typeof errorData === "object" && errorData.message) message = errorData.message;
-      showModal(message);
+      else if (typeof errorData === "object" && errorData.message)
+        message = errorData.message;
+      dispatch(showModal(message));
     }
   };
 
@@ -134,32 +148,70 @@ const AdminUserCreatePage = ({ onSuccess }) => {
       <h2 className="text-2xl font-bold text-center mb-6">학생 / 교수 등록</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* 사용자 구분 */}
         <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">사용자 구분 *</label>
-          <select name="userRole" className="w-full p-2 border rounded" value={form.userRole} onChange={handleChange}>
+          <label className="block mb-1 text-sm font-medium text-gray-700">
+            사용자 구분 *
+          </label>
+          <select
+            name="userRole"
+            className="w-full p-2 border rounded"
+            value={form.userRole}
+            onChange={handleChange}
+          >
             <option value="STUDENT">학생</option>
             <option value="PROFESSOR">교수</option>
           </select>
         </div>
 
+        {/* ID */}
         <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">학번 또는 ID *</label>
-          <input name="userId" className="w-full p-2 border rounded" onChange={handleChange} value={form.userId} placeholder="예: 202500101" />
+          <label className="block mb-1 text-sm font-medium text-gray-700">
+            학번 또는 ID *
+          </label>
+          <input
+            name="userId"
+            className="w-full p-2 border rounded"
+            onChange={handleChange}
+            value={form.userId}
+            placeholder="예: 202500101"
+          />
           <p className="text-sm mt-1 text-gray-600">{userIdMessage}</p>
         </div>
 
+        {/* 이름 */}
         <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">이름 *</label>
-          <input name="userName" className="w-full p-2 border rounded" onChange={handleChange} value={form.userName} placeholder="예: 홍길동" />
+          <label className="block mb-1 text-sm font-medium text-gray-700">
+            이름 *
+          </label>
+          <input
+            name="userName"
+            className="w-full p-2 border rounded"
+            onChange={handleChange}
+            value={form.userName}
+            placeholder="예: 홍길동"
+          />
         </div>
 
+        {/* 생년월일 */}
         <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">생년월일 *</label>
-          <input name="userBirth" type="date" className="w-full p-2 border rounded" onChange={handleChange} value={form.userBirth} />
+          <label className="block mb-1 text-sm font-medium text-gray-700">
+            생년월일 *
+          </label>
+          <input
+            name="userBirth"
+            type="date"
+            className="w-full p-2 border rounded"
+            onChange={handleChange}
+            value={form.userBirth}
+          />
         </div>
 
+        {/* 비밀번호 */}
         <div className="md:col-span-2">
-          <label className="block mb-1 text-sm font-medium text-gray-700">비밀번호 *</label>
+          <label className="block mb-1 text-sm font-medium text-gray-700">
+            비밀번호 *
+          </label>
           <div className="relative">
             <input
               name="userPassword"
@@ -179,12 +231,24 @@ const AdminUserCreatePage = ({ onSuccess }) => {
           </div>
         </div>
 
+        {/* 이메일 */}
         <div className="md:col-span-2">
-          <label className="block mb-1 text-sm font-medium text-gray-700">이메일 *</label>
+          <label className="block mb-1 text-sm font-medium text-gray-700">
+            이메일 *
+          </label>
           <div className="flex flex-wrap gap-2">
-            <input className="flex-1 min-w-[100px] p-2 border rounded" placeholder="아이디" value={emailId} onChange={handleEmailIdChange} />
+            <input
+              className="flex-1 min-w-[100px] p-2 border rounded"
+              placeholder="아이디"
+              value={emailId}
+              onChange={handleEmailIdChange}
+            />
             <span className="self-center">@</span>
-            <select className="flex-1 min-w-[120px] p-2 border rounded" onChange={handleEmailDomainChange} value={emailDomain}>
+            <select
+              className="flex-1 min-w-[120px] p-2 border rounded"
+              onChange={handleEmailDomainChange}
+              value={emailDomain}
+            >
               <option value="@naver.com">naver.com</option>
               <option value="@gmail.com">gmail.com</option>
               <option value="custom">직접 입력</option>
@@ -200,17 +264,41 @@ const AdminUserCreatePage = ({ onSuccess }) => {
           </div>
         </div>
 
+        {/* 전화번호 */}
         <div className="md:col-span-2">
-          <label className="block mb-1 text-sm font-medium text-gray-700">전화번호 *</label>
+          <label className="block mb-1 text-sm font-medium text-gray-700">
+            전화번호 *
+          </label>
           <div className="flex space-x-2">
-            <input name="part1" maxLength={3} className="w-1/3 p-2 border rounded" value={phoneParts.part1} onChange={handlePhoneChange} />
-            <input name="part2" maxLength={4} className="w-1/3 p-2 border rounded" value={phoneParts.part2} onChange={handlePhoneChange} />
-            <input name="part3" maxLength={4} className="w-1/3 p-2 border rounded" value={phoneParts.part3} onChange={handlePhoneChange} />
+            <input
+              name="part1"
+              maxLength={3}
+              className="w-1/3 p-2 border rounded"
+              value={phoneParts.part1}
+              onChange={handlePhoneChange}
+            />
+            <input
+              name="part2"
+              maxLength={4}
+              className="w-1/3 p-2 border rounded"
+              value={phoneParts.part2}
+              onChange={handlePhoneChange}
+            />
+            <input
+              name="part3"
+              maxLength={4}
+              className="w-1/3 p-2 border rounded"
+              value={phoneParts.part3}
+              onChange={handlePhoneChange}
+            />
           </div>
         </div>
 
+        {/* 학과 */}
         <div className="md:col-span-2">
-          <label className="block mb-1 text-sm font-medium text-gray-700">소속 학과 *</label>
+          <label className="block mb-1 text-sm font-medium text-gray-700">
+            소속 학과 *
+          </label>
           <select
             name="departmentId"
             className="w-full p-2 border rounded"
@@ -232,8 +320,11 @@ const AdminUserCreatePage = ({ onSuccess }) => {
           </select>
         </div>
 
+        {/* 이미지 업로드 */}
         <div className="md:col-span-2">
-          <label className="block mb-1 text-sm font-medium text-gray-700">프로필 이미지</label>
+          <label className="block mb-1 text-sm font-medium text-gray-700">
+            프로필 이미지
+          </label>
           <input
             type="file"
             accept="image/*"
@@ -244,6 +335,7 @@ const AdminUserCreatePage = ({ onSuccess }) => {
           {uploadMsg && <p className="text-sm mt-1">{uploadMsg}</p>}
         </div>
 
+        {/* 등록 버튼 */}
         <div className="md:col-span-2">
           <button
             onClick={handleSubmit}

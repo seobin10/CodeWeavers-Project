@@ -1,28 +1,31 @@
-import React, { useContext, useState, useEffect, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { AuthContext, ModalContext } from "../App";
+import { useSelector } from "react-redux";
 import axios from "axios";
 import { WaitModalClick } from "../components/WaitModalClick";
+import { useModal } from "../hooks/useModal"; // 커스텀 훅 또는 context 대체
 
 const QnaDeletePage = () => {
   const location = useLocation();
   const questionId = location.state?.questionId;
   const [writerId, setWriterId] = useState();
-  const { userId, setUserId } = useContext(AuthContext);
-  const { showModal } = useContext(ModalContext);
-  const [userData, setUserData] = useState({
-    userName: "",
-    userId: "",
-    userBirth: "",
-    userEmail: "",
-    userPhone: "",
-    userImgUrl: "",
-    departmentName: "",
-  });
-
   const [message, setMessage] = useState("");
   const [contentInfo, setContentInfo] = useState([]);
   const navigate = useNavigate();
+
+  // Redux에서 유저 정보 가져오기
+  const {
+    userId,
+    userName,
+    userBirth,
+    userEmail,
+    userPhone,
+    userImgUrl,
+    departmentName,
+    userRole,
+  } = useSelector((state) => state.login);
+
+  const { showModal } = useModal(); // ModalContext 대체 커스텀 훅
 
   useEffect(() => {
     const localQnaNumber = localStorage.getItem("No.");
@@ -32,40 +35,18 @@ const QnaDeletePage = () => {
       fetchContentInfo(questionId);
       fetchWriterId(questionId);
     } else if (localQnaNumber) {
-      setUserId(localQnaNumber);
       fetchContentInfo(localQnaNumber);
     }
-  }, [questionId, userId, setUserId]);
+  }, [questionId]);
 
   const fetchContentInfo = async (id) => {
     try {
       const response = await axios.get(
         `http://localhost:8080/api/user/qna/${id}`
       );
-
       setContentInfo(response.data);
     } catch (error) {
       setMessage("게시물 정보를 불러올 수 없습니다.");
-    }
-  };
-
-  const fetchUserInfo = async (userId) => {
-    try {
-      const response = await axios.get(
-        `http://localhost:8080/api/user/${userId}`
-      );
-      setUserData({
-        userName: response.data.userName,
-        userId: response.data.userId,
-        userBirth: response.data.userBirth,
-        userEmail: response.data.userEmail,
-        userPhone: response.data.userPhone,
-        userImgUrl: response.data.userImgUrl,
-        departmentName: response.data.departmentName || "",
-      });
-      return response.data;
-    } catch (error) {
-      setMessage("유저 정보를 불러올 수 없습니다.");
     }
   };
 
@@ -75,7 +56,6 @@ const QnaDeletePage = () => {
         `http://localhost:8080/api/user/qna/find/${questionId}`
       );
       setWriterId(response.data);
-      return response.data;
     } catch (error) {
       setMessage("작성자 정보를 불러올 수 없습니다.");
     }
@@ -87,32 +67,23 @@ const QnaDeletePage = () => {
         `http://localhost:8080/api/user/qna/delete/${questionId}`
       );
     } catch (error) {
-      console.log("데이터 삭제 실패");
+      console.error("❌ 데이터 삭제 실패:", error);
     }
   }, [questionId]);
 
   const deleteQna = async () => {
-    let currentId = userData.userId;
-    if (!currentId) {
-      const fetched = await fetchUserInfo(userId);
-      currentId = fetched?.userId;
-    }
-
-    const userRole = localStorage.getItem("role");
     let msg = "";
-    // currentId와 writerId의 타입이 다르므로, === 대신 == 사용
-    if (currentId == writerId || userRole === "ADMIN") {
+    if (userId == writerId || userRole === "ADMIN") {
       msg =
-        userRole === "ADMIN" && currentId != writerId
+        userRole === "ADMIN" && userId != writerId
           ? "관리자 권한 확인, 삭제되었습니다"
           : "본인 확인 완료! 삭제되었습니다";
-      handleDelete();
+      await handleDelete();
       showModal(msg);
       await WaitModalClick();
       navigate("/main/qnalist");
     } else {
-      msg = "삭제할 수 있는 권한이 없습니다.";
-      showModal(msg);
+      showModal("삭제할 수 있는 권한이 없습니다.");
     }
   };
 
@@ -125,8 +96,7 @@ const QnaDeletePage = () => {
       <div className="bg-red-200 rounded-lg pt-4 pb-4 text-red-600 border border-red-300 flex justify-between items-center px-4">
         <span>정말로 삭제하시겠습니까?</span>
         <button
-          className="bg-red-600 hover:bg-red-800 text-white text-sm font-semibold rounded transition px-3 py-1
-        "
+          className="bg-red-600 hover:bg-red-800 text-white text-sm font-semibold rounded transition px-3 py-1"
           onClick={deleteQna}
         >
           삭제

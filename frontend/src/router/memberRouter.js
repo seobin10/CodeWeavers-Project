@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react";
 import Loading from "../components/Loading";
 
-const LoginPage = lazy(() => import("../pages/LoginPage"));
+const LoginPage = lazy(() => import("../pages/users/LoginPage"));
 const FindidPage = lazy(() => import("../pages/FindidPage"));
 const FindpwPage = lazy(() => import("../pages/FindpwPage"));
 

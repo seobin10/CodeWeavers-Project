@@ -1,9 +1,8 @@
-import { useContext } from "react";
-import { AuthContext } from "../App";
+import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
 
 const RoleGuard = ({ allowedRoles, children }) => {
-  const { userRole } = useContext(AuthContext);
+  const { userRole } = useSelector((state) => state.auth); // 🔁 auth로 변경
 
   if (!allowedRoles.includes(userRole)) {
     return <Navigate to="/main/unauthorized" replace />;

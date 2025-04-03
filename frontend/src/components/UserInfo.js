@@ -1,23 +1,23 @@
-import React, { useContext, useEffect, useState, useMemo } from "react";
-import { AuthContext } from "../App";
+import React, { useEffect, useState, useMemo } from "react";
+import { useSelector } from "react-redux";
 import axios from "axios";
+import { fetchUserInfo } from "../api/memberApi";
 
 const UserInfo = () => {
-  const { userId, userRole } = useContext(AuthContext);
+  const { userId, userRole } = useSelector((state) => state.auth);
   const [userInfo, setUserInfo] = useState(null);
-  const localId = localStorage.getItem("id");
 
   useEffect(() => {
-    const idToUse = userId || localId;
-    if (!idToUse || idToUse === "null") return;
-    fetchUserInfo(idToUse);
-  }, [userId, localId]);
+    const idToUse = userId || localStorage.getItem("id");
+    console.log("id:", idToUse);
+    if (!idToUse || idToUse === "null" || idToUse === "undefined") return;
 
-  const fetchUserInfo = async (userId) => {
+    getUserInfo(idToUse);
+  }, [userId]);
+
+  const getUserInfo = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:8080/api/user/${userId}`
-      );
+      const response = await fetchUserInfo(userId);
       setUserInfo(response.data);
     } catch (error) {
       console.error("Error fetching user info:", error);

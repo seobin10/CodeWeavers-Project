@@ -1,34 +1,38 @@
-import React, { useContext, useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { AuthContext, ModalContext } from "../App";
+import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import QnaAnswerModal from "../components/QnaAnswerModal";
 import QnaAnswerWritePage from "../pages/Admin/QnaAnswerWritePage";
 import QnaAnswerDeletePage from "./Admin/QnaAnswerDeletePage";
+import { WaitModalClick } from "../components/WaitModalClick";
+import { showModal } from "../slices/modalSlice"; // 예시
 
 const QnaDataPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [props, setProps] = useState();
   const isOpen = isModalOpen;
   const handleClose = () => setIsModalOpen(false);
+
+  const dispatch = useDispatch();
+  const location = useLocation();
+  const questionId = location.state?.questionId;
+  const currentPage = location.state?.page;
+
+  const userId = useSelector((state) => state.login.userId);
+  const userRole = useSelector((state) => state.login.userRole);
+
+  const [writerId, setWriterId] = useState();
+  const [message, setMessage] = useState("");
+  const [contentInfo, setContentInfo] = useState([]);
+  const [menuOpen, setMenuOpen] = useState(false);
+
   const refetchData = () => {
     if (questionId) {
       fetchContentInfo(questionId);
       fetchWriterId(questionId);
     }
   };
-
-  const userRole = localStorage.getItem("role");
-  const location = useLocation();
-  const questionId = location.state?.questionId;
-  const currentPage = location.state?.page;
-  const [writerId, setWriterId] = useState();
-  const { userId, setUserId } = useContext(AuthContext);
-  const { showModal } = useContext(ModalContext);
-  const [message, setMessage] = useState("");
-  const [contentInfo, setContentInfo] = useState([]);
-
-  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleView = useCallback(async () => {
     try {
@@ -43,7 +47,6 @@ const QnaDataPage = () => {
   useEffect(() => {
     handleView();
     const localQnaNumber = localStorage.getItem("No.");
-
     if (questionId) {
       localStorage.setItem("No.", questionId);
       fetchContentInfo(questionId);
@@ -52,14 +55,13 @@ const QnaDataPage = () => {
       fetchContentInfo(localQnaNumber);
       fetchWriterId(localQnaNumber);
     }
-  }, [questionId, userId, setUserId, writerId, setWriterId, handleView]);
+  }, [questionId, handleView]);
 
   const fetchContentInfo = async (id) => {
     try {
       const response = await axios.get(
         `http://localhost:8080/api/user/qna/${id}`
       );
-
       setContentInfo(response.data);
     } catch (error) {
       setMessage("게시물 정보를 불러올 수 없습니다.");
@@ -72,11 +74,12 @@ const QnaDataPage = () => {
         `http://localhost:8080/api/user/qna/find/${questionId}`
       );
       setWriterId(response.data);
-      return response.data;
     } catch (error) {
       setMessage("작성자 정보를 불러올 수 없습니다.");
     }
   };
+
+  const openModalWithCheck = (text) => dispatch(showModal(text));
 
   return (
     <div>
@@ -94,7 +97,6 @@ const QnaDataPage = () => {
                   <td className="border border-gray-400 px-4 py-2 bg-white">
                     <div className="flex justify-between items-center relative">
                       <span>{qna.title}</span>
-
                       <div className="relative">
                         <button
                           onClick={() => setMenuOpen(!menuOpen)}
@@ -104,19 +106,20 @@ const QnaDataPage = () => {
                         </button>
 
                         {menuOpen && (
-                          <div className="absolute right-0 mt-2 w-24 bg-white border rounded shadow z-10 text-sm ">
+                          <div className="absolute right-0 mt-2 w-24 bg-white border rounded shadow z-10 text-sm">
                             <Link
                               to={
-                                userId == writerId || userRole == "ADMIN"
+                                userId == writerId || userRole === "ADMIN"
                                   ? "/main/qnadelete"
                                   : ""
                               }
                               onClick={
-                                userId == writerId || userRole == "ADMIN"
-                                  ? ""
-                                  : () => {
-                                      showModal("작성자만 삭제할 수 있습니다!");
-                                    }
+                                userId == writerId || userRole === "ADMIN"
+                                  ? undefined
+                                  : () =>
+                                      openModalWithCheck(
+                                        "작성자만 삭제할 수 있습니다!"
+                                      )
                               }
                               state={{ questionId }}
                               className="block px-4 py-2 hover:bg-gray-100 text-gray-800 border border-solid border-black-300"
@@ -126,7 +129,7 @@ const QnaDataPage = () => {
                             {qna.answerContent ? (
                               <button
                                 onClick={() =>
-                                  showModal(
+                                  openModalWithCheck(
                                     "답변 완료 게시글은 수정 불가입니다."
                                   )
                                 }
@@ -139,12 +142,11 @@ const QnaDataPage = () => {
                                 to={userId == writerId ? "/main/qnaedit" : ""}
                                 onClick={
                                   userId == writerId
-                                    ? ""
-                                    : () => {
-                                        showModal(
+                                    ? undefined
+                                    : () =>
+                                        openModalWithCheck(
                                           "작성자만 수정할 수 있습니다!"
-                                        );
-                                      }
+                                        )
                                 }
                                 state={{ questionId }}
                                 className="block px-4 py-2 hover:bg-gray-100 text-gray-800 border border-solid border-black-300 border-t-0"
@@ -158,7 +160,6 @@ const QnaDataPage = () => {
                     </div>
                   </td>
                 </tr>
-
                 <tr>
                   <th className="border border-gray-400 px-4 py-2">작성자</th>
                   <td className="border border-gray-400 px-4 py-2 bg-white">
@@ -175,6 +176,7 @@ const QnaDataPage = () => {
                 </tr>
               </thead>
             </table>
+
             <table>
               <tbody>
                 <tr>
@@ -203,7 +205,7 @@ const QnaDataPage = () => {
           </div>
         ))
       ) : (
-        <p className="text-center text-gray-500"> 데이터를 불러오는 중...</p>
+        <p className="text-center text-gray-500">데이터를 불러오는 중...</p>
       )}
       <br />
       <Link
@@ -213,48 +215,51 @@ const QnaDataPage = () => {
       >
         목록
       </Link>
-      <div className="float-right">
-        {userRole == "ADMIN" && contentInfo.length > 0 && (
-          <>
-            <button
-              onClick={() => {
-                const qna = contentInfo[0];
-                if (!qna.answerContent || qna.answerContent.trim() === "") {
-                  setProps(<QnaAnswerWritePage qno={questionId} page={currentPage}/>);
-                  setIsModalOpen(true);
-                } else {
-                  showModal("이미 답변이 작성되었습니다.");
-                }
-              }}
-              className="bg-green-500 hover:bg-green-700 text-white text-sm font-semibold py-2.5 px-3 rounded transition"
-            >
-              답변 작성
-            </button>
-            &nbsp;
-            <button
-              onClick={() => {
-                const qna = contentInfo[0];
-                if (qna.answerContent) {
-                  setProps(<QnaAnswerDeletePage qno={questionId} page={currentPage} />);
-                  setIsModalOpen(true);
-                } else {
-                  showModal("삭제할 답변이 없습니다.");
-                }
-              }}
-              className="bg-red-500 hover:bg-red-700 text-white text-sm font-semibold py-2.5 px-3 rounded transition"
-            >
-              답변 삭제
-            </button>
-          </>
-        )}
 
-        <QnaAnswerModal
-          isOpen={isOpen}
-          onClose={handleClose}
-          onSuccess={refetchData}
-          pageProps={props}
-        />
-      </div>
+      {userRole === "ADMIN" && contentInfo.length > 0 && (
+        <div className="float-right">
+          <button
+            onClick={() => {
+              const qna = contentInfo[0];
+              if (!qna.answerContent) {
+                setProps(
+                  <QnaAnswerWritePage qno={questionId} page={currentPage} />
+                );
+                setIsModalOpen(true);
+              } else {
+                openModalWithCheck("이미 답변이 작성되었습니다.");
+              }
+            }}
+            className="bg-green-500 hover:bg-green-700 text-white text-sm font-semibold py-2.5 px-3 rounded transition"
+          >
+            답변 작성
+          </button>
+          &nbsp;
+          <button
+            onClick={() => {
+              const qna = contentInfo[0];
+              if (qna.answerContent) {
+                setProps(
+                  <QnaAnswerDeletePage qno={questionId} page={currentPage} />
+                );
+                setIsModalOpen(true);
+              } else {
+                openModalWithCheck("삭제할 답변이 없습니다.");
+              }
+            }}
+            className="bg-red-500 hover:bg-red-700 text-white text-sm font-semibold py-2.5 px-3 rounded transition"
+          >
+            답변 삭제
+          </button>
+        </div>
+      )}
+
+      <QnaAnswerModal
+        isOpen={isOpen}
+        onClose={handleClose}
+        onSuccess={refetchData}
+        pageProps={props}
+      />
     </div>
   );
 };

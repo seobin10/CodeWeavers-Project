@@ -1,12 +1,14 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState } from "react";
 import { getAllUsers, deleteUser } from "../../api/adminUserApi";
-import { ModalContext } from "../../App";
+import { useDispatch } from "react-redux";
+import { showModal, showConfirm } from "../../slices/modalSlice";
 import PageComponent from "../../components/PageComponent";
 import BaseModal from "../../components/BaseModal";
 import AdminUserCreatePage from "./AdminUserCreatePage";
 import AdminUserEditPage from "./AdminUserEditPage";
 
 const AdminUserListPage = () => {
+  const dispatch = useDispatch();
   const [users, setUsers] = useState({
     dtoList: [],
     totalPage: 0,
@@ -18,7 +20,6 @@ const AdminUserListPage = () => {
   const [sortField, setSortField] = useState("userId");
   const [sortDir, setSortDir] = useState("asc");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { showModal, showConfirm } = useContext(ModalContext);
   const [editUser, setEditUser] = useState(null);
   const [hoveredUser, setHoveredUser] = useState(null);
 
@@ -28,7 +29,7 @@ const AdminUserListPage = () => {
       setUsers(res.data);
       setCurrentPage(page);
     } catch (err) {
-      showModal("사용자 목록을 불러오지 못했습니다.");
+      dispatch(showModal("사용자 목록을 불러오지 못했습니다."));
     }
   };
 
@@ -37,18 +38,20 @@ const AdminUserListPage = () => {
   }, [searchQuery, sortField, sortDir]);
 
   const handleDelete = (user) => {
-    showConfirm({
-      message: `ID: ${user.userId}\n이름: ${user.userName}\n\n이 사용자를 삭제하시겠습니까?`,
-      onConfirm: async () => {
-        try {
-          await deleteUser(user.userId);
-          showModal("사용자가 성공적으로 삭제되었습니다.");
-          fetchUsers(currentPage);
-        } catch (err) {
-          showModal("사용자 삭제 중 오류가 발생했습니다.");
-        }
-      },
-    });
+    dispatch(
+      showConfirm({
+        message: `ID: ${user.userId}\n이름: ${user.userName}\n\n이 사용자를 삭제하시겠습니까?`,
+        onConfirm: async () => {
+          try {
+            await deleteUser(user.userId);
+            dispatch(showModal("사용자가 성공적으로 삭제되었습니다."));
+            fetchUsers(currentPage);
+          } catch (err) {
+            dispatch(showModal("사용자 삭제 중 오류가 발생했습니다."));
+          }
+        },
+      })
+    );
   };
 
   const handleSort = (field) => {
@@ -128,12 +131,11 @@ const AdminUserListPage = () => {
             >
               <td className="py-3 px-4">{user.userId}</td>
               <td
-                className="py-3 px-4 text-center relative"
+                className="py-3 px-4 relative"
                 onMouseEnter={() => setHoveredUser(user)}
                 onMouseLeave={() => setHoveredUser(null)}
               >
                 {user.userName}
-
                 {hoveredUser?.userId === user.userId && (
                   <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 w-24 h-24 bg-white border rounded shadow z-10">
                     <img
@@ -142,7 +144,7 @@ const AdminUserListPage = () => {
                           ? `http://localhost:8080${hoveredUser.userImgUrl}`
                           : "/images/noImage.jpg"
                       }
-                      alt="프로필 이미지"
+                      alt="프로필"
                       className="w-full h-full object-cover rounded"
                     />
                   </div>
