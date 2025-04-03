@@ -1,11 +1,8 @@
-import React, { useContext, useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
+import { useSelector } from "react-redux";
 import { getEnrolledCourses } from "../api/enrollmentApi";
-import { AuthContext } from "../App";
 
-// 요일
 const days = ["월", "화", "수", "목", "금"];
-
-// 교시 + 시간
 const periods = [
   { label: "1교시", time: "09:00 ~ 09:50" },
   { label: "2교시", time: "10:00 ~ 10:50" },
@@ -19,7 +16,6 @@ const periods = [
   { label: "10교시", time: "18:00 ~ 18:50" },
 ];
 
-// 고정 색상 리스트
 const COLORS = [
   "bg-red-200",
   "bg-orange-200",
@@ -34,7 +30,6 @@ const COLORS = [
   "bg-lime-200",
 ];
 
-// 과목명 기반으로 색상 인덱스 반환 (해시)
 const getColorClass = (courseName) => {
   let hash = 0;
   for (let i = 0; i < courseName.length; i++) {
@@ -42,11 +37,10 @@ const getColorClass = (courseName) => {
   }
   const index = Math.abs(hash) % COLORS.length;
   return COLORS[index];
-  
 };
 
 const SchedulePage = () => {
-  const { userId } = useContext(AuthContext);
+  const { userId } = useSelector((state) => state.login || {});
   const [schedule, setSchedule] = useState([]);
 
   const fetchSchedule = useCallback(async () => {
@@ -82,16 +76,12 @@ const SchedulePage = () => {
           <tbody>
             {periods.map((period, periodIndex) => {
               const currentPeriod = periodIndex + 1;
-
               return (
                 <tr key={period.label} className="text-center h-[4.5rem]">
-                  {/* 왼쪽 시간 표시 */}
                   <td className="border border-gray-300 p-2 bg-gray-200 text-sm">
                     <div className="font-semibold">{period.label}</div>
                     <div className="text-xs text-gray-600">{period.time}</div>
                   </td>
-
-                  {/* 요일별 셀 렌더링 */}
                   {days.map((day) => {
                     if (renderMap[`${day}-${currentPeriod}`]) return null;
 
@@ -104,13 +94,10 @@ const SchedulePage = () => {
                     if (course) {
                       const duration =
                         course.classEndPeriod - course.classStartPeriod + 1;
-
                       for (let i = 0; i < duration; i++) {
                         renderMap[`${day}-${currentPeriod + i}`] = true;
                       }
-
                       const bgColorClass = getColorClass(course.courseName);
-
                       return (
                         <td
                           key={`${day}-${period.label}`}
@@ -132,7 +119,7 @@ const SchedulePage = () => {
                         <td
                           key={`${day}-${period.label}`}
                           className="border border-gray-300 p-2 min-h-[4.5rem]"
-                        />
+                        ></td>
                       );
                     }
                   })}

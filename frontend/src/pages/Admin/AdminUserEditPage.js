@@ -1,23 +1,28 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   getDepartments,
   uploadProfileImage,
   updateUser,
   resetPassword,
 } from "../../api/adminUserApi";
-import { ModalContext } from "../../App";
+import { useDispatch } from "react-redux";
+import { showModal } from "../../slices/modalSlice";
 import ConfirmModal from "../../components/ConfirmModal";
 
 const AdminUserEditPage = ({ user, onSuccess, onClose }) => {
+  const dispatch = useDispatch();
   const [form, setForm] = useState({ ...user });
   const [departments, setDepartments] = useState([]);
   const [emailId, setEmailId] = useState("");
   const [emailDomain, setEmailDomain] = useState("@naver.com");
   const [customEmailDomain, setCustomEmailDomain] = useState("");
   const [uploadMsg, setUploadMsg] = useState("");
-  const [phoneParts, setPhoneParts] = useState({ part1: "", part2: "", part3: "" });
+  const [phoneParts, setPhoneParts] = useState({
+    part1: "",
+    part2: "",
+    part3: "",
+  });
   const fileInputRef = useRef(null);
-  const { showModal } = useContext(ModalContext);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   useEffect(() => {
@@ -92,16 +97,20 @@ const AdminUserEditPage = ({ user, onSuccess, onClose }) => {
   const handleSubmit = async () => {
     try {
       const response = await updateUser(form);
-      const msg = typeof response.data === "string" ? response.data : response.data.message ?? "응답 메시지를 확인할 수 없습니다.";
-      showModal(msg);
+      const msg =
+        typeof response.data === "string"
+          ? response.data
+          : response.data.message ?? "응답 메시지를 확인할 수 없습니다.";
+      dispatch(showModal(msg));
       onSuccess();
       onClose();
     } catch (err) {
       const errorData = err.response?.data;
       let message = "알 수 없는 에러가 발생했습니다.";
       if (typeof errorData === "string") message = errorData;
-      else if (typeof errorData === "object" && errorData.message) message = errorData.message;
-      showModal(message);
+      else if (typeof errorData === "object" && errorData.message)
+        message = errorData.message;
+      dispatch(showModal(message));
     }
   };
 
@@ -112,45 +121,75 @@ const AdminUserEditPage = ({ user, onSuccess, onClose }) => {
   const handleConfirmResetPassword = async () => {
     try {
       const response = await resetPassword(form.userId);
-      const msg = response.data;
-      showModal(msg);
+      dispatch(showModal(response.data));
       setIsConfirmModalOpen(false);
     } catch (err) {
       const errorData = err.response?.data;
       let message = "알 수 없는 에러가 발생했습니다.";
       if (typeof errorData === "string") message = errorData;
-      else if (typeof errorData === "object" && errorData.message) message = errorData.message;
-      showModal(message);
+      else if (typeof errorData === "object" && errorData.message)
+        message = errorData.message;
+      dispatch(showModal(message));
       setIsConfirmModalOpen(false);
     }
   };
-
   return (
     <div className="max-w-3xl mx-auto mt-8 p-6 bg-white shadow-md rounded-lg">
-      <h2 className="text-2xl font-bold text-center mb-6">학생 / 교수 정보 수정</h2>
+      <h2 className="text-2xl font-bold text-center mb-6">
+        학생 / 교수 정보 수정
+      </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">사용자 구분 *</label>
-          <select name="userRole" className="w-full p-2 border rounded" value={form.userRole} onChange={handleChange}>
+          <label className="block mb-1 text-sm font-medium text-gray-700">
+            사용자 구분 *
+          </label>
+          <select
+            name="userRole"
+            className="w-full p-2 border rounded"
+            value={form.userRole}
+            onChange={handleChange}
+          >
             <option value="STUDENT">학생</option>
             <option value="PROFESSOR">교수</option>
           </select>
         </div>
 
         <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">학번 또는 ID *</label>
-          <input name="userId" className="w-full p-2 border rounded bg-gray-100" value={form.userId} disabled />
+          <label className="block mb-1 text-sm font-medium text-gray-700">
+            학번 또는 ID *
+          </label>
+          <input
+            name="userId"
+            className="w-full p-2 border rounded bg-gray-100"
+            value={form.userId}
+            disabled
+          />
         </div>
 
         <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">이름 *</label>
-          <input name="userName" className="w-full p-2 border rounded" onChange={handleChange} value={form.userName} />
+          <label className="block mb-1 text-sm font-medium text-gray-700">
+            이름 *
+          </label>
+          <input
+            name="userName"
+            className="w-full p-2 border rounded"
+            onChange={handleChange}
+            value={form.userName}
+          />
         </div>
 
         <div>
-          <label className="block mb-1 text-sm font-medium text-gray-700">생년월일 *</label>
-          <input name="userBirth" type="date" className="w-full p-2 border rounded" onChange={handleChange} value={form.userBirth} />
+          <label className="block mb-1 text-sm font-medium text-gray-700">
+            생년월일 *
+          </label>
+          <input
+            name="userBirth"
+            type="date"
+            className="w-full p-2 border rounded"
+            onChange={handleChange}
+            value={form.userBirth}
+          />
         </div>
 
         <div className="md:col-span-2">
@@ -163,32 +202,70 @@ const AdminUserEditPage = ({ user, onSuccess, onClose }) => {
         </div>
 
         <div className="md:col-span-2">
-          <label className="block mb-1 text-sm font-medium text-gray-700">이메일 *</label>
+          <label className="block mb-1 text-sm font-medium text-gray-700">
+            이메일 *
+          </label>
           <div className="flex flex-wrap gap-2">
-            <input className="flex-1 min-w-[100px] p-2 border rounded" placeholder="아이디" value={emailId} onChange={handleEmailIdChange} />
+            <input
+              className="flex-1 min-w-[100px] p-2 border rounded"
+              placeholder="아이디"
+              value={emailId}
+              onChange={handleEmailIdChange}
+            />
             <span className="self-center">@</span>
-            <select className="flex-1 min-w-[120px] p-2 border rounded" onChange={handleEmailDomainChange} value={emailDomain}>
+            <select
+              className="flex-1 min-w-[120px] p-2 border rounded"
+              onChange={handleEmailDomainChange}
+              value={emailDomain}
+            >
               <option value="@naver.com">naver.com</option>
               <option value="@gmail.com">gmail.com</option>
               <option value="custom">직접 입력</option>
             </select>
             {emailDomain === "custom" && (
-              <input className="flex-1 min-w-[120px] p-2 border rounded" placeholder="직접입력" value={customEmailDomain} onChange={handleCustomDomainChange} />
+              <input
+                className="flex-1 min-w-[120px] p-2 border rounded"
+                placeholder="직접입력"
+                value={customEmailDomain}
+                onChange={handleCustomDomainChange}
+              />
             )}
           </div>
         </div>
 
         <div className="md:col-span-2">
-          <label className="block mb-1 text-sm font-medium text-gray-700">전화번호 *</label>
+          <label className="block mb-1 text-sm font-medium text-gray-700">
+            전화번호 *
+          </label>
           <div className="flex space-x-2">
-            <input name="part1" maxLength={3} className="w-1/3 p-2 border rounded" value={phoneParts.part1} onChange={handlePhoneChange} />
-            <input name="part2" maxLength={4} className="w-1/3 p-2 border rounded" value={phoneParts.part2} onChange={handlePhoneChange} />
-            <input name="part3" maxLength={4} className="w-1/3 p-2 border rounded" value={phoneParts.part3} onChange={handlePhoneChange} />
+            <input
+              name="part1"
+              maxLength={3}
+              className="w-1/3 p-2 border rounded"
+              value={phoneParts.part1}
+              onChange={handlePhoneChange}
+            />
+            <input
+              name="part2"
+              maxLength={4}
+              className="w-1/3 p-2 border rounded"
+              value={phoneParts.part2}
+              onChange={handlePhoneChange}
+            />
+            <input
+              name="part3"
+              maxLength={4}
+              className="w-1/3 p-2 border rounded"
+              value={phoneParts.part3}
+              onChange={handlePhoneChange}
+            />
           </div>
         </div>
 
         <div className="md:col-span-2">
-          <label className="block mb-1 text-sm font-medium text-gray-700">소속 학과 *</label>
+          <label className="block mb-1 text-sm font-medium text-gray-700">
+            소속 학과 *
+          </label>
           <select
             name="departmentId"
             className="w-full p-2 border rounded"
@@ -211,7 +288,9 @@ const AdminUserEditPage = ({ user, onSuccess, onClose }) => {
         </div>
 
         <div className="md:col-span-2">
-          <label className="block mb-1 text-sm font-medium text-gray-700">프로필 이미지</label>
+          <label className="block mb-1 text-sm font-medium text-gray-700">
+            프로필 이미지
+          </label>
           <input
             type="file"
             accept="image/*"

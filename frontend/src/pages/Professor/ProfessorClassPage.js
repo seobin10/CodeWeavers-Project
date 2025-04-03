@@ -1,14 +1,16 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { getMyClasses, deleteClass } from "../../api/professorClassApi";
-import { AuthContext, ModalContext } from "../../App";
+import { setUserId } from "../../slices/authSlice";
+import { showModal } from "../../slices/modalSlice";
 import PageComponent from "../../components/PageComponent";
 import BaseModal from "../../components/BaseModal";
 import ProfessorClassCreatePage from "./ProfessorClassCreatePage";
 import ProfessorClassEditPage from "./ProfessorClassEditPage";
 
 const ProfessorClassPage = () => {
-  const { showModal, showConfirm } = useContext(ModalContext);
-  const { userId, setUserId } = useContext(AuthContext);
+  const dispatch = useDispatch();
+  const userId = useSelector((state) => state.auth.userId);
 
   const [classes, setClasses] = useState({
     dtoList: [],
@@ -16,6 +18,7 @@ const ProfessorClassPage = () => {
     current: 1,
     totalCount: 0,
   });
+
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editClass, setEditClass] = useState(null);
@@ -23,9 +26,9 @@ const ProfessorClassPage = () => {
   useEffect(() => {
     const localId = localStorage.getItem("id");
     if (!userId && localId) {
-      setUserId(localId);
+      dispatch(setUserId(localId));
     }
-  }, [userId, setUserId]);
+  }, [userId, dispatch]);
 
   const fetchClasses = async (page = 1) => {
     if (!userId) return;
@@ -34,7 +37,7 @@ const ProfessorClassPage = () => {
       setClasses(res.data);
       setCurrentPage(page);
     } catch (err) {
-      showModal("강의 목록을 불러오지 못했습니다.", "error");
+      dispatch(showModal("강의 목록을 불러오지 못했습니다."));
     }
   };
 
@@ -43,18 +46,19 @@ const ProfessorClassPage = () => {
   }, [userId]);
 
   const handleDelete = (classData) => {
-    showConfirm({
-      message: `과목: ${classData.courseName}\n학기: ${classData.semester}\n\n 삭제하시겠습니까?`,
-      onConfirm: async () => {
-        try {
-          await deleteClass(classData.classId);
-          showModal("강의가 성공적으로 삭제되었습니다.");
-          fetchClasses(currentPage);
-        } catch (err) {
-          showModal("삭제 중 오류 발생", "error");
-        }
-      },
-    });
+    const confirmed = window.confirm(
+      `과목: ${classData.courseName}\n학기: ${classData.semester}\n\n삭제하시겠습니까?`
+    );
+    if (!confirmed) return;
+
+    deleteClass(classData.classId)
+      .then(() => {
+        dispatch(showModal("강의가 성공적으로 삭제되었습니다."));
+        fetchClasses(currentPage);
+      })
+      .catch(() => {
+        dispatch(showModal("삭제 중 오류 발생"));
+      });
   };
 
   return (

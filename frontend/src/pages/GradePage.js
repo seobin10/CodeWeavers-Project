@@ -1,29 +1,29 @@
-import { useEffect, useContext, useState } from "react";
-import { AuthContext } from "../App";
+import { useEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { setUserId as setUserIdAction } from "../slices/authSlice";
 import axios from "axios";
 
 const GradePage = () => {
-  const { userId, setUserId } = useContext(AuthContext);
+  const dispatch = useDispatch();
+  const userId = useSelector((state) => state.auth.userId);
   const [message, setMessage] = useState("");
   const [gradeInfo, setGradeInfo] = useState([]);
 
-  const localId = localStorage.getItem("id");
-
   useEffect(() => {
-    if (userId) {
-      fetchStudentInfo(userId);
-    } else if (localId) {
-      setUserId(localId);
+    const localId = localStorage.getItem("id");
+    if (!userId && localId) {
+      dispatch(setUserIdAction(localId));
       fetchStudentInfo(localId);
+    } else if (userId) {
+      fetchStudentInfo(userId);
     }
-  }, [userId, setUserId, localId]);
+  }, [userId, dispatch]);
 
-  const fetchStudentInfo = async (userId) => {
+  const fetchStudentInfo = async (id) => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/students/grade/${userId}/grade`
+        `http://localhost:8080/api/students/grade/${id}/grade`
       );
-      console.log("Fetched data:", response.data);
       setGradeInfo(response.data);
     } catch (error) {
       setMessage("성적 정보를 불러올 수 없습니다.");
