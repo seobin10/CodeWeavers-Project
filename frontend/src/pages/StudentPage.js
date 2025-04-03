@@ -1,10 +1,11 @@
-import { useEffect, useContext, useState } from "react";
-import { AuthContext } from "../App";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import axios from "axios";
 import { updateUserInfo } from "../api/memberApi";
+import { getAuthHeader } from "../util/authHeader";
 
 function StudentPage() {
-  const { userId, setUserId } = useContext(AuthContext);
+  const userId = useSelector((state) => state.auth?.userId);
   const [studentInfo, setStudentInfo] = useState(null);
   const [message, setMessage] = useState("");
   const [formData, setFormData] = useState({
@@ -16,21 +17,18 @@ function StudentPage() {
     userImgUrl: "",
     departmentName: "",
   });
-  const localId = localStorage.getItem("id");
 
   useEffect(() => {
     if (userId) {
       fetchStudentInfo(userId);
-    } else if (localId) {
-      setUserId(localId);
-      fetchStudentInfo(localId);
     }
-  }, [userId, setUserId, localId]);
+  }, [userId]);
 
   const fetchStudentInfo = async (userId) => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/user/${userId}`
+        `http://localhost:8080/api/user/${userId}`,
+        getAuthHeader() 
       );
       setStudentInfo(response.data);
       setFormData({
@@ -54,7 +52,6 @@ function StudentPage() {
 
   const handleSave = async () => {
     try {
-      // formData에서 필요한 정보를 추출하여 업데이트 API에 전달합니다.
       await updateUserInfo({
         userId: formData.userId,
         userEmail: formData.userEmail,

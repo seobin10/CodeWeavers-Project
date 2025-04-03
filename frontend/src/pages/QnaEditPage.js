@@ -1,25 +1,20 @@
-import React, { useContext, useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { AuthContext, ModalContext } from "../App";
+import { useSelector } from "react-redux";
 import axios from "axios";
 import { WaitModalClick } from "../components/WaitModalClick";
+import { useModal } from "../hooks/useModal"; // 커스텀 훅 가정
 
 const QnaEditPage = () => {
   const location = useLocation();
   const questionId = location.state?.questionId;
-  const [writerId, setWriterId] = useState();
-  const { userId, setUserId } = useContext(AuthContext);
-  const { showModal } = useContext(ModalContext);
-  const [userData, setUserData] = useState({
-    userName: "",
-    userId: "",
-    userBirth: "",
-    userEmail: "",
-    userPhone: "",
-    userImgUrl: "",
-    departmentName: "",
-  });
+  const navigate = useNavigate();
 
+  // Redux 상태로부터 사용자 정보
+  const { userId, userRole } = useSelector((state) => state.login);
+  const { showModal } = useModal(); // Redux dispatch or 커스텀 Modal 훅
+
+  const [writerId, setWriterId] = useState();
   const [message, setMessage] = useState("");
   const [contentInfo, setContentInfo] = useState([]);
   const [contentData, setContentData] = useState({
@@ -27,20 +22,15 @@ const QnaEditPage = () => {
     title: "",
     content: "",
   });
-  const navigate = useNavigate();
 
+  // QnA 데이터 조회
   useEffect(() => {
-    const localQnaNumber = localStorage.getItem("No.");
-
     if (questionId) {
       localStorage.setItem("No.", questionId);
       fetchContentInfo(questionId);
       fetchWriterId(questionId);
-    } else if (localQnaNumber) {
-      setUserId(localQnaNumber);
-      fetchContentInfo(localQnaNumber);
     }
-  }, [questionId, userId, setUserId]);
+  }, [questionId]);
 
   useEffect(() => {
     if (contentInfo.length > 0) {
@@ -55,76 +45,34 @@ const QnaEditPage = () => {
 
   const fetchContentInfo = async (id) => {
     try {
-      const response = await axios.get(
-        `http://localhost:8080/api/user/qna/${id}`
-      );
-
-      setContentInfo(response.data);
-    } catch (error) {
+      const res = await axios.get(`http://localhost:8080/api/user/qna/${id}`);
+      setContentInfo(res.data);
+    } catch (err) {
       setMessage("게시물 정보를 불러올 수 없습니다.");
     }
   };
 
-  const fetchUserInfo = async (userId) => {
+  const fetchWriterId = async (qid) => {
     try {
-      const response = await axios.get(
-        `http://localhost:8080/api/user/${userId}`
+      const res = await axios.get(
+        `http://localhost:8080/api/user/qna/find/${qid}`
       );
-      setUserData({
-        userName: response.data.userName,
-        userId: response.data.userId,
-        userBirth: response.data.userBirth,
-        userEmail: response.data.userEmail,
-        userPhone: response.data.userPhone,
-        userImgUrl: response.data.userImgUrl,
-        departmentName: response.data.departmentName || "",
-      });
-      return response.data;
-    } catch (error) {
-      setMessage("유저 정보를 불러올 수 없습니다.");
-    }
-  };
-
-  const fetchWriterId = async (questionId) => {
-    try {
-      const response = await axios.get(
-        `http://localhost:8080/api/user/qna/find/${questionId}`
-      );
-      setWriterId(response.data);
-      return response.data;
-    } catch (error) {
+      setWriterId(res.data);
+    } catch (err) {
       setMessage("작성자 정보를 불러올 수 없습니다.");
     }
   };
 
-  const updateQnaData = async (contentData) => {
-    try {
-      if (!contentData?.questionId) throw new Error("Invalid questionId!");
-      const res = await axios.put(
-        `http://localhost:8080/api/user/qna/edit/${questionId}`,
-        contentData
-      );
-      return res.data;
-    } catch (error) {
-      console.error("게시글 정보 업데이트 실패:", error);
-      return { error: "게시글 업데이트 실패. 다시 시도해주세요." };
-    }
-  };
-
   const cleanedTitle = (title) => {
-    const hasLock = /\u{1F512}/u.test(title);
-    title = hasLock ? title.replace(/\u{1F512}\s*/gu, "") : title;
-    return title;
+    return /\u{1F512}/u.test(title)
+      ? title.replace(/\u{1F512}\s*/gu, "")
+      : title;
   };
 
   const handleSecret = (title) => {
-    cleanedTitle(title);
-    let isSecret = document.getElementById("secret");
-    if (!isSecret.checked) {
-      return title;
-    } else {
-      return "\u{1F512} " + title;
-    }
+    const isSecret = document.getElementById("secret").checked;
+    const cleanTitle = cleanedTitle(title);
+    return isSecret ? `🔒 ${cleanTitle}` : cleanTitle;
   };
 
   const handleChange = (e) => {
@@ -137,41 +85,34 @@ const QnaEditPage = () => {
 
   const handleEdit = async () => {
     try {
-      if (!contentData.title.trim() || !contentData.content.trim()) {
-        // 제목 혹은 내용이 비어 있는 경우 false 반환
+      if (!contentData.title.trim() || !contentData.content.trim())
         return false;
-      } else {
-        // 그 외의 경우 true 반환
-        const processedTitle = handleSecret(cleanedTitle(contentData.title));
-        await updateQnaData({
-          questionId: questionId,
-          title: processedTitle,
-          content: contentData.content,
-        });
-        return true;
-      }
-    } catch (error) {
+
+      const updatedTitle = handleSecret(contentData.title);
+
+      await axios.put(`http://localhost:8080/api/user/qna/edit/${questionId}`, {
+        ...contentData,
+        title: updatedTitle,
+      });
+      return true;
+    } catch (err) {
       return false;
     }
   };
 
   const editQna = async () => {
-    let currentId = userData.userId;
-    if (!currentId) {
-      const fetched = await fetchUserInfo(userId);
-      currentId = fetched?.userId;
-    }
-    // currentId와 writerId의 타입이 다르므로, === 대신 == 사용
-    if (currentId == writerId) {
-      let checkEditSuccess = (await handleEdit())
-        ? ["성공적으로 수정되었습니다.", "/main/qnadata"]
-        : ["제목 혹은 내용을 입력해주세요.", ""];
-      showModal(checkEditSuccess[0]);
+    if (userId == writerId) {
+      const success = await handleEdit();
+      showModal(
+        success
+          ? "성공적으로 수정되었습니다."
+          : "제목 혹은 내용을 입력해주세요."
+      );
       await WaitModalClick();
-      navigate(checkEditSuccess[1], { state: { questionId } });
-      setTimeout(() => {
-        window.location.reload();
-      }, 0);
+      if (success) {
+        navigate("/main/qnadata", { state: { questionId } });
+        setTimeout(() => window.location.reload(), 0);
+      }
     } else {
       showModal("작성자만 수정할 수 있습니다!");
       await WaitModalClick();
@@ -183,18 +124,16 @@ const QnaEditPage = () => {
     <div>
       <h1 className="text-3xl font-bold text-left mb-6">Q&A 수정</h1>
       {message && <p className="text-red-500 text-center">{message}</p>}
-      <hr />
-      <br />
-      <div className="bg-green-200 rounded-lg pt-4 pb-4 text-green-600 border border-green-300 flex justify-between items-center px-4">
+      <div className="bg-green-200 rounded-lg p-4 mb-4">
         <span>수정한 내용을 저장하시겠습니까?</span>
         <button
-          className="bg-green-600 hover:bg-green-800 text-white text-sm font-semibold rounded transition px-3 py-1
-        "
           onClick={editQna}
+          className="ml-4 bg-green-600 text-white px-4 py-1 rounded"
         >
           수정
         </button>
       </div>
+
       <br />
       {contentInfo.length > 0 ? (
         contentInfo.map((qna, i) => (

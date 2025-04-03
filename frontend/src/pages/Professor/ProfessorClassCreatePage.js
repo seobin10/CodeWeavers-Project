@@ -1,14 +1,15 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import {
   createClass,
   getCourses,
   getLectureRooms,
 } from "../../api/professorClassApi";
-import { ModalContext } from "../../App";
+import { useDispatch } from "react-redux";
+import { showModal } from "../../slices/modalSlice";
 
 const initialForm = {
   courseId: null,
-  professorId: "", 
+  professorId: "",
   semester: "",
   day: "",
   startTime: "",
@@ -18,10 +19,11 @@ const initialForm = {
 };
 
 const ProfessorClassCreatePage = ({ onSuccess, professorId }) => {
+  const dispatch = useDispatch();
+
   const [form, setForm] = useState({ ...initialForm, professorId });
   const [courses, setCourses] = useState([]);
   const [rooms, setRooms] = useState([]);
-  const { showModal } = useContext(ModalContext);
 
   useEffect(() => {
     getCourses()
@@ -40,11 +42,11 @@ const ProfessorClassCreatePage = ({ onSuccess, professorId }) => {
   const handleSubmit = async () => {
     try {
       const response = await createClass(form);
-      showModal(response.data || "강의 등록 완료");
+      dispatch(showModal(response.data || "강의 등록 완료"));
       onSuccess?.();
       setForm({ ...initialForm, professorId });
     } catch (err) {
-      showModal(err.response?.data, "error" || "강의 등록 실패", "error");
+      dispatch(showModal(err.response?.data || "강의 등록 실패"));
     }
   };
 
@@ -53,7 +55,6 @@ const ProfessorClassCreatePage = ({ onSuccess, professorId }) => {
       <h2 className="text-xl font-bold mb-4 text-center">강의 등록</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* 과목 선택 */}
         <div>
           <label className="text-sm font-medium">과목 *</label>
           <select
@@ -71,7 +72,6 @@ const ProfessorClassCreatePage = ({ onSuccess, professorId }) => {
           </select>
         </div>
 
-        {/* 학기 */}
         <div>
           <label className="text-sm font-medium">학기 *</label>
           <input
@@ -84,7 +84,6 @@ const ProfessorClassCreatePage = ({ onSuccess, professorId }) => {
           />
         </div>
 
-        {/* 요일 */}
         <div>
           <label className="text-sm font-medium">요일 *</label>
           <select
@@ -102,7 +101,6 @@ const ProfessorClassCreatePage = ({ onSuccess, professorId }) => {
           </select>
         </div>
 
-        {/* 교시 */}
         <div className="flex gap-2">
           <div>
             <label className="text-sm font-medium">시작 교시 *</label>
@@ -128,7 +126,6 @@ const ProfessorClassCreatePage = ({ onSuccess, professorId }) => {
           </div>
         </div>
 
-        {/* 강의실 */}
         <div className="md:col-span-2">
           <label className="text-sm font-medium">강의실 *</label>
           <select
@@ -146,7 +143,6 @@ const ProfessorClassCreatePage = ({ onSuccess, professorId }) => {
           </select>
         </div>
 
-        {/* 정원 */}
         <div className="md:col-span-2">
           <label className="text-sm font-medium">수강 정원 *</label>
           <input

@@ -1,31 +1,29 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { AuthContext, ModalContext } from "../App";
+import { useSelector } from "react-redux";
 import axios from "axios";
 import PageComponent from "../components/PageComponent";
 import { WaitModalClick } from "../components/WaitModalClick";
+import { useModal } from "../hooks/useModal";
 
 const QnaListPage = () => {
   const navigate = useNavigate();
-  const { userId, setUserId } = useContext(AuthContext);
-  const { showModal } = useContext(ModalContext);
+  const { showModal } = useModal();
   const [message, setMessage] = useState("");
   const [qnaInfo, setQnaInfo] = useState([]);
   const location = useLocation();
-  const checkPage = location.state?.page ?? 1
+  const checkPage = location.state?.page ?? 1;
   const [currentPage, setCurrentPage] = useState(checkPage);
   const itemCount = 15;
 
-  const localId = localStorage.getItem("id");
-  const userRole = localStorage.getItem("role");
+  const user = useSelector((state) => state.login || {});
+  const { userId, userRole } = user;
+
   useEffect(() => {
     if (userId) {
-      fetchQnaInfo(userId);
-    } else if (localId) {
-      setUserId(localId);
-      fetchQnaInfo(localId);
+      fetchQnaInfo();
     }
-  }, [userId, setUserId, localId]);
+  }, [userId]);
 
   const fetchQnaInfo = async () => {
     try {
@@ -57,6 +55,7 @@ const QnaListPage = () => {
   const firstItem = lastItem - itemCount;
   const currentItem = qnaInfo.slice(firstItem, lastItem);
   const totalPage = Math.ceil(qnaInfo.length / itemCount);
+
   return (
     <div>
       <h1 className="text-3xl font-bold text-center mb-6">Q&A</h1>
@@ -88,31 +87,40 @@ const QnaListPage = () => {
                         className="text-gray-400 cursor-pointer"
                         onClick={async () => {
                           let writerId = await fetchWriterId(qna.questionId);
-                          // 두 아이디의 타입이 다르므로 !== 대신 != 사용
                           if (userId == writerId) {
                             showModal("본인 확인 완료! 글을 조회합니다.");
                             await WaitModalClick();
                             navigate("/main/qnadata", {
-                              state: { questionId: qna.questionId, page: currentPage },
-                              
+                              state: {
+                                questionId: qna.questionId,
+                                page: currentPage,
+                              },
                             });
-                          } else if (userRole === ("ADMIN" || "PROFESSOR")) {
+                          } else if (
+                            ["ADMIN", "PROFESSOR"].includes(userRole)
+                          ) {
                             showModal("권한 확인 완료! 글을 조회합니다.");
                             await WaitModalClick();
                             navigate("/main/qnadata", {
-                              state: { questionId: qna.questionId, page: currentPage },
+                              state: {
+                                questionId: qna.questionId,
+                                page: currentPage,
+                              },
                             });
                           } else {
                             showModal("읽을 수 있는 권한이 없습니다.");
                           }
                         }}
                       >
-                        &#128274; 비밀글입니다.
+                        🔒 비밀글입니다.
                       </p>
                     ) : (
                       <Link
                         to="/main/qnadata"
-                        state={{ questionId: qna.questionId, page: currentPage }}
+                        state={{
+                          questionId: qna.questionId,
+                          page: currentPage,
+                        }}
                       >
                         {qna.title}
                       </Link>
@@ -148,14 +156,12 @@ const QnaListPage = () => {
         />
       </div>
       <br />
-      {userRole === "ADMIN" ? (
-        <></>
-      ) : (
+      {userRole !== "ADMIN" && (
         <Link
           to="/main/qnawrite"
           className="bg-blue-500 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 px-3 rounded transition float-right"
         >
-          &nbsp;등록&nbsp;
+          등록
         </Link>
       )}
     </div>

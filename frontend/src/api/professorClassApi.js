@@ -1,8 +1,10 @@
 import axios from "axios";
+import { getAuthHeader } from "../util/authHeader"; // ✅ 인증 헤더 유틸 임포트
 
 export const API_SERVER_HOST = "http://localhost:8080";
 const prefix = `${API_SERVER_HOST}/api/professor`;
 
+// ✅ 교수의 강의 목록 조회
 export const getMyClasses = (
   professorId,
   page = 1,
@@ -18,34 +20,31 @@ export const getMyClasses = (
       sortField,
       sortDir,
     },
+    ...getAuthHeader(), // ✅ headers 병합
   });
 };
 
-// 강의 등록
+// ✅ 강의 등록
 export const createClass = (classData) => {
-  return axios.post(`${prefix}/classes`, classData);
+  return axios.post(`${prefix}/classes`, classData, getAuthHeader());
 };
 
-// 강의 수정
-
+// ✅ 강의 수정
 export const updateClass = (classData) => {
-  return axios.put(`${prefix}/classes`, classData);
+  return axios.put(`${prefix}/classes`, classData, getAuthHeader());
 };
 
-// 강의 삭제
-
+// ✅ 강의 삭제
 export const deleteClass = (classId) => {
-  return axios.delete(`${prefix}/classes/${classId}`);
+  return axios.delete(`${prefix}/classes/${classId}`, getAuthHeader());
 };
 
-// 과목 목록 조회
-
+// ✅ 과목 목록 조회
 export const getCourses = () => {
-  return axios.get(`${prefix}/courses`);
+  return axios.get(`${prefix}/courses`, getAuthHeader());
 };
 
-// 강의실 목록 조회
-
+// ✅ 강의실 목록 조회
 export const getLectureRooms = () => {
-  return axios.get(`${prefix}/lecture-rooms`);
+  return axios.get(`${prefix}/lecture-rooms`, getAuthHeader());
 };

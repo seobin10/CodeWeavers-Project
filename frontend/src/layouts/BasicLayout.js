@@ -1,25 +1,28 @@
-import React, { useCallback, useContext, useState } from "react";
-import { Link, Outlet } from "react-router-dom";
+import React, { useCallback, useState } from "react";
+import { Link, Outlet, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../slices/authSlice";
 import UserInfo from "../components/UserInfo";
-import { AuthContext } from "../App";
 
 const BasicLayout = () => {
-  const { userId, setUserId, userRole } = useContext(AuthContext);
-  // 수강 신청 메뉴의 하위 메뉴의 상태를 제어하는 상수
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { userId, userRole } = useSelector((state) => state.auth);
   const [openEnrollmentMenu, setOpenEnrollmentMenu] = useState(false);
-  // 성적 메뉴의 하위 메뉴의 상태를 제어하는 상수
   const [openGradeMenu, setOpenGradeMenu] = useState(false);
 
   const handleLogout = useCallback(() => {
-    setUserId(null);
+    dispatch(logout());
     localStorage.removeItem("id");
     localStorage.removeItem("pw");
     localStorage.removeItem("role");
-  }, [setUserId]);
+    navigate("/member/login");
+  }, [dispatch, navigate]);
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
-      {/* 상단 헤더 */}
+      {/* Header */}
       <header className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 p-4 flex justify-between items-center bg-opacity-80">
         <Link to="/main" className="flex items-center space-x-3">
           <img src="/images/eonLogo.jpg" alt="학교 로고" className="h-16" />
@@ -31,27 +34,28 @@ const BasicLayout = () => {
         <div className="flex items-center space-x-4">
           <UserInfo />
           {userId ? (
-            <Link
-              to="/"
-              className="bg-blue-500 hover:bg-blue-900 text-white text-sm font-semibold py-1 px-4 rounded transition"
+            <button
               onClick={handleLogout}
+              className="bg-blue-500 hover:bg-blue-900 text-white text-sm font-semibold py-1 px-4 rounded transition"
             >
               로그아웃
-            </Link>
+            </button>
           ) : (
-            <Link
-              to="/member/login"
-              className="bg-blue-500 hover:bg-blue-900 text-white text-sm font-semibold py-1 px-4 rounded transition"
-            >
-              로그인
-            </Link>
+            <>
+              <Link
+                to="/member/login"
+                className="bg-blue-500 hover:bg-blue-900 text-white text-sm font-semibold py-1 px-4 rounded transition"
+              >
+                로그인
+              </Link>
+            </>
           )}
         </div>
       </header>
 
-      {/* 메인 컨테이너 (사이드바 & 콘텐츠) */}
+      {/* Main */}
       <div className="flex flex-1">
-        {/* 왼쪽 사이드바 */}
+        {/* Sidebar */}
         <nav className="bg-blue-800 text-white w-64 p-4 flex flex-col min-h-full">
           <div className="flex flex-col space-y-8">
             {userRole === "STUDENT" && (
@@ -62,7 +66,7 @@ const BasicLayout = () => {
                 >
                   정보조회 ▶
                 </Link>
-                {/* 수강신청 드롭다운 메뉴 */}
+
                 <div className="flex flex-col mt-2 mb-2">
                   <button
                     className="hover:bg-blue-500 px-6 py-3 text-left w-full"
@@ -78,14 +82,12 @@ const BasicLayout = () => {
                       >
                         📋 수강신청 목록
                       </Link>
-
                       <Link
                         to="/main/history"
                         className="hover:underline block pt-4"
                       >
                         🗂 수강신청 내역
                       </Link>
-
                       <Link
                         to="/main/schedule"
                         className="hover:underline block pt-4"
@@ -95,6 +97,7 @@ const BasicLayout = () => {
                     </div>
                   )}
                 </div>
+
                 <div className="flex flex-col mt-2 mb-2">
                   <button
                     className="hover:bg-blue-500 px-6 py-3 text-left w-full"
@@ -107,7 +110,6 @@ const BasicLayout = () => {
                       <Link to="/main/grades" className="hover:underline block">
                         📄 전체성적 조회
                       </Link>
-
                       <Link
                         to="/main/currentgrades"
                         className="hover:underline block pt-4"
@@ -117,6 +119,7 @@ const BasicLayout = () => {
                     </div>
                   )}
                 </div>
+
                 <Link
                   to="/main/qnalist"
                   className="hover:bg-blue-500 px-6 py-3"
@@ -125,6 +128,7 @@ const BasicLayout = () => {
                 </Link>
               </>
             )}
+
             {userRole === "ADMIN" && (
               <>
                 <Link
@@ -150,6 +154,7 @@ const BasicLayout = () => {
                 </Link>
               </>
             )}
+
             {userRole === "PROFESSOR" && (
               <>
                 <Link
@@ -169,20 +174,20 @@ const BasicLayout = () => {
           </div>
         </nav>
 
-        {/* 오른쪽 콘텐츠 영역 */}
+        {/* Content */}
         <main className="p-8 bg-gray-50 shadow-md w-full flex-1 pb-16">
           <Outlet />
         </main>
       </div>
 
-      {/* 하단 푸터 */}
+      {/* Footer */}
       <footer className="bg-blue-900 text-white text-center py-4 text-sm w-full mt-auto">
         <div>
           01212 서울특별시 한국구 한국산로 12(한국동) 이온대학교 02-123-1234
           <br />
           webmaster@eon.ac.kr
           <br />
-          COPYRIGHT © EON UNIVERSITY.ALL RIGHTS RESERVED.
+          COPYRIGHT © EON UNIVERSITY. ALL RIGHTS RESERVED.
         </div>
       </footer>
     </div>
