@@ -7,8 +7,11 @@ import PageComponent from "../../components/PageComponent";
 import BaseModal from "../../components/BaseModal";
 import ProfessorClassCreatePage from "./ProfessorClassCreatePage";
 import ProfessorClassEditPage from "./ProfessorClassEditPage";
+import useConfirmModal from "../../hooks/useConfirmModal";
 
 const ProfessorClassPage = () => {
+  const { openConfirm, ConfirmModalComponent } = useConfirmModal();
+
   const dispatch = useDispatch();
   const userId = useSelector((state) => state.auth.userId);
 
@@ -46,19 +49,18 @@ const ProfessorClassPage = () => {
   }, [userId]);
 
   const handleDelete = (classData) => {
-    const confirmed = window.confirm(
-      `과목: ${classData.courseName}\n학기: ${classData.semester}\n\n삭제하시겠습니까?`
+    openConfirm(
+      `과목: ${classData.courseName}\n학기: ${classData.semester}\n\n삭제하시겠습니까?`,
+      async () => {
+        try {
+          await deleteClass(classData.classId);
+          dispatch(showModal("강의가 성공적으로 삭제되었습니다."));
+          fetchClasses(currentPage);
+        } catch (err) {
+          dispatch(showModal({ message: "삭제 중 오류 발생", type: "error" }));
+        }
+      }
     );
-    if (!confirmed) return;
-
-    deleteClass(classData.classId)
-      .then(() => {
-        dispatch(showModal("강의가 성공적으로 삭제되었습니다."));
-        fetchClasses(currentPage);
-      })
-      .catch(() => {
-        dispatch(showModal("삭제 중 오류 발생"));
-      });
   };
 
   return (
@@ -136,6 +138,8 @@ const ProfessorClassPage = () => {
           onClose={() => setEditClass(null)}
         />
       </BaseModal>
+
+      {ConfirmModalComponent}
     </div>
   );
 };

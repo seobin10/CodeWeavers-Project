@@ -36,6 +36,7 @@ public class JWTCheckFilter extends OncePerRequestFilter {
         log.info("check uri....." + path);
 
         return request.getMethod().equals("OPTIONS")
+                || path.startsWith("/uploads/")
                 || path.startsWith("/api/user/login")
                 || path.equals("/api/atelier/logout");
     }
