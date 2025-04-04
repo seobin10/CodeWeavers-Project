@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { getAllUsers, deleteUser } from "../../api/adminUserApi";
 import { useDispatch } from "react-redux";
-import { showModal, showConfirm } from "../../slices/modalSlice";
+import { showModal } from "../../slices/modalSlice";
 import PageComponent from "../../components/PageComponent";
 import BaseModal from "../../components/BaseModal";
 import AdminUserCreatePage from "./AdminUserCreatePage";
 import AdminUserEditPage from "./AdminUserEditPage";
+import useConfirmModal from "../../hooks/useConfirmModal";
 
 const AdminUserListPage = () => {
   const dispatch = useDispatch();
+  const { openConfirm, ConfirmModalComponent } = useConfirmModal();
+
   const [users, setUsers] = useState({
     dtoList: [],
     totalPage: 0,
@@ -38,19 +41,19 @@ const AdminUserListPage = () => {
   }, [searchQuery, sortField, sortDir]);
 
   const handleDelete = (user) => {
-    dispatch(
-      showConfirm({
-        message: `ID: ${user.userId}\n이름: ${user.userName}\n\n이 사용자를 삭제하시겠습니까?`,
-        onConfirm: async () => {
-          try {
-            await deleteUser(user.userId);
-            dispatch(showModal("사용자가 성공적으로 삭제되었습니다."));
-            fetchUsers(currentPage);
-          } catch (err) {
-            dispatch(showModal("사용자 삭제 중 오류가 발생했습니다."));
-          }
-        },
-      })
+    openConfirm(
+      `ID: ${user.userId}\n이름: ${user.userName}\n\n이 사용자를 삭제하시겠습니까?`,
+      async () => {
+        try {
+          await deleteUser(user.userId);
+          dispatch(showModal("사용자가 성공적으로 삭제되었습니다."));
+          fetchUsers(currentPage);
+        } catch (err) {
+          dispatch(
+            showModal({ message: "사용자 삭제 중 오류가 발생했습니다.", type: "error" })
+          );
+        }
+      }
     );
   };
 
@@ -191,6 +194,8 @@ const AdminUserListPage = () => {
           onClose={() => setEditUser(null)}
         />
       </BaseModal>
+
+      {ConfirmModalComponent}
     </div>
   );
 };

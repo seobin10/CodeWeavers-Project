@@ -2,6 +2,7 @@ package com.cw.cwu.util;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Component;
 
@@ -50,6 +51,35 @@ public class JWTUtil {
                 .parseClaimsJws(token)
                 .getBody();
     }
+
+    public String getUserIdFromToken(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            return (String) claims.get("userId");
+        } catch (Exception e) {
+            throw new RuntimeException("유효하지 않은 토큰입니다.");
+        }
+    }
+
+    public String getUserIdFromRequest(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7); // "Bearer " 제거
+            return getUserIdFromToken(token);
+        }
+
+        throw new RuntimeException("Authorization 헤더가 없거나 올바르지 않습니다.");
+    }
+
+
+
+
+
 
 //    // ✅ 로그인 성공 후 토큰 생성용 메서드
 //    public static String createToken(User user) {

@@ -121,7 +121,13 @@ const AdminUserCreatePage = ({ onSuccess }) => {
         typeof response.data === "string"
           ? response.data
           : response.data.message ?? "응답 메시지를 확인할 수 없습니다.";
-      dispatch(showModal(msg));
+
+      dispatch(
+        showModal({
+          message: msg,
+          type: "success",
+        })
+      );
 
       onSuccess();
 
@@ -139,7 +145,13 @@ const AdminUserCreatePage = ({ onSuccess }) => {
       if (typeof errorData === "string") message = errorData;
       else if (typeof errorData === "object" && errorData.message)
         message = errorData.message;
-      dispatch(showModal(message));
+
+      dispatch(
+        showModal({
+          message,
+          type: "error",
+        })
+      );
     }
   };
 
