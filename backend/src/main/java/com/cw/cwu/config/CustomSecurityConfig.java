@@ -40,6 +40,7 @@ public class CustomSecurityConfig {
 
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.POST, "/api/user/login").permitAll()
+                .requestMatchers("/uploads/**").permitAll()  // 이미지 경로 인증 없이 허용
                 .requestMatchers("/error").permitAll()
                 .anyRequest().authenticated()
         );

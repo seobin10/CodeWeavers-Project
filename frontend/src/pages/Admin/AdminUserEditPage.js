@@ -101,7 +101,8 @@ const AdminUserEditPage = ({ user, onSuccess, onClose }) => {
         typeof response.data === "string"
           ? response.data
           : response.data.message ?? "응답 메시지를 확인할 수 없습니다.";
-      dispatch(showModal(msg));
+  
+      dispatch(showModal({ message: msg }));
       onSuccess();
       onClose();
     } catch (err) {
@@ -110,7 +111,8 @@ const AdminUserEditPage = ({ user, onSuccess, onClose }) => {
       if (typeof errorData === "string") message = errorData;
       else if (typeof errorData === "object" && errorData.message)
         message = errorData.message;
-      dispatch(showModal(message));
+  
+      dispatch(showModal({ message, type: "error" }));
     }
   };
 
@@ -121,7 +123,7 @@ const AdminUserEditPage = ({ user, onSuccess, onClose }) => {
   const handleConfirmResetPassword = async () => {
     try {
       const response = await resetPassword(form.userId);
-      dispatch(showModal(response.data));
+      dispatch(showModal({ message: response.data }));
       setIsConfirmModalOpen(false);
     } catch (err) {
       const errorData = err.response?.data;
@@ -129,10 +131,12 @@ const AdminUserEditPage = ({ user, onSuccess, onClose }) => {
       if (typeof errorData === "string") message = errorData;
       else if (typeof errorData === "object" && errorData.message)
         message = errorData.message;
-      dispatch(showModal(message));
+  
+      dispatch(showModal({ message, type: "error" }));
       setIsConfirmModalOpen(false);
     }
   };
+
   return (
     <div className="max-w-3xl mx-auto mt-8 p-6 bg-white shadow-md rounded-lg">
       <h2 className="text-2xl font-bold text-center mb-6">
