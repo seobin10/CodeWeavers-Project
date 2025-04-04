@@ -6,7 +6,6 @@ import Loading from "../components/Loading";
 const QnaListPage = lazy(() => import("../pages/QnaListPage"));
 const QnaDataPage = lazy(() => import("../pages/QnaDataPage"));
 const QnaWritePage = lazy(() => import("../pages/QnaWritePage"));
-const QnaDeletePage = lazy(() => import("../pages/QnaDeletePage"));
 const QnaEditPage = lazy(() => import("../pages/QnaEditPage"));
 
 const qnaRouter = [
@@ -34,14 +33,6 @@ const qnaRouter = [
           <QnaWritePage />
         </Suspense>
       </RoleGuard>
-    ),
-  },
-  {
-    path: "qnadelete",
-    element: (
-      <Suspense fallback={<Loading />}>
-        <QnaDeletePage />
-      </Suspense>
     ),
   },
   {

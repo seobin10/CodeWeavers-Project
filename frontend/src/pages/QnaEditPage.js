@@ -1,226 +1,180 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import axios from "axios";
-import { WaitModalClick } from "../components/WaitModalClick";
-import { useModal } from "../hooks/useModal"; // 커스텀 훅 가정
+import { getQnaDetail, getQnaWriterId, updateQna } from "../api/qnaApi";
+import AlertModal from "../components/AlertModal";
 
 const QnaEditPage = () => {
   const location = useLocation();
   const questionId = location.state?.questionId;
   const navigate = useNavigate();
+  const userId = useSelector((state) => state.auth?.userId);
 
-  // Redux 상태로부터 사용자 정보
-  const { userId, userRole } = useSelector((state) => state.login);
-  const { showModal } = useModal(); // Redux dispatch or 커스텀 Modal 훅
-
-  const [writerId, setWriterId] = useState();
+  const [writerId, setWriterId] = useState(null);
   const [message, setMessage] = useState("");
-  const [contentInfo, setContentInfo] = useState([]);
   const [contentData, setContentData] = useState({
-    questionId: 0,
     title: "",
     content: "",
+    questionId,
   });
 
-  // QnA 데이터 조회
+  const [alertModalOpen, setAlertModalOpen] = useState(false);
+  const [msg, setMsg] = useState("");
+  const [type, setType] = useState("");
+  const [goTarget, setGoTarget] = useState(null);
+
   useEffect(() => {
     if (questionId) {
-      localStorage.setItem("No.", questionId);
-      fetchContentInfo(questionId);
-      fetchWriterId(questionId);
+      fetchContent();
+      fetchWriter();
     }
   }, [questionId]);
 
-  useEffect(() => {
-    if (contentInfo.length > 0) {
-      const qna = contentInfo[0];
+  const fetchContent = async () => {
+    try {
+      const res = await getQnaDetail(questionId);
+      const qna = res.data[0];
       setContentData({
         questionId: qna.questionId,
         title: qna.title,
         content: qna.questionContent,
+        createdAt: qna.createdAt,
+        viewCount: qna.viewCount,
+        userName: qna.userName,
       });
-    }
-  }, [contentInfo]);
-
-  const fetchContentInfo = async (id) => {
-    try {
-      const res = await axios.get(`http://localhost:8080/api/user/qna/${id}`);
-      setContentInfo(res.data);
     } catch (err) {
-      setMessage("게시물 정보를 불러올 수 없습니다.");
+      setMessage("질문을 불러올 수 없습니다.");
     }
   };
 
-  const fetchWriterId = async (qid) => {
+  const fetchWriter = async () => {
     try {
-      const res = await axios.get(
-        `http://localhost:8080/api/user/qna/find/${qid}`
-      );
+      const res = await getQnaWriterId(questionId);
       setWriterId(res.data);
     } catch (err) {
       setMessage("작성자 정보를 불러올 수 없습니다.");
     }
   };
 
-  const cleanedTitle = (title) => {
-    return /\u{1F512}/u.test(title)
-      ? title.replace(/\u{1F512}\s*/gu, "")
-      : title;
-  };
-
   const handleSecret = (title) => {
     const isSecret = document.getElementById("secret").checked;
-    const cleanTitle = cleanedTitle(title);
-    return isSecret ? `🔒 ${cleanTitle}` : cleanTitle;
+    return isSecret ? `🔒 ${title.replace(/^🔒\s*/, "")}` : title.replace(/^🔒\s*/, "");
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setContentData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setContentData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleEdit = async () => {
-    try {
-      if (!contentData.title.trim() || !contentData.content.trim())
-        return false;
+  const setAlertData = (modalType, modalMsg, targetPath = null) => {
+    setType(modalType);
+    setMsg(modalMsg);
+    setGoTarget(targetPath);
+    setAlertModalOpen(true);
+  };
 
-      const updatedTitle = handleSecret(contentData.title);
-
-      await axios.put(`http://localhost:8080/api/user/qna/edit/${questionId}`, {
-        ...contentData,
-        title: updatedTitle,
-      });
-      return true;
-    } catch (err) {
-      return false;
+  const handleClose = () => {
+    setAlertModalOpen(false);
+    if (goTarget) {
+      navigate(goTarget, { state: { questionId } });
+      setGoTarget(null);
     }
   };
 
-  const editQna = async () => {
-    if (userId == writerId) {
-      const success = await handleEdit();
-      showModal(
-        success
-          ? "성공적으로 수정되었습니다."
-          : "제목 혹은 내용을 입력해주세요."
-      );
-      await WaitModalClick();
-      if (success) {
-        navigate("/main/qnadata", { state: { questionId } });
-        setTimeout(() => window.location.reload(), 0);
-      }
-    } else {
-      showModal("작성자만 수정할 수 있습니다!");
-      await WaitModalClick();
-      navigate("/main/qnalist");
+  const handleSubmit = async () => {
+    if (!contentData.title.trim() || !contentData.content.trim()) {
+      setAlertData("error", "제목과 내용을 모두 입력해주세요.");
+      return;
+    }
+
+    if (userId != writerId) {
+      console.log("u ", userId);
+      console.log("w ", writerId);
+      setAlertData("error", "작성자만 수정할 수 있습니다.", "/main/qnalist");
+      return;
+    }
+
+    try {
+      const updatedTitle = handleSecret(contentData.title);
+      await updateQna(questionId, { ...contentData, title: updatedTitle });
+      setAlertData("success", "성공적으로 수정되었습니다.", "/main/qnadata");
+    } catch (err) {
+      setAlertData("error", "수정에 실패했습니다.");
     }
   };
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold text-left mb-6">Q&A 수정</h1>
+    <div className="max-w-7xl mx-auto p-8 bg-white shadow-md rounded-md mt-10">
+      <h1 className="text-md font-bold text-left mb-6">Q&A 수정</h1>
+      <hr />
+      <br />
       {message && <p className="text-red-500 text-center">{message}</p>}
-      <div className="bg-green-200 rounded-lg p-4 mb-4">
-        <span>수정한 내용을 저장하시겠습니까?</span>
-        <button
-          onClick={editQna}
-          className="ml-4 bg-green-600 text-white px-4 py-1 rounded"
-        >
-          수정
-        </button>
+      <table className="table-auto border-collapse border border-gray-400 w-full">
+        <thead className="bg-blue-800">
+          <tr>
+            <th className="border border-gray-400 px-4 py-2 text-white">제목</th>
+            <td className="border border-gray-400 px-4 py-2 bg-white">
+              <input
+                name="title"
+                className="w-full focus-visible:outline-none"
+                value={contentData.title.replace(/^🔒\s*/, "")}
+                onChange={handleChange}
+              />
+            </td>
+          </tr>
+          <tr>
+            <th className="border border-gray-400 px-4 py-2 text-white">작성자</th>
+            <td className="border border-gray-400 px-4 py-2 bg-white">
+              {"시온" || ""}
+            </td>
+          </tr>
+          <tr>
+            <th className="border border-gray-400 px-4 py-2 text-white">작성일 / 조회수</th>
+            <td className="border border-gray-400 px-4 py-2 bg-white">
+              {contentData.createdAt} / {contentData.viewCount}
+            </td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr className="w-full h-96 flex-auto shadow-md">
+            <td colSpan={2} className="p-4">
+              <textarea
+                placeholder="질문 내용을 수정하세요."
+                name="content"
+                className="w-full h-96 focus-visible:outline-none resize-none"
+                maxLength={255}
+                onChange={handleChange}
+                value={contentData.content}
+              />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div className="mt-4">
+        <label>
+          <input
+            type="checkbox"
+            id="secret"
+            defaultChecked={/^🔒/.test(contentData.title)}
+          />{" "}
+          비밀 글
+        </label>
+        <div className="flex float-right mb-10">
+          <button
+            onClick={handleSubmit}
+            className="text-green-500 hover:text-green-700 text-lg font-semibold px-3 rounded transition"
+          >
+            📗 수정하기
+          </button>
+        </div>
+        <br />
       </div>
-
-      <br />
-      {contentInfo.length > 0 ? (
-        contentInfo.map((qna, i) => (
-          <div key={i}>
-            <table className="table-auto border-collapse border border-gray-400 w-full">
-              <thead className="bg-gray-200">
-                <tr>
-                  <th className="border border-gray-400 px-4 py-2">제목</th>
-                  <td className="border border-gray-400 px-4 py-2 bg-white">
-                    <input
-                      name="title"
-                      className="w-full focus-visible:outline-none"
-                      value={cleanedTitle(contentData.title)}
-                      onChange={handleChange}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th className="border border-gray-400 px-4 py-2">작성자</th>
-                  <td className="border border-gray-400 px-4 py-2 bg-white">
-                    {qna.userName}
-                  </td>
-                </tr>
-                <tr>
-                  <th className="border border-gray-400 px-4 py-2">
-                    등록일 / 조회수
-                  </th>
-                  <td className="border border-gray-400 px-4 py-2 bg-white">
-                    {qna.createdAt} / {qna.viewCount}
-                  </td>
-                </tr>
-              </thead>
-            </table>
-            <table className="table-auto w-full border-collapse border border-gray-400">
-              <tbody>
-                <tr className="h-96">
-                  <td colSpan={2} className="p-4 w-full">
-                    <input
-                      type="text"
-                      name="content"
-                      className="w-full h-96 focus-visible:outline-none text-left px-4 py-2"
-                      maxLength={255}
-                      value={contentData.content}
-                      onChange={handleChange}
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-
-            <hr />
-            <p>
-              {/\u{1F512}/u.test(qna.title) ? (
-                <>
-                  <input type="checkbox" id="secret" defaultChecked={true} />{" "}
-                  비밀 글
-                </>
-              ) : (
-                <>
-                  <input type="checkbox" id="secret" /> 비밀 글
-                </>
-              )}
-            </p>
-            <br />
-
-            <table className="table-auto border-collapse border w-full text-left">
-              <tfoot>
-                <tr>
-                  <th className="bg-gray-200 px-4 py-2">답변내용</th>
-                </tr>
-                <tr>
-                  <td
-                    className={`p-5 ${
-                      !qna.answerContent ? "text-gray-400" : ""
-                    }`}
-                  >
-                    {qna.answerContent || "아직 답변이 작성되지 않았습니다."}
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-        ))
-      ) : (
-        <p className="text-center text-gray-500"> 데이터를 불러오는 중...</p>
-      )}
-      <br />
+      <AlertModal
+        isOpen={alertModalOpen}
+        message={msg}
+        type={type}
+        onClose={handleClose}
+      />
     </div>
   );
 };
