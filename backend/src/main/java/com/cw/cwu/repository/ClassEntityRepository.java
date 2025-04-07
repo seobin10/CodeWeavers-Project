@@ -102,4 +102,11 @@ WHERE
             @Param("courseName") String courseName,
             org.springframework.data.domain.Pageable pageable
     );
+
+
+    // 강의실 + 요일
+    List<ClassEntity> findByProfessor_UserIdAndDayAndSemester(String userId, String day, String semester);
+
+    // 교수 + 요일
+    List<ClassEntity> findByLectureRoom_IdAndDayAndSemester(Integer roomId, String day, String semester);
 }

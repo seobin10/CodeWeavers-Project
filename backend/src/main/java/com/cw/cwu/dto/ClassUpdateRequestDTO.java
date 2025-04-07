@@ -7,6 +7,7 @@ import lombok.Setter;
 @Setter
 public class ClassUpdateRequestDTO {
     private Integer classId;
+    private String professorId;
     private String day;
     private Integer startTime;
     private Integer endTime;

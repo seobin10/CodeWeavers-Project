@@ -40,7 +40,12 @@ const ProfessorClassPage = () => {
       setClasses(res.data);
       setCurrentPage(page);
     } catch (err) {
-      dispatch(showModal("강의 목록을 불러오지 못했습니다."));
+      dispatch(
+        showModal({
+          message: "강의 목록을 불러오지 못했습니다.",
+          type: "error",
+        })
+      );
     }
   };
 
@@ -79,6 +84,8 @@ const ProfessorClassPage = () => {
         <thead className="bg-gray-50 text-gray-600 uppercase text-sm leading-normal">
           <tr>
             <th className="py-3 px-4">과목명</th>
+            <th className="py-3 px-4">구분</th>
+            <th className="py-3 px-4">학년</th>
             <th className="py-3 px-4">학기</th>
             <th className="py-3 px-4">요일</th>
             <th className="py-3 px-4">시간</th>
@@ -94,6 +101,10 @@ const ProfessorClassPage = () => {
               className="hover:bg-gray-100 border-b text-center"
             >
               <td className="py-3 px-4">{c.courseName}</td>
+              <td className="py-3 px-4">
+                {c.courseType === "MAJOR" ? "전공" : "교양"}
+              </td>
+              <td className="py-3 px-4">{c.courseYear}학년</td>
               <td className="py-3 px-4">{c.semester}</td>
               <td className="py-3 px-4">{c.day}</td>
               <td className="py-3 px-4">{`${c.startTime} ~ ${c.endTime}교시`}</td>

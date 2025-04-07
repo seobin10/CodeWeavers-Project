@@ -7,7 +7,7 @@ import lombok.Setter;
 @Setter
 public class ClassCreateRequestDTO {
     private Integer courseId;
-    private String professorId; // User.userId
+    private String professorId;
     private String semester;
     private String day;
     private Integer startTime;
