@@ -5,24 +5,17 @@ export const API_SERVER_HOST = "http://localhost:8080";
 const prefix = `${API_SERVER_HOST}/api/professor`;
 
 // ✅ 교수의 강의 목록 조회
-export const getMyClasses = (
-  professorId,
-  page = 1,
-  size = 10,
-  sortField = "id",
-  sortDir = "asc"
-) => {
+export const getMyClasses = (page = 1, size = 10, sortField = "id", sortDir = "asc", semesterId = null) => {
+  const params = { page, size, sortField, sortDir };
+  if (semesterId !== null && semesterId !== undefined) {
+    params.semesterId = semesterId;
+  }
   return axios.get(`${prefix}/classes`, {
-    params: {
-      professorId,
-      page,
-      size,
-      sortField,
-      sortDir,
-    },
-    ...getAuthHeader(), // ✅ headers 병합
+    params,
+    ...getAuthHeader(), // 여기에 Authorization: Bearer 토큰 포함됨
   });
 };
+
 
 // ✅ 강의 등록
 export const createClass = (classData) => {
@@ -44,10 +37,10 @@ export const getCourses = () => {
   return axios.get(`${prefix}/courses`, getAuthHeader());
 };
 
-// ✅ 특정 조건(학기, 요일, 교시) 기준으로 비어있는 강의실만 조회
-export const getLectureRooms = ({ semester, day, startTime, endTime }) => {
+// ✅ 현재 날짜 기준으로 빈 강의실 조회 (semesterId 제거)
+export const getLectureRooms = ({ day, startTime, endTime }) => {
   return axios.get(`${prefix}/lecture-rooms`, {
-    params: { semester, day, startTime, endTime },
+    params: { day, startTime, endTime },
     ...getAuthHeader(),
   });
 };

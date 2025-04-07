@@ -8,6 +8,7 @@ import lombok.Setter;
 public class ClassUpdateRequestDTO {
     private Integer classId;
     private String professorId;
+    private Integer semesterId;
     private String day;
     private Integer startTime;
     private Integer endTime;
