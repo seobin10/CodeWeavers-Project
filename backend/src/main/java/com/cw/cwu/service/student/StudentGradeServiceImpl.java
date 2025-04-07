@@ -2,14 +2,12 @@ package com.cw.cwu.service.student;
 
 import com.cw.cwu.domain.*;
 import com.cw.cwu.dto.GradeDTO;
-import com.cw.cwu.repository.GradeRepository;
-import com.cw.cwu.repository.EnrollmentRepository;
-import com.cw.cwu.repository.StudentRecordRepository;
-import com.cw.cwu.repository.UserRepository;
+import com.cw.cwu.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -23,6 +21,7 @@ public class StudentGradeServiceImpl implements StudentGradeService {
     private final EnrollmentRepository enrollmentRepository;
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final SemesterRepository semesterRepository;
 
     // 학생 성적 조회
     // ConvertToDb로 ENUM 데이터 String으로 변환 (예시> A_PLUS -> A+)
@@ -70,12 +69,35 @@ public class StudentGradeServiceImpl implements StudentGradeService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 학생을 찾을 수 없습니다: " + studentId));
 
         StudentRecord studentRecord = modelMapper.map(student, StudentRecord.class);
-        studentRecord.setSemester("2024-1");
+
+        // 동적으로 semester를 선택하도록 수정
+        Semester semester = getCurrentSemester(); // 동적 방식으로 학기 선택
+        studentRecord.setSemester(semester);
+
         studentRecord.setEnrolled(totalEnrolled);
         studentRecord.setEarned(totalEarned);
         studentRecord.setGpa(gpa);
 
         studentRecordRepository.save(studentRecord);
+    }
+
+    // 현재 학기를 계산하는 메서드
+    private Semester getCurrentSemester() {
+        LocalDate currentDate = LocalDate.now();
+
+        int currentYear = currentDate.getYear();
+        int currentMonth = currentDate.getMonthValue();
+
+        // 1학기 (1월 ~ 6월)
+        if (currentMonth >= 1 && currentMonth <= 6) {
+            return semesterRepository.findByYearAndTerm(currentYear, SemesterTerm.FIRST)
+                    .orElseThrow(() -> new IllegalArgumentException("현재 학기를 찾을 수 없습니다."));
+        }
+        // 2학기 (7월 ~ 12월)
+        else {
+            return semesterRepository.findByYearAndTerm(currentYear, SemesterTerm.SECOND)
+                    .orElseThrow(() -> new IllegalArgumentException("현재 학기를 찾을 수 없습니다."));
+        }
     }
 
     private double convertGradeToPoint(StudentGrade grade) {

@@ -30,9 +30,11 @@ public class ProfessorClassController {
     @GetMapping("/classes")
     public ResponseEntity<PageResponseDTO<ClassDTO>> getMyClasses(
             PageRequestDTO pageRequestDTO,
-            @RequestParam String professorId
+            @RequestParam(required = false) Integer semesterId,
+            HttpServletRequest request
     ) {
-        PageResponseDTO<ClassDTO> result = professorClassService.getMyClasses(professorId, pageRequestDTO);
+        String professorId = userRequestUtil.extractUserId(request);
+        PageResponseDTO<ClassDTO> result = professorClassService.getMyClasses(professorId, pageRequestDTO, semesterId);
         return ResponseEntity.ok(result);
     }
 
@@ -69,13 +71,12 @@ public class ProfessorClassController {
 
     @GetMapping("/lecture-rooms")
     public ResponseEntity<List<LectureRoomSimpleDTO>> getAvailableLectureRooms(
-            @RequestParam String semester,
             @RequestParam String day,
             @RequestParam int startTime,
             @RequestParam int endTime
     ) {
         List<LectureRoomSimpleDTO> available = professorClassService.getAvailableLectureRooms(
-                semester, day, startTime, endTime
+                day, startTime, endTime
         );
         return ResponseEntity.ok(available);
     }

@@ -10,4 +10,5 @@ public class CwuApplication {
 		SpringApplication.run(CwuApplication.class, args);
 	}
 
+
 }

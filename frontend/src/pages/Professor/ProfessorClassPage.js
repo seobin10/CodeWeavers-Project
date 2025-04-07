@@ -33,10 +33,9 @@ const ProfessorClassPage = () => {
     }
   }, [userId, dispatch]);
 
-  const fetchClasses = async (page = 1) => {
-    if (!userId) return;
+  const fetchClasses = async (page = 1, semesterId = null) => {
     try {
-      const res = await getMyClasses(userId, page, 10);
+      const res = await getMyClasses(page, 10, "id", "asc", semesterId); 
       setClasses(res.data);
       setCurrentPage(page);
     } catch (err) {

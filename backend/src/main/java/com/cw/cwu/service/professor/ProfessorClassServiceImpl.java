@@ -2,10 +2,7 @@ package com.cw.cwu.service.professor;
 
 import com.cw.cwu.domain.*;
 import com.cw.cwu.dto.*;
-import com.cw.cwu.repository.CourseRepository;
-import com.cw.cwu.repository.LectureRoomRepository;
-import com.cw.cwu.repository.ClassEntityRepository;
-import com.cw.cwu.repository.UserRepository;
+import com.cw.cwu.repository.*;
 import com.cw.cwu.util.AuthUtil;
 import com.cw.cwu.util.PageUtil;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +12,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,30 +24,18 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
     private final CourseRepository courseRepository;
     private final LectureRoomRepository lectureRoomRepository;
     private final UserRepository userRepository;
+    private final SemesterRepository semesterRepository;
 
+    // 시간 중복 체크
     private boolean isTimeOverlap(int start1, int end1, int start2, int end2) {
         return start1 <= end2 && start2 <= end1;
     }
 
-    private boolean isValidSemester(String semester) {
-        if (semester == null) return false;
-        if (!semester.matches("^\\d{4}-[1-2]$")) return false;
 
-        String[] parts = semester.split("-");
-        int year = Integer.parseInt(parts[0]);
-        int term = Integer.parseInt(parts[1]);
-        int currentYear = java.time.Year.now().getValue();
-
-        return (year == currentYear || year == currentYear + 1) && (term == 1 || term == 2);
-    }
-
-    private String validateClassConstraints(String professorId, String semester, String day,
+    private String validateClassConstraints(String professorId, Semester semester, String day,
                                             Integer startTime, Integer endTime, Integer capacity,
                                             Integer classIdToExclude, Integer lectureRoomId) {
-
-        if (!isValidSemester(semester)) {
-            return "학기 형식이 잘못되었습니다.";
-        }
+        if (semester == null) return "유효한 학기 정보가 없습니다.";
 
         if (startTime == null || endTime == null || startTime < 1 || endTime > 10 || startTime > endTime) {
             return "시간 설정이 올바르지 않습니다.";
@@ -61,6 +47,7 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
 
         List<ClassEntity> professorClasses = classEntityRepository
                 .findByProfessor_UserIdAndDayAndSemester(professorId, day, semester);
+
         for (ClassEntity cls : professorClasses) {
             if (!cls.getId().equals(classIdToExclude) &&
                     isTimeOverlap(cls.getStartTime(), cls.getEndTime(), startTime, endTime)) {
@@ -71,6 +58,7 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
         if (lectureRoomId != null) {
             List<ClassEntity> roomClasses = classEntityRepository
                     .findByLectureRoom_IdAndDayAndSemester(lectureRoomId, day, semester);
+
             for (ClassEntity cls : roomClasses) {
                 if (!cls.getId().equals(classIdToExclude) &&
                         isTimeOverlap(cls.getStartTime(), cls.getEndTime(), startTime, endTime)) {
@@ -82,11 +70,15 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
         return null;
     }
 
+    private Semester getCurrentSemester() {
+        return semesterRepository.findCurrentSemester(LocalDate.now())
+                .orElseThrow(() -> new IllegalArgumentException("현재 학기를 찾을 수 없습니다."));
+    }
+
     @Transactional
     @Override
     public String createClass(ClassCreateRequestDTO dto) {
-
-
+        // 기본 검증
         if (dto.getCourseId() == null || !courseRepository.existsById(dto.getCourseId())) {
             return "존재하지 않는 과목입니다.";
         }
@@ -100,26 +92,23 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
             return "해당 교수를 찾을 수 없습니다.";
         }
 
-        Course course = courseRepository.findById(dto.getCourseId()).get();
-        if (course.getDepartment() != null && professor.getDepartment() != null) {
-            if (!course.getDepartment().getDepartmentId().equals(professor.getDepartment().getDepartmentId())) {
-                return "해당 과목은 교수님의 학과에 속해 있지 않습니다.";
-            }
-        }
+        Semester semester = getCurrentSemester();
 
+        // 시간 및 강의실 중복 검증
         String validationError = validateClassConstraints(
-                dto.getProfessorId(), dto.getSemester(), dto.getDay(),
+                dto.getProfessorId(), semester, dto.getDay(),
                 dto.getStartTime(), dto.getEndTime(), dto.getCapacity(),
                 null, dto.getLectureRoomId()
         );
         if (validationError != null) return validationError;
 
         LectureRoom lectureRoom = lectureRoomRepository.findById(dto.getLectureRoomId()).get();
+        Course course = courseRepository.findById(dto.getCourseId()).get();
 
         ClassEntity classEntity = ClassEntity.builder()
                 .course(course)
                 .professor(professor)
-                .semester(dto.getSemester())
+                .semester(semester)
                 .day(dto.getDay())
                 .startTime(dto.getStartTime())
                 .endTime(dto.getEndTime())
@@ -133,16 +122,25 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
     }
 
     @Override
-    public PageResponseDTO<ClassDTO> getMyClasses(String professorId, PageRequestDTO pageRequestDTO) {
+    public PageResponseDTO<ClassDTO> getMyClasses(String professorId, PageRequestDTO pageRequestDTO, Integer semesterId) {
         Pageable pageable = PageUtil.toPageable(pageRequestDTO, "id");
 
-        Page<ClassEntity> page = classEntityRepository.findByProfessor_UserId(professorId, pageable);
+        Page<ClassEntity> page;
+
+        if (semesterId != null) {
+            page = classEntityRepository.findByProfessor_UserIdAndSemester_Id(professorId, semesterId, pageable);
+        } else {
+            page = classEntityRepository.findByProfessor_UserId(professorId, pageable);
+        }
 
         Page<ClassDTO> dtoPage = page.map(entity -> {
+            Semester semester = entity.getSemester();
             ClassDTO dto = new ClassDTO();
             dto.setClassId(entity.getId());
             dto.setCourseName(entity.getCourse().getName());
-            dto.setSemester(entity.getSemester());
+            dto.setSemester(
+                    semester.getYear() + "-" + (semester.getTerm() == SemesterTerm.FIRST ? "1" : "2")
+            );
             dto.setDay(entity.getDay());
             dto.setStartTime(entity.getStartTime());
             dto.setEndTime(entity.getEndTime());
@@ -150,7 +148,6 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
             dto.setEnrolled(entity.getEnrolled());
             dto.setLectureRoomName(entity.getLectureRoom().getName());
             dto.setBuildingName(entity.getLectureRoom().getBuilding().getName());
-
             dto.setCourseType(entity.getCourse().getType().name());
             dto.setCourseYear(entity.getCourse().getYear());
 
@@ -162,14 +159,18 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
 
     @Transactional
     @Override
-    public String updateClass(ClassUpdateRequestDTO dto, String professorId) throws AccessDeniedException{
+    public String updateClass(ClassUpdateRequestDTO dto, String professorId) throws AccessDeniedException {
         ClassEntity entity = classEntityRepository.findById(dto.getClassId()).orElse(null);
         if (entity == null) return "해당 강의를 찾을 수 없습니다.";
 
+        // 교수 권한 체크
         AuthUtil.checkOwnership(entity.getProfessor().getUserId(), professorId);
 
+        Semester semester = getCurrentSemester();
+
+        // 검증
         String validationError = validateClassConstraints(
-                entity.getProfessor().getUserId(), entity.getSemester(), dto.getDay(),
+                entity.getProfessor().getUserId(), semester, dto.getDay(),
                 dto.getStartTime(), dto.getEndTime(), dto.getCapacity(),
                 entity.getId(), dto.getLectureRoomId()
         );
@@ -184,6 +185,9 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
             LectureRoom room = lectureRoomRepository.findById(dto.getLectureRoomId()).orElse(null);
             entity.setLectureRoom(room);
         }
+
+        // 학기 정보 업데이트
+        entity.setSemester(semester);
 
         classEntityRepository.save(entity);
         return "수정 완료";
@@ -217,12 +221,16 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
     }
 
     @Override
-    public List<LectureRoomSimpleDTO> getAvailableLectureRooms(String semester, String day, int startTime, int endTime) {
+    public List<LectureRoomSimpleDTO> getAvailableLectureRooms(String day, int startTime, int endTime) {
+        Semester semester = getCurrentSemester();
+
         List<LectureRoom> allRooms = lectureRoomRepository.findAll();
 
         return allRooms.stream()
                 .filter(room -> {
-                    List<ClassEntity> classes = classEntityRepository.findByLectureRoom_IdAndDayAndSemester(room.getId(), day, semester);
+                    List<ClassEntity> classes = classEntityRepository.findByLectureRoom_IdAndDayAndSemester(
+                            room.getId(), day, semester
+                    );
                     return classes.stream().noneMatch(c ->
                             startTime <= c.getEndTime() && c.getStartTime() <= endTime
                     );

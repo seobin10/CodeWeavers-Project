@@ -26,16 +26,22 @@ const ProfessorGradePage = () => {
   const [newGrades, setNewGrades] = useState({});
 
   useEffect(() => {
-    if (userId) {
-      getMyClasses(userId).then((res) => setClasses(res.data.dtoList || []));
-    }
-  }, [userId]);
+    getMyClasses() 
+      .then((res) => setClasses(res.data.dtoList || []))
+      .catch(() => setClasses([]));
+  }, []);
 
-  const fetchGrades = async (classId, page = 1) => {
+  const fetchGrades = async (classId, page = 1, retry = false) => {
     try {
-      const res = await getGradesByClass(classId, userId, page);
-      setGradePage(res.data);
-      setGrades(res.data.dtoList);
+      const res = await getGradesByClass(classId, page);
+      const data = res.data;
+  
+      if (data.dtoList.length === 0 && data.totalCount > 0 && !retry) {
+        return fetchGrades(classId, 1, true);
+      }
+  
+      setGradePage(data);
+      setGrades(data.dtoList);
       setSelectedClassId(classId);
     } catch {
       dispatch(

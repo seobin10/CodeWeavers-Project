@@ -1,6 +1,8 @@
 package com.cw.cwu.repository;
 
 import com.cw.cwu.domain.ClassEntity;
+import com.cw.cwu.domain.Semester;
+import com.cw.cwu.domain.SemesterTerm;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,7 +16,7 @@ import java.util.Map;
 @Repository
 public interface ClassEntityRepository extends JpaRepository<ClassEntity, Integer> {
 
-    Page<ClassEntity> findByProfessor_UserId(String userId, Pageable pageable);
+    Page<ClassEntity> findByProfessor_UserId(String professorId, Pageable pageable);
 
     @Query("SELECT DISTINCT d.departmentName FROM Department d")
     List<String> findDistinctDepartments();
@@ -105,8 +107,13 @@ WHERE
 
 
     // 강의실 + 요일
-    List<ClassEntity> findByProfessor_UserIdAndDayAndSemester(String userId, String day, String semester);
+    List<ClassEntity> findByLectureRoom_IdAndDayAndSemester(Integer roomId, String day, Semester semester);
 
     // 교수 + 요일
-    List<ClassEntity> findByLectureRoom_IdAndDayAndSemester(Integer roomId, String day, String semester);
+    List<ClassEntity> findByProfessor_UserIdAndDayAndSemester(String userId, String day, Semester semester);
+
+    // 학기 ID를 기준으로 필터링
+    Page<ClassEntity> findByProfessor_UserIdAndSemester_Id(String professorId, Integer semesterId, Pageable pageable);
+
+
 }
