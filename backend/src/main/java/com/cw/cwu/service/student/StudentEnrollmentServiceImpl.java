@@ -9,7 +9,6 @@ import com.cw.cwu.dto.PageRequestDTO;
 import com.cw.cwu.dto.PageResponseDTO;
 import com.cw.cwu.repository.ClassEntityRepository;
 import com.cw.cwu.repository.EnrollmentRepository;
-import com.cw.cwu.repository.StudentRecordRepository;
 import com.cw.cwu.repository.UserRepository;
 import com.cw.cwu.util.PageUtil;
 import lombok.RequiredArgsConstructor;
