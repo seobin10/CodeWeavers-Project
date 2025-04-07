@@ -2,6 +2,8 @@ package com.cw.cwu.controller.professor;
 
 import com.cw.cwu.dto.*;
 import com.cw.cwu.service.professor.ProfessorClassService;
+import com.cw.cwu.util.UserRequestUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,7 @@ import java.util.List;
 public class ProfessorClassController {
 
     private final ProfessorClassService professorClassService;
+    private final UserRequestUtil userRequestUtil;
 
     @PostMapping("/classes")
     public ResponseEntity<String> createClass(@RequestBody ClassCreateRequestDTO dto) {
@@ -34,8 +37,9 @@ public class ProfessorClassController {
     }
 
     @PutMapping("/classes")
-    public ResponseEntity<String> updateClass(@RequestBody ClassUpdateRequestDTO dto) {
-        String result = professorClassService.updateClass(dto);
+    public ResponseEntity<String> updateClass(@RequestBody ClassUpdateRequestDTO dto, HttpServletRequest request) {
+        String professorId = userRequestUtil.extractUserId(request);
+        String result = professorClassService.updateClass(dto, professorId);
         if (!"수정 완료".equals(result)) {
             return ResponseEntity.badRequest().body(result);
         }
@@ -43,8 +47,13 @@ public class ProfessorClassController {
     }
 
     @DeleteMapping("/classes/{classId}")
-    public ResponseEntity<String> deleteClass(@PathVariable Integer classId) {
-        String result = professorClassService.deleteClass(classId);
+    public ResponseEntity<String> deleteClass(
+            @PathVariable Integer classId,
+            HttpServletRequest request
+    ) {
+        String professorId = userRequestUtil.extractUserId(request);
+        String result = professorClassService.deleteClass(classId, professorId);
+
         if (!"삭제 완료".equals(result)) {
             return ResponseEntity.badRequest().body(result);
         }
@@ -52,14 +61,22 @@ public class ProfessorClassController {
     }
 
     @GetMapping("/courses")
-    public ResponseEntity<List<CourseSimpleDTO>> getAllCourses() {
-        List<CourseSimpleDTO> list = professorClassService.getAllCourses();
+    public ResponseEntity<List<CourseSimpleDTO>> getCoursesByProfessor(HttpServletRequest request) {
+        String professorId = userRequestUtil.extractUserId(request); // 토큰에서 교수 ID 추출
+        List<CourseSimpleDTO> list = professorClassService.getCoursesByProfessor(professorId);
         return ResponseEntity.ok(list);
     }
 
     @GetMapping("/lecture-rooms")
-    public ResponseEntity<List<LectureRoomSimpleDTO>> getAllLectureRooms() {
-        List<LectureRoomSimpleDTO> list = professorClassService.getAllLectureRooms();
-        return ResponseEntity.ok(list);
+    public ResponseEntity<List<LectureRoomSimpleDTO>> getAvailableLectureRooms(
+            @RequestParam String semester,
+            @RequestParam String day,
+            @RequestParam int startTime,
+            @RequestParam int endTime
+    ) {
+        List<LectureRoomSimpleDTO> available = professorClassService.getAvailableLectureRooms(
+                semester, day, startTime, endTime
+        );
+        return ResponseEntity.ok(available);
     }
 }

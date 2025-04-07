@@ -1,49 +1,59 @@
 package com.cw.cwu.service.professor;
 
 import com.cw.cwu.dto.*;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.util.List;
 
 public interface ProfessorClassService {
 
     /**
-     * [강의 생성]
+     * [강의 등록]
      * @param dto 강의 생성 요청 DTO
-     * @return 성공 메시지 또는 오류 메시지
+     * @return 등록 성공 시 "성공", 실패 시 상세 오류 메시지
      */
     String createClass(ClassCreateRequestDTO dto);
 
     /**
-     * [강의 목록 조회 (페이징 처리)]
+     * [교수 본인의 강의 목록 조회]
      * @param professorId 교수 ID
-     * @param pageRequestDTO 페이징 및 정렬 정보
+     * @param pageRequestDTO 페이징 정보
      * @return 강의 목록 DTO 페이징 응답
      */
     PageResponseDTO<ClassDTO> getMyClasses(String professorId, PageRequestDTO pageRequestDTO);
 
     /**
-     * [강의 정보 수정]
-     * @param dto 강의 수정 요청 DTO
-     * @return 성공 또는 실패 메시지
+     * [강의 수정]
+     * @param dto 수정할 강의 정보 DTO
+     * @param professorId 요청자 교수 ID (JWT 기반)
+     * @return 수정 성공 시 "수정 완료", 실패 시 오류 메시지
+     * @throws AccessDeniedException 권한 없음
      */
-    String updateClass(ClassUpdateRequestDTO dto);
+    String updateClass(ClassUpdateRequestDTO dto, String professorId) throws AccessDeniedException;
 
     /**
-     * [특정 강의 삭제]
-     * @param classId 삭제할 강의 ID
-     * @return 성공 또는 실패 메시지
+     * [강의 삭제]
+     * @param classId 삭제 대상 강의 ID
+     * @param professorId 요청자 교수 ID
+     * @return 삭제 성공 시 "삭제 완료", 실패 시 오류 메시지
+     * @throws AccessDeniedException 권한 없음
      */
-    String deleteClass(Integer classId);
+    String deleteClass(Integer classId, String professorId) throws AccessDeniedException;
 
     /**
-     * [전체 과목 목록 조회]
-     * @return 과목 ID와 이름을 담은 CourseSimpleDTO 리스트
+     * [교수의 과목 목록 조회]
+     * @param professorId 교수 ID
+     * @return CourseSimpleDTO 리스트 (과목 ID, 이름, 타입)
      */
-    List<CourseSimpleDTO> getAllCourses();
+    List<CourseSimpleDTO> getCoursesByProfessor(String professorId);
 
     /**
-     * [전체 강의실 목록 조회]
-     * @return 강의실 ID, 이름, 건물명을 담은 LectureRoomSimpleDTO 리스트
+     * [조건에 맞는 빈 강의실 목록 조회]
+     * @param semester 학기 ("2025-1" 형식)
+     * @param day 요일 ("월", "화" 등)
+     * @param startTime 시작 교시
+     * @param endTime 종료 교시
+     * @return LectureRoomSimpleDTO 리스트
      */
-    List<LectureRoomSimpleDTO> getAllLectureRooms();
+    List<LectureRoomSimpleDTO> getAvailableLectureRooms(String semester, String day, int startTime, int endTime);
 }

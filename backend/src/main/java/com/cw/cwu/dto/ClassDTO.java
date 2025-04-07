@@ -16,4 +16,7 @@ public class ClassDTO {
     private Integer enrolled;
     private String lectureRoomName;
     private String buildingName;
+
+    private String courseType;
+    private Integer courseYear;
 }
