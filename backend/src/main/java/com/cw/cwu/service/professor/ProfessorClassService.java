@@ -20,7 +20,7 @@ public interface ProfessorClassService {
      * @param pageRequestDTO 페이징 정보
      * @return 강의 목록 DTO 페이징 응답
      */
-    PageResponseDTO<ClassDTO> getMyClasses(String professorId, PageRequestDTO pageRequestDTO);
+    PageResponseDTO<ClassDTO> getMyClasses(String professorId, PageRequestDTO pageRequestDTO, Integer semesterId);
 
     /**
      * [강의 수정]
@@ -49,11 +49,10 @@ public interface ProfessorClassService {
 
     /**
      * [조건에 맞는 빈 강의실 목록 조회]
-     * @param semester 학기 ("2025-1" 형식)
      * @param day 요일 ("월", "화" 등)
      * @param startTime 시작 교시
      * @param endTime 종료 교시
      * @return LectureRoomSimpleDTO 리스트
      */
-    List<LectureRoomSimpleDTO> getAvailableLectureRooms(String semester, String day, int startTime, int endTime);
+    List<LectureRoomSimpleDTO> getAvailableLectureRooms(String day, int startTime, int endTime);
 }

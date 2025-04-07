@@ -20,8 +20,6 @@ public class StudentRecord {
     @JoinColumn(name = "student_id", nullable = false)
     private User student;
 
-    @Column(name = "semester", nullable = false, length = 10)
-    private String semester;
 
     @Column(name = "enrolled", nullable = false)
     private int enrolled;
@@ -34,4 +32,8 @@ public class StudentRecord {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @ManyToOne
+    @JoinColumn(name = "semester_id")
+    private Semester semester;
 }

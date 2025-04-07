@@ -1,15 +1,13 @@
 package com.cw.cwu.service.student;
 
-import com.cw.cwu.domain.ClassEntity;
-import com.cw.cwu.domain.CourseType;
-import com.cw.cwu.domain.Enrollment;
-import com.cw.cwu.domain.User;
+import com.cw.cwu.domain.*;
 import com.cw.cwu.dto.EnrollmentRequestDTO;
 import com.cw.cwu.dto.PageRequestDTO;
 import com.cw.cwu.dto.PageResponseDTO;
 import com.cw.cwu.repository.ClassEntityRepository;
 import com.cw.cwu.repository.EnrollmentRepository;
 import com.cw.cwu.repository.UserRepository;
+import com.cw.cwu.service.admin.AdminScheduleService;
 import com.cw.cwu.util.PageUtil;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -36,6 +34,7 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
     private final UserRepository userRepository;
     private final ClassEntityRepository classEntityRepository;
     private final StudentInfoService studentInfoService;
+    private final AdminScheduleService adminScheduleService;
 
     // 학생이 수강 신청 가능한 강의 목록 조회
     @Override
@@ -169,6 +168,11 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
     // 수강 신청 처리
     @Override
     public String applyToClass(EnrollmentRequestDTO requestDTO) {
+        // 수강신청 가능 기간인지 확인
+        if (!adminScheduleService.isScheduleOpen(ScheduleType.ENROLL)) {
+            return "현재는 수강신청 기간이 아닙니다!";
+        }
+
         System.out.println("service applyToClass : " + requestDTO);
         User student = userRepository.getReferenceById(requestDTO.getStudentId());
 

@@ -1,0 +1,21 @@
+package com.cw.cwu.repository;
+
+
+import com.cw.cwu.domain.Semester;
+import com.cw.cwu.domain.SemesterTerm;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+
+import java.time.LocalDate;
+import java.util.Optional;
+
+
+public interface SemesterRepository extends JpaRepository<Semester, Integer> {
+
+
+    Optional<Semester> findByYearAndTerm(int year, SemesterTerm term);
+
+    @Query("SELECT s FROM Semester s WHERE :now BETWEEN s.startDate AND s.endDate")
+    Optional<Semester> findCurrentSemester(LocalDate now);
+}
