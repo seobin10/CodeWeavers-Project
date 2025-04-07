@@ -8,7 +8,7 @@ import { useDispatch } from "react-redux";
 import { showModal } from "../../slices/modalSlice";
 
 const initialForm = {
-  courseId: null,
+  courseId: "",
   professorId: "",
   semester: "",
   day: "",
@@ -29,10 +29,19 @@ const ProfessorClassCreatePage = ({ onSuccess, professorId }) => {
     getCourses()
       .then((res) => setCourses(res.data))
       .catch(() => setCourses([]));
-    getLectureRooms()
-      .then((res) => setRooms(res.data))
-      .catch(() => setRooms([]));
-  }, []);
+  }, []); 
+
+  useEffect(() => {
+    const { semester, day, startTime, endTime } = form;
+
+    if (semester && day && startTime && endTime) {
+      getLectureRooms({ semester, day, startTime, endTime })
+        .then((res) => setRooms(res.data))
+        .catch(() => setRooms([]));
+    } else {
+      setRooms([]);
+    }
+  }, [form.semester, form.day, form.startTime, form.endTime]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -46,11 +55,18 @@ const ProfessorClassCreatePage = ({ onSuccess, professorId }) => {
       onSuccess?.();
       setForm({ ...initialForm, professorId });
     } catch (err) {
-      dispatch(showModal({
-        message: err.response?.data || "강의 등록 실패",
-        type: "error"
-      }));
+      dispatch(
+        showModal({
+          message: err.response?.data || "강의 등록 실패",
+          type: "error",
+        })
+      );
     }
+  };
+
+  const getSemesterOptions = () => {
+    const year = new Date().getFullYear();
+    return [`${year}-1`, `${year}-2`, `${year + 1}-1`, `${year + 1}-2`];
   };
 
   return (
@@ -69,7 +85,7 @@ const ProfessorClassCreatePage = ({ onSuccess, professorId }) => {
             <option value="">과목 선택</option>
             {courses.map((c) => (
               <option key={c.courseId} value={c.courseId}>
-                {c.courseName}
+                {c.courseType === "MAJOR" ? "전공" : "교양"} - {c.courseName}
               </option>
             ))}
           </select>
@@ -77,14 +93,19 @@ const ProfessorClassCreatePage = ({ onSuccess, professorId }) => {
 
         <div>
           <label className="text-sm font-medium">학기 *</label>
-          <input
-            type="text"
+          <select
             name="semester"
             className="w-full p-2 border rounded"
-            value={form.semester}
+            value={form.semester || ""}
             onChange={handleChange}
-            placeholder="예: 2025-1"
-          />
+          >
+            <option value="">학기 선택</option>
+            {getSemesterOptions().map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div>
@@ -110,6 +131,8 @@ const ProfessorClassCreatePage = ({ onSuccess, professorId }) => {
             <input
               type="number"
               name="startTime"
+              min={1}
+              max={10}
               className="w-full p-2 border rounded"
               value={form.startTime}
               onChange={handleChange}
@@ -121,6 +144,8 @@ const ProfessorClassCreatePage = ({ onSuccess, professorId }) => {
             <input
               type="number"
               name="endTime"
+              min={form.startTime || 1}
+              max={10}
               className="w-full p-2 border rounded"
               value={form.endTime}
               onChange={handleChange}
@@ -151,6 +176,8 @@ const ProfessorClassCreatePage = ({ onSuccess, professorId }) => {
           <input
             type="number"
             name="capacity"
+            min={20}
+            max={50}
             className="w-full p-2 border rounded"
             value={form.capacity}
             onChange={handleChange}

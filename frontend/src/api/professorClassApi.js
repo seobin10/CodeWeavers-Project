@@ -44,7 +44,10 @@ export const getCourses = () => {
   return axios.get(`${prefix}/courses`, getAuthHeader());
 };
 
-// ✅ 강의실 목록 조회
-export const getLectureRooms = () => {
-  return axios.get(`${prefix}/lecture-rooms`, getAuthHeader());
+// ✅ 특정 조건(학기, 요일, 교시) 기준으로 비어있는 강의실만 조회
+export const getLectureRooms = ({ semester, day, startTime, endTime }) => {
+  return axios.get(`${prefix}/lecture-rooms`, {
+    params: { semester, day, startTime, endTime },
+    ...getAuthHeader(),
+  });
 };
