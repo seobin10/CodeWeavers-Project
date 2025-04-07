@@ -1,6 +1,8 @@
 import React from "react";
 
 const PageComponent = ({ currentPage, totalPage, onPageChange }) => {
+  if (totalPage < 1) return null;
+
   const visiblePages = 5;
 
   const generatePages = () => {
