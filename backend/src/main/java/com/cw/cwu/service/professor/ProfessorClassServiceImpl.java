@@ -212,7 +212,7 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
         List<Course> courses = courseRepository.findCoursesByDepartmentOrLiberal(deptId, CourseType.LIBERAL);
 
         return courses.stream()
-                .map(c -> new CourseSimpleDTO(c.getId(), c.getName(), c.getType()))
+                .map(c -> new CourseSimpleDTO(c.getId(), c.getName(), c.getType(), c.getYear()))
                 .collect(Collectors.toList());
     }
 

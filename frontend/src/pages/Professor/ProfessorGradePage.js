@@ -38,7 +38,12 @@ const ProfessorGradePage = () => {
       setGrades(res.data.dtoList);
       setSelectedClassId(classId);
     } catch {
-      dispatch(showModal("성적 조회에 실패했습니다."));
+      dispatch(
+        showModal({
+          message: "성적 조회에 실패했습니다.",
+          type: "error",
+        })
+      );
     }
   };
 
@@ -48,7 +53,10 @@ const ProfessorGradePage = () => {
 
   const handleRegisterOrUpdate = async (studentId, enrollmentId, gradeId) => {
     const gradeValue = newGrades[studentId];
-    if (!gradeValue) return dispatch(showModal("성적을 먼저 선택해주세요."));
+    if (!gradeValue)
+      return dispatch(
+        showModal({ message: "성적을 선택해주세요.", type: "error" })
+      );
 
     try {
       const dto = { enrollmentId, grade: gradeValue };
@@ -56,7 +64,9 @@ const ProfessorGradePage = () => {
       dispatch(showModal(gradeId ? "성적 수정 완료" : "성적 등록 완료"));
       fetchGrades(selectedClassId);
     } catch {
-      dispatch(showModal("성적 등록/수정에 실패했습니다."));
+      dispatch(
+        showModal({ message: "성적 등록/수정에 실패했습니다.", type: "error" })
+      );
     }
   };
 
@@ -66,7 +76,7 @@ const ProfessorGradePage = () => {
       dispatch(showModal("성적 초기화 완료"));
       fetchGrades(selectedClassId);
     } catch {
-      dispatch(showModal("성적 초기화 실패"));
+      dispatch(showModal({ message: "성적 초기화 실패", type: "error" }));
     }
   };
 
@@ -87,7 +97,6 @@ const ProfessorGradePage = () => {
       <div className="flex justify-between items-center border-b pb-3 mb-6">
         <h2 className="text-2xl font-semibold text-gray-700">성적 관리</h2>
       </div>
-
       {/* 강의 선택 */}
       <div className="mb-6">
         <select
@@ -118,23 +127,30 @@ const ProfessorGradePage = () => {
           ))}
         </select>
       </div>
-
       {/* 성적 목록 */}
-      {grades.length > 0 && (
-        <table className="min-w-full table-auto shadow-sm border border-gray-200 rounded-md text-sm">
-          <thead className="bg-gray-50 text-gray-600 uppercase text-sm leading-normal">
-            <tr className="text-center">
-              <th className="py-3 px-4">학번</th>
-              <th className="py-3 px-4">이름</th>
-              <th className="py-3 px-4">과목명</th>
-              <th className="py-3 px-4">학점</th>
-              <th className="py-3 px-4">기존 성적</th>
-              <th className="py-3 px-4">입력</th>
-              <th className="py-3 px-4">관리</th>
+      <table className="min-w-full table-auto shadow-sm border border-gray-200 rounded-md text-sm">
+        <thead className="bg-gray-50 text-gray-600 uppercase text-sm leading-normal">
+          <tr className="text-center">
+            <th className="py-3 px-4">학번</th>
+            <th className="py-3 px-4">이름</th>
+            <th className="py-3 px-4">과목명</th>
+            <th className="py-3 px-4">학점</th>
+            <th className="py-3 px-4">기존 성적</th>
+            <th className="py-3 px-4">입력</th>
+            <th className="py-3 px-4">관리</th>
+          </tr>
+        </thead>
+        <tbody className="text-center text-gray-700">
+          {grades.length === 0 ? (
+            <tr>
+              <td colSpan={7} className="py-4 text-gray-400">
+                {selectedClassId
+                  ? "성적 정보가 없습니다."
+                  : "강의를 선택해주세요."}
+              </td>
             </tr>
-          </thead>
-          <tbody className="text-center text-gray-700">
-            {grades.map((g) => (
+          ) : (
+            grades.map((g) => (
               <tr key={g.studentId} className="hover:bg-gray-50 border-t">
                 <td className="py-2 px-4">{g.studentId}</td>
                 <td className="py-2 px-4">{g.studentName}</td>
@@ -186,10 +202,11 @@ const ProfessorGradePage = () => {
                   )}
                 </td>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+            ))
+          )}
+        </tbody>
+      </table>
+
       <PageComponent
         currentPage={gradePage.current}
         totalPage={gradePage.totalPage}

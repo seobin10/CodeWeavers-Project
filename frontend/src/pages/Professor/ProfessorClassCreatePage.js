@@ -29,7 +29,7 @@ const ProfessorClassCreatePage = ({ onSuccess, professorId }) => {
     getCourses()
       .then((res) => setCourses(res.data))
       .catch(() => setCourses([]));
-  }, []); 
+  }, []);
 
   useEffect(() => {
     const { semester, day, startTime, endTime } = form;
@@ -82,12 +82,22 @@ const ProfessorClassCreatePage = ({ onSuccess, professorId }) => {
             value={form.courseId || ""}
             onChange={handleChange}
           >
-            <option value="">과목 선택</option>
-            {courses.map((c) => (
-              <option key={c.courseId} value={c.courseId}>
-                {c.courseType === "MAJOR" ? "전공" : "교양"} - {c.courseName}
-              </option>
-            ))}
+            <option value="">강의 선택</option>
+            {[...courses]
+              .sort((a, b) => {
+                // 전공 우선 (MAJOR < LIBERAL)
+                if (a.courseType !== b.courseType) {
+                  return a.courseType === "MAJOR" ? -1 : 1;
+                }
+                // 같은 타입이면 학년 오름차순
+                return a.courseYear - b.courseYear;
+              })
+              .map((c) => (
+                <option key={c.courseId} value={c.courseId}>
+                  {c.courseType === "MAJOR" ? "전공" : "교양"} - {c.courseName}{" "}
+                  ({c.courseYear}학년)
+                </option>
+              ))}
           </select>
         </div>
 

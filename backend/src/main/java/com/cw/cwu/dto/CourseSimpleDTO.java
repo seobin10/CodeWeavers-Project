@@ -12,4 +12,5 @@ public class CourseSimpleDTO {
     private Integer courseId;
     private String courseName;
     private CourseType courseType;
+    private Integer courseYear;
 }
