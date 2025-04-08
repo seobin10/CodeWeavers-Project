@@ -1,6 +1,8 @@
 package com.cw.cwu.controller.professor;
 
+import com.cw.cwu.domain.ScheduleType;
 import com.cw.cwu.dto.*;
+import com.cw.cwu.service.admin.AdminScheduleService;
 import com.cw.cwu.service.professor.ProfessorClassService;
 import com.cw.cwu.util.UserRequestUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,6 +19,7 @@ public class ProfessorClassController {
 
     private final ProfessorClassService professorClassService;
     private final UserRequestUtil userRequestUtil;
+    private final AdminScheduleService adminScheduleService;
 
     @PostMapping("/classes")
     public ResponseEntity<String> createClass(@RequestBody ClassCreateRequestDTO dto) {
@@ -79,5 +82,11 @@ public class ProfessorClassController {
                 day, startTime, endTime
         );
         return ResponseEntity.ok(available);
+    }
+
+    @GetMapping("/is-class-open")
+    public ResponseEntity<Boolean> isClassOpen() {
+        boolean result = adminScheduleService.isScheduleOpen(ScheduleType.CLASS);
+        return ResponseEntity.ok(result);
     }
 }

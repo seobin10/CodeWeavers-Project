@@ -24,4 +24,6 @@ public interface AdminScheduleService {
     List<SemesterResponseDTO> getAllSemesters();
 
     boolean isScheduleOpen(ScheduleType scheduleType);
+
+    Integer getCurrentSemesterId();
 }

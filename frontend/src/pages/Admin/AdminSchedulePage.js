@@ -80,7 +80,7 @@ const AdminSchedulePage = () => {
       dispatch(showModal("학기가 등록되었습니다."));
       setIsSemesterModalOpen(false);
       setNewSemester({
-        year: new Date().getFullYear(), 
+        year: new Date().getFullYear(),
         term: "FIRST",
         startDate: "",
         endDate: "",
@@ -155,8 +155,8 @@ const AdminSchedulePage = () => {
             <tr>
               <th className="py-3 px-4">년도</th>
               <th className="py-3 px-4">학기</th>
-              <th className="py-3 px-4">시작일</th>
-              <th className="py-3 px-4">종료일</th>
+              <th className="py-3 px-4">학기 시작일</th>
+              <th className="py-3 px-4">학기 종료일</th>
               <th className="py-3 px-4">관리</th>
             </tr>
           </thead>
@@ -174,8 +174,24 @@ const AdminSchedulePage = () => {
                   <td className="py-3 px-4">
                     {s.term === "FIRST" ? "1학기" : "2학기"}
                   </td>
-                  <td className="py-3 px-4">{s.startDate}</td>
-                  <td className="py-3 px-4">{s.endDate}</td>
+                  <td className="py-3 px-4">
+                    {s.startDate
+                      ? new Date(s.startDate).toLocaleString("ko-KR", {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                        })
+                      : "-"}
+                  </td>
+                  <td className="py-3 px-4">
+                    {s.endDate
+                      ? new Date(s.endDate).toLocaleString("ko-KR", {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                        })
+                      : "-"}
+                  </td>
                   <td className="py-3 px-4 space-x-2">
                     <button
                       onClick={() => {
@@ -224,9 +240,9 @@ const AdminSchedulePage = () => {
           <thead className="bg-gray-50 text-gray-600 uppercase text-sm">
             <tr>
               <th className="py-3 px-4">일정 종류</th>
-              <th className="py-3 px-4">시작일</th>
-              <th className="py-3 px-4">종료일</th>
-              <th className="py-3 px-4">설명</th>
+              <th className="py-3 px-4">일정 시작시간</th>
+              <th className="py-3 px-4">일정 종료시간</th>
+              <th className="py-3 px-4">비고</th>
               <th className="py-3 px-4">관리</th>
             </tr>
           </thead>
@@ -235,9 +251,29 @@ const AdminSchedulePage = () => {
               schedules.map((s) => (
                 <tr key={s.scheduleType} className="border-t hover:bg-gray-50">
                   <td className="py-3 px-4">{getLabel(s.scheduleType)}</td>
-                  <td className="py-3 px-4">{s.startDate}</td>
-                  <td className="py-3 px-4">{s.endDate}</td>
-                  <td className="py-3 px-4">{s.description}</td>
+                  <td className="py-3 px-4">
+                    {s.startDate
+                      ? new Date(s.startDate).toLocaleString("ko-KR", {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : "-"}
+                  </td>
+                  <td className="py-3 px-4">
+                    {s.endDate
+                      ? new Date(s.endDate).toLocaleString("ko-KR", {
+                          year: "numeric",
+                          month: "2-digit",
+                          day: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : "-"}
+                  </td>
+                  <td className="py-3 px-4">{s.description || "-"}</td>
                   <td className="py-3 px-4">
                     <button
                       onClick={() => {
@@ -399,7 +435,7 @@ const AdminSchedulePage = () => {
               {getLabel(editSchedule.scheduleType)} 수정
             </h3>
             <input
-              type="date"
+              type="datetime-local"
               className="w-full border px-3 py-2 rounded"
               value={editSchedule.startDate}
               onChange={(e) =>
@@ -410,7 +446,7 @@ const AdminSchedulePage = () => {
               }
             />
             <input
-              type="date"
+              type="datetime-local"
               className="w-full border px-3 py-2 rounded"
               value={editSchedule.endDate}
               onChange={(e) =>
@@ -423,7 +459,7 @@ const AdminSchedulePage = () => {
             <input
               type="text"
               className="w-full border px-3 py-2 rounded"
-              placeholder="설명"
+              placeholder="비고"
               value={editSchedule.description}
               onChange={(e) =>
                 setEditSchedule((prev) => ({

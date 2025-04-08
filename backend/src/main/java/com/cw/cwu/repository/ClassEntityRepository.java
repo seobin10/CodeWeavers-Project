@@ -65,7 +65,8 @@ JOIN (
 ) n
 ON n.number BETWEEN 0 AND (c.class_end - c.class_start)
 WHERE 
-    (:courseType IS NULL OR
+    c.semester_id = :semesterId 
+    AND (:courseType IS NULL OR
         (co.course_type = 'MAJOR' AND :courseType = '전공') OR
         (co.course_type = 'LIBERAL' AND :courseType = '교양'))
     AND (:departmentName IS NULL OR IFNULL(d.department_name, '공통') = :departmentName)
@@ -82,7 +83,8 @@ FROM classes c
 JOIN courses co ON c.course_id = co.course_id
 LEFT JOIN departments d ON co.department_id = d.department_id
 WHERE 
-    (:courseType IS NULL OR
+    c.semester_id = :semesterId
+    AND (:courseType IS NULL OR
         (co.course_type = 'MAJOR' AND :courseType = '전공') OR
         (co.course_type = 'LIBERAL' AND :courseType = '교양'))
     AND (:departmentName IS NULL OR IFNULL(d.department_name, '공통') = :departmentName)
@@ -102,6 +104,7 @@ WHERE
             @Param("classStart") Integer classStart,
             @Param("credit") Integer credit,
             @Param("courseName") String courseName,
+            @Param("semesterId") Integer semesterId,
             org.springframework.data.domain.Pageable pageable
     );
 
