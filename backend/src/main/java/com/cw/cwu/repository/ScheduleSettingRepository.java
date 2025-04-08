@@ -9,6 +9,7 @@ import java.util.Optional;
 
 public interface ScheduleSettingRepository extends JpaRepository<ScheduleSetting, Integer> {
 
-    Optional<ScheduleSetting> findByScheduleType(ScheduleType scheduleType);
+    Optional<ScheduleSetting> findBySemesterIdAndScheduleType(Integer semesterId, ScheduleType type);
 
+    boolean existsBySemesterId(Integer semesterId);
 }

@@ -10,7 +10,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { showModal } from "../slices/modalSlice";
 import { setUserId as setUserIdAction } from "../slices/authSlice";
-
+import { checkEnrollPeriod } from "../api/enrollmentApi";
 import PageComponent from "../components/PageComponent";
 
 const EnrollmentPage = () => {
@@ -24,6 +24,19 @@ const EnrollmentPage = () => {
     current: 1,
     totalCount: 0,
   });
+
+   // 수강신청 가능 기간 확인
+   useEffect(() => {
+    const checkPeriod = async () => {
+      const isOpen = await checkEnrollPeriod();
+      if (!isOpen) {
+        // 수강신청 기간이 아니면 제한 페이지로 리다이렉트
+        navigate("/main/period-expired", { state: { message: "현재는 수강신청 기간이 아닙니다!" } });
+      }
+    };
+
+    checkPeriod();
+  }, [navigate]);
 
   const [timetable, setTimetable] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);

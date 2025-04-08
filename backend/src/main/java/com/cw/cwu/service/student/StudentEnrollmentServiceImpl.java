@@ -6,6 +6,7 @@ import com.cw.cwu.dto.PageRequestDTO;
 import com.cw.cwu.dto.PageResponseDTO;
 import com.cw.cwu.repository.ClassEntityRepository;
 import com.cw.cwu.repository.EnrollmentRepository;
+import com.cw.cwu.repository.SemesterRepository;
 import com.cw.cwu.repository.UserRepository;
 import com.cw.cwu.service.admin.AdminScheduleService;
 import com.cw.cwu.util.PageUtil;
@@ -35,6 +36,7 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
     private final ClassEntityRepository classEntityRepository;
     private final StudentInfoService studentInfoService;
     private final AdminScheduleService adminScheduleService;
+    private final SemesterRepository semesterRepository;
 
     // 학생이 수강 신청 가능한 강의 목록 조회
     @Override
@@ -49,6 +51,10 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
             String courseName,
             PageRequestDTO pageRequestDTO
     ) {
+        // 수강신청 기간 확인
+        if (!adminScheduleService.isScheduleOpen(ScheduleType.ENROLL)) {
+            throw new IllegalStateException("현재는 수강신청 기간이 아닙니다!");
+        }
 
         Pageable pageable = PageRequest.of(pageRequestDTO.getPage() - 1, pageRequestDTO.getSize()); // 0이 베이스이므로
 
@@ -59,6 +65,17 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
 
         return PageUtil.toDTO(result, pageRequestDTO.getPage());
     }
+
+    public Integer getCurrentSemesterId() {
+        LocalDate today = LocalDate.now();
+
+        // 현재 날짜에 해당하는 학기를 찾기 위한 쿼리
+        Semester currentSemester = semesterRepository.findByStartDateBeforeAndEndDateAfter(today, today)
+                .orElseThrow(() -> new IllegalStateException("현재 학기가 존재하지 않습니다."));
+
+        return currentSemester.getId();
+    }
+
 
     // 학과 목록 필터링
     @Override
@@ -129,6 +146,10 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
 
     @Override
     public String deleteCourse(String studentId, Integer classId) {
+        if (!adminScheduleService.isScheduleOpen(ScheduleType.ENROLL)) {
+            throw new IllegalStateException("현재는 수강신청 기간이 아닙니다!");
+        }
+
         User student = userRepository.findByUserId(studentId).orElseThrow();
         ClassEntity classEntity = classEntityRepository.findById(classId).orElseThrow();
         Optional<Enrollment> optional = enrollmentRepository.findByStudentAndEnrolledClassEntity(student, classEntity);
@@ -170,8 +191,9 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
     public String applyToClass(EnrollmentRequestDTO requestDTO) {
         // 수강신청 가능 기간인지 확인
         if (!adminScheduleService.isScheduleOpen(ScheduleType.ENROLL)) {
-            return "현재는 수강신청 기간이 아닙니다!";
+            throw new IllegalStateException("현재는 수강신청 기간이 아닙니다!");
         }
+
 
         System.out.println("service applyToClass : " + requestDTO);
         User student = userRepository.getReferenceById(requestDTO.getStudentId());
@@ -232,6 +254,7 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
         // 학생 수 1 증가
         classEntity.setEnrolled(classEntity.getEnrolled() + 1);
         classEntityRepository.save(classEntity);
+
         return "수강 신청에 성공하였습니다";
     }
 }
