@@ -3,7 +3,7 @@ package com.cw.cwu.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "schedule_settings")
@@ -24,10 +24,10 @@ public class ScheduleSetting {
     private ScheduleType scheduleType;
 
     @Column(name = "start_date", nullable = false)
-    private LocalDate startDate;
+    private LocalDateTime startDate;
 
     @Column(name = "end_date", nullable = false)
-    private LocalDate endDate;
+    private LocalDateTime endDate;
 
     @Column(name = "description", length = 255)
     private String description;

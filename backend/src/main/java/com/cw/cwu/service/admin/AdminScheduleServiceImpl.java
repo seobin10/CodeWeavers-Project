@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Transactional
@@ -127,7 +128,8 @@ public class AdminScheduleServiceImpl implements AdminScheduleService {
      */
     @Override
     public boolean isScheduleOpen(ScheduleType scheduleType) {
-        LocalDate today = LocalDate.now();
+        LocalDateTime now = LocalDateTime.now();
+
         ScheduleSetting setting = scheduleSettingRepository
                 .findBySemesterIdAndScheduleType(getCurrentSemesterId(), scheduleType)
                 .orElse(null);
@@ -136,11 +138,12 @@ public class AdminScheduleServiceImpl implements AdminScheduleService {
             return false;
         }
 
-        return (today.isEqual(setting.getStartDate()) || today.isAfter(setting.getStartDate())) &&
-                (today.isEqual(setting.getEndDate()) || today.isBefore(setting.getEndDate()));
+        return (now.isEqual(setting.getStartDate()) || now.isAfter(setting.getStartDate())) &&
+                (now.isEqual(setting.getEndDate()) || now.isBefore(setting.getEndDate()));
     }
 
-    private Integer getCurrentSemesterId() {
+    @Override
+    public Integer getCurrentSemesterId() {
         LocalDate today = LocalDate.now();
 
         Semester currentSemester = semesterRepository
@@ -149,4 +152,6 @@ public class AdminScheduleServiceImpl implements AdminScheduleService {
 
         return currentSemester.getId();
     }
+
+
 }

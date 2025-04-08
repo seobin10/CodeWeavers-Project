@@ -43,9 +43,9 @@ export const deleteCourse = (userId, classId) => {
 export const checkEnrollPeriod = async () => {
   try {
     const response = await axios.get(`${prefix}/is-enroll-open`, getAuthHeader());
-    return response.data;  // true 또는 false 반환
+    return response.data;  // true 또는 false
   } catch (error) {
     console.error("수강신청 기간 확인 실패:", error);
-    return false;  // 오류 발생 시 false 반환
+    return false;
   }
 };
