@@ -19,4 +19,5 @@ public class ClassDTO {
 
     private String courseType;
     private Integer courseYear;
+    private Boolean isCurrentSemester;
 }

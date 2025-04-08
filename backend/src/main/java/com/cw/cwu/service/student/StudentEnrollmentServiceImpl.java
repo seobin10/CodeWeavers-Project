@@ -56,24 +56,17 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
             throw new IllegalStateException("현재는 수강신청 기간이 아닙니다!");
         }
 
-        Pageable pageable = PageRequest.of(pageRequestDTO.getPage() - 1, pageRequestDTO.getSize()); // 0이 베이스이므로
+        // 현재 학기ID 가져오기
+        Integer semesterId = adminScheduleService.getCurrentSemesterId();
+
+        Pageable pageable = PageRequest.of(pageRequestDTO.getPage() - 1, pageRequestDTO.getSize());
 
         Page<Map<String, Object>> result = classEntityRepository.findAvailableCoursesPaged(
                 studentId, courseType, departmentName, courseYear,
-                classDay, classStart, credit, courseName, pageable
+                classDay, classStart, credit, courseName, semesterId, pageable
         );
 
         return PageUtil.toDTO(result, pageRequestDTO.getPage());
-    }
-
-    public Integer getCurrentSemesterId() {
-        LocalDate today = LocalDate.now();
-
-        // 현재 날짜에 해당하는 학기를 찾기 위한 쿼리
-        Semester currentSemester = semesterRepository.findByStartDateBeforeAndEndDateAfter(today, today)
-                .orElseThrow(() -> new IllegalStateException("현재 학기가 존재하지 않습니다."));
-
-        return currentSemester.getId();
     }
 
 

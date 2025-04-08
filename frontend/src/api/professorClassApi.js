@@ -44,3 +44,8 @@ export const getLectureRooms = ({ day, startTime, endTime }) => {
     ...getAuthHeader(),
   });
 };
+
+// ✅ 강의 등록 가능 여부 확인
+export const isClassScheduleOpen = () => {
+  return axios.get(`${prefix}/is-class-open`, getAuthHeader());
+};

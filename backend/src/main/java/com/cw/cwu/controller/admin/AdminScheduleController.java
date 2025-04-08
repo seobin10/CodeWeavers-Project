@@ -67,10 +67,4 @@ public class AdminScheduleController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/is-enroll-open")
-    public ResponseEntity<Boolean> isEnrollOpen() {
-        boolean result = adminScheduleService.isScheduleOpen(ScheduleType.ENROLL);
-        return ResponseEntity.ok(result);
-    }
-
 }

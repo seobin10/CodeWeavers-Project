@@ -3,6 +3,7 @@ package com.cw.cwu.service.professor;
 import com.cw.cwu.domain.*;
 import com.cw.cwu.dto.*;
 import com.cw.cwu.repository.*;
+import com.cw.cwu.service.admin.AdminScheduleService;
 import com.cw.cwu.util.AuthUtil;
 import com.cw.cwu.util.PageUtil;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
     private final LectureRoomRepository lectureRoomRepository;
     private final UserRepository userRepository;
     private final SemesterRepository semesterRepository;
+    private final AdminScheduleService adminScheduleService;
 
     // 시간 중복 체크
     private boolean isTimeOverlap(int start1, int end1, int start2, int end2) {
@@ -75,9 +77,23 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
                 .orElseThrow(() -> new IllegalArgumentException("현재 학기를 찾을 수 없습니다."));
     }
 
+    private void validateCurrentSemester(Semester semester) {
+        Semester current = getCurrentSemester();
+        if (!semester.getId().equals(current.getId())) {
+            throw new IllegalStateException("현재 학기에만 강의 등록/수정/삭제가 가능합니다.");
+        }
+    }
+
     @Transactional
     @Override
     public String createClass(ClassCreateRequestDTO dto) {
+
+        if (!adminScheduleService.isScheduleOpen(ScheduleType.CLASS)) {
+            throw new IllegalStateException("현재는 강의 등록 기간이 아닙니다!");
+        }
+        Semester currentSemester = getCurrentSemester();
+        validateCurrentSemester(currentSemester);
+
         // 기본 검증
         if (dto.getCourseId() == null || !courseRepository.existsById(dto.getCourseId())) {
             return "존재하지 않는 과목입니다.";
@@ -151,6 +167,10 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
             dto.setCourseType(entity.getCourse().getType().name());
             dto.setCourseYear(entity.getCourse().getYear());
 
+            // 현재 학기와 비교
+            Semester currentSemester = getCurrentSemester();
+            dto.setIsCurrentSemester(semester.getId().equals(currentSemester.getId()));
+
             return dto;
         });
 
@@ -160,11 +180,14 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
     @Transactional
     @Override
     public String updateClass(ClassUpdateRequestDTO dto, String professorId) throws AccessDeniedException {
+
         ClassEntity entity = classEntityRepository.findById(dto.getClassId()).orElse(null);
         if (entity == null) return "해당 강의를 찾을 수 없습니다.";
 
         // 교수 권한 체크
         AuthUtil.checkOwnership(entity.getProfessor().getUserId(), professorId);
+
+        validateCurrentSemester(entity.getSemester());
 
         Semester semester = getCurrentSemester();
 
@@ -196,11 +219,17 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
     @Transactional
     @Override
     public String deleteClass(Integer classId, String professorId) throws AccessDeniedException {
+        if (!adminScheduleService.isScheduleOpen(ScheduleType.CLASS)) {
+            throw new IllegalStateException("현재는 강의 등록 기간이 아닙니다!");
+        }
+
         ClassEntity entity = classEntityRepository.findById(classId).orElse(null);
         if (entity == null) return "해당 강의를 찾을 수 없습니다.";
 
 
         AuthUtil.checkOwnership(entity.getProfessor().getUserId(), professorId);
+
+        validateCurrentSemester(entity.getSemester());
 
         classEntityRepository.delete(entity);
         return "삭제 완료";
