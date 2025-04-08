@@ -8,4 +8,5 @@ import lombok.Setter;
 public class EnrollmentRequestDTO {
     private String studentId;
     private int classId;
+
 }
