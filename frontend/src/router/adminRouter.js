@@ -6,8 +6,8 @@ import Loading from "../components/Loading";
 const AdminUserListPage = lazy(() =>
   import("../pages/Admin/AdminUserListPage")
 );
-const AdminDashboardPage = lazy(() =>
-  import("../pages/Admin/AdminDashboardPage")
+const AdminSchedulePage = lazy(() =>
+  import("../pages/Admin/AdminSchedulePage")
 );
 
 const adminRouter = [
@@ -27,7 +27,7 @@ const adminRouter = [
     element: (
       <RoleGuard allowedRoles={["ADMIN"]}>
         <Suspense fallback={<Loading />}>
-          <AdminDashboardPage />
+          <AdminSchedulePage />
         </Suspense>
       </RoleGuard>
     ),

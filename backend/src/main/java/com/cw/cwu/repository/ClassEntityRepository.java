@@ -1,6 +1,8 @@
 package com.cw.cwu.repository;
 
 import com.cw.cwu.domain.ClassEntity;
+import com.cw.cwu.domain.Semester;
+import com.cw.cwu.domain.SemesterTerm;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,7 +16,7 @@ import java.util.Map;
 @Repository
 public interface ClassEntityRepository extends JpaRepository<ClassEntity, Integer> {
 
-    Page<ClassEntity> findByProfessor_UserId(String userId, Pageable pageable);
+    Page<ClassEntity> findByProfessor_UserId(String professorId, Pageable pageable);
 
     @Query("SELECT DISTINCT d.departmentName FROM Department d")
     List<String> findDistinctDepartments();
@@ -63,7 +65,8 @@ JOIN (
 ) n
 ON n.number BETWEEN 0 AND (c.class_end - c.class_start)
 WHERE 
-    (:courseType IS NULL OR
+    c.semester_id = :semesterId 
+    AND (:courseType IS NULL OR
         (co.course_type = 'MAJOR' AND :courseType = '전공') OR
         (co.course_type = 'LIBERAL' AND :courseType = '교양'))
     AND (:departmentName IS NULL OR IFNULL(d.department_name, '공통') = :departmentName)
@@ -80,7 +83,8 @@ FROM classes c
 JOIN courses co ON c.course_id = co.course_id
 LEFT JOIN departments d ON co.department_id = d.department_id
 WHERE 
-    (:courseType IS NULL OR
+    c.semester_id = :semesterId
+    AND (:courseType IS NULL OR
         (co.course_type = 'MAJOR' AND :courseType = '전공') OR
         (co.course_type = 'LIBERAL' AND :courseType = '교양'))
     AND (:departmentName IS NULL OR IFNULL(d.department_name, '공통') = :departmentName)
@@ -100,13 +104,19 @@ WHERE
             @Param("classStart") Integer classStart,
             @Param("credit") Integer credit,
             @Param("courseName") String courseName,
+            @Param("semesterId") Integer semesterId,
             org.springframework.data.domain.Pageable pageable
     );
 
 
     // 강의실 + 요일
-    List<ClassEntity> findByProfessor_UserIdAndDayAndSemester(String userId, String day, String semester);
+    List<ClassEntity> findByLectureRoom_IdAndDayAndSemester(Integer roomId, String day, Semester semester);
 
     // 교수 + 요일
-    List<ClassEntity> findByLectureRoom_IdAndDayAndSemester(Integer roomId, String day, String semester);
+    List<ClassEntity> findByProfessor_UserIdAndDayAndSemester(String userId, String day, Semester semester);
+
+    // 학기 ID를 기준으로 필터링
+    Page<ClassEntity> findByProfessor_UserIdAndSemester_Id(String professorId, Integer semesterId, Pageable pageable);
+
+
 }

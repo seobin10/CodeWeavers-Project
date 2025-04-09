@@ -6,15 +6,7 @@ const prefix = `${API_SERVER_HOST}/api/admin`;
 
 // 사용자 생성
 export const createUser = (userData) => {
-  const config = {
-    ...getAuthHeader(),
-    headers: {
-      ...getAuthHeader().headers,
-      "Content-Type": "application/json", // ✅ 명시 필요
-    },
-  };
-
-  return axios.post(`${prefix}/users`, userData, config);
+  return axios.post(`${prefix}/users`, userData, getAuthHeader());
 };
 
 // 부서 목록 조회
@@ -24,15 +16,7 @@ export const getDepartments = () => {
 
 // 프로필 이미지 업로드
 export const uploadProfileImage = (formData) => {
-  const authHeader = getAuthHeader();
-
-  return axios.post(`${prefix}/profile`, formData, {
-    ...authHeader,
-    headers: {
-      ...authHeader.headers,
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  return axios.post(`${prefix}/profile`, formData, getAuthHeader());
 };
 
 // 전체 사용자 목록 조회

@@ -45,12 +45,15 @@ public class JWTUtil {
     }
 
     public Map<String, Object> getClaims(String token) {
+        log.info("📨 getClaims() - 전달된 토큰: {}", token);
         return Jwts.parserBuilder()
                 .setSigningKey(secretKey)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
     }
+
+
 
     public String getUserIdFromToken(String token) {
         try {

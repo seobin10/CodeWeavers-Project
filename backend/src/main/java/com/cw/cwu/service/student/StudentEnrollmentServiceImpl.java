@@ -1,16 +1,14 @@
 package com.cw.cwu.service.student;
 
-import com.cw.cwu.domain.ClassEntity;
-import com.cw.cwu.domain.CourseType;
-import com.cw.cwu.domain.Enrollment;
-import com.cw.cwu.domain.User;
+import com.cw.cwu.domain.*;
 import com.cw.cwu.dto.EnrollmentRequestDTO;
 import com.cw.cwu.dto.PageRequestDTO;
 import com.cw.cwu.dto.PageResponseDTO;
 import com.cw.cwu.repository.ClassEntityRepository;
 import com.cw.cwu.repository.EnrollmentRepository;
-import com.cw.cwu.repository.StudentRecordRepository;
+import com.cw.cwu.repository.SemesterRepository;
 import com.cw.cwu.repository.UserRepository;
+import com.cw.cwu.service.admin.AdminScheduleService;
 import com.cw.cwu.util.PageUtil;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -37,6 +35,8 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
     private final UserRepository userRepository;
     private final ClassEntityRepository classEntityRepository;
     private final StudentInfoService studentInfoService;
+    private final AdminScheduleService adminScheduleService;
+    private final SemesterRepository semesterRepository;
 
     // 학생이 수강 신청 가능한 강의 목록 조회
     @Override
@@ -51,16 +51,24 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
             String courseName,
             PageRequestDTO pageRequestDTO
     ) {
+        // 수강신청 기간 확인
+        if (!adminScheduleService.isScheduleOpen(ScheduleType.ENROLL)) {
+            throw new IllegalStateException("현재는 수강신청 기간이 아닙니다!");
+        }
 
-        Pageable pageable = PageRequest.of(pageRequestDTO.getPage() - 1, pageRequestDTO.getSize()); // 0이 베이스이므로
+        // 현재 학기ID 가져오기
+        Integer semesterId = adminScheduleService.getCurrentSemesterId();
+
+        Pageable pageable = PageRequest.of(pageRequestDTO.getPage() - 1, pageRequestDTO.getSize());
 
         Page<Map<String, Object>> result = classEntityRepository.findAvailableCoursesPaged(
                 studentId, courseType, departmentName, courseYear,
-                classDay, classStart, credit, courseName, pageable
+                classDay, classStart, credit, courseName, semesterId, pageable
         );
 
         return PageUtil.toDTO(result, pageRequestDTO.getPage());
     }
+
 
     // 학과 목록 필터링
     @Override
@@ -131,6 +139,10 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
 
     @Override
     public String deleteCourse(String studentId, Integer classId) {
+        if (!adminScheduleService.isScheduleOpen(ScheduleType.ENROLL)) {
+            throw new IllegalStateException("현재는 수강신청 기간이 아닙니다!");
+        }
+
         User student = userRepository.findByUserId(studentId).orElseThrow();
         ClassEntity classEntity = classEntityRepository.findById(classId).orElseThrow();
         Optional<Enrollment> optional = enrollmentRepository.findByStudentAndEnrolledClassEntity(student, classEntity);
@@ -170,6 +182,12 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
     // 수강 신청 처리
     @Override
     public String applyToClass(EnrollmentRequestDTO requestDTO) {
+        // 수강신청 가능 기간인지 확인
+        if (!adminScheduleService.isScheduleOpen(ScheduleType.ENROLL)) {
+            throw new IllegalStateException("현재는 수강신청 기간이 아닙니다!");
+        }
+
+
         System.out.println("service applyToClass : " + requestDTO);
         User student = userRepository.getReferenceById(requestDTO.getStudentId());
 
@@ -229,6 +247,7 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
         // 학생 수 1 증가
         classEntity.setEnrolled(classEntity.getEnrolled() + 1);
         classEntityRepository.save(classEntity);
+
         return "수강 신청에 성공하였습니다";
     }
 }
