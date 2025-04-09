@@ -9,6 +9,7 @@ const CurrentPage = lazy(() => import("../pages/CurrentPage"));
 const EnrollmentPage = lazy(() => import("../pages/EnrollmentPage"));
 const HistoryPage = lazy(() => import("../pages/HistoryPage"));
 const SchedulePage = lazy(() => import("../pages/SchedulePage"));
+const ChangepwPage =  lazy(() => import("../components/ChangepwPage"));
 
 const studentRouter = [
   {
@@ -64,6 +65,10 @@ const studentRouter = [
         </Suspense>
       </RoleGuard>
     ),
+  },
+  {
+    path: "password",
+    element: <ChangepwPage />,
   },
 ];
 

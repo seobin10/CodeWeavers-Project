@@ -11,7 +11,8 @@ const BasicLayout = () => {
   const { userId, userRole } = useSelector((state) => state.auth);
   const [openEnrollmentMenu, setOpenEnrollmentMenu] = useState(false);
   const [openGradeMenu, setOpenGradeMenu] = useState(false);
-
+  const [openInfoMenu, setOpenInfoMenu] = useState(false);
+  
   const handleLogout = useCallback(() => {
     dispatch(logout());
     localStorage.removeItem("id");
@@ -61,11 +62,35 @@ const BasicLayout = () => {
             {userRole === "STUDENT" && (
               <>
                 <Link
-                  to="/main/student"
+                  to="/main/noticelist"
                   className="hover:bg-blue-500 px-6 py-3 mt-6"
                 >
-                  정보조회 ▶
+                  공지사항 ▶
                 </Link>
+                <div className="flex flex-col mt-2 mb-2">
+                  <button
+                    className="hover:bg-blue-500 px-6 py-3 text-left w-full"
+                    onClick={() => setOpenInfoMenu((prev) => !prev)}
+                  >
+                    정보조회 {openInfoMenu ? "▼" : "▶"}
+                  </button>
+                  {openInfoMenu && (
+                    <div className="pl-8 space-y-3 text-sm mt-5">
+                      <Link
+                        to="/main/student"
+                        className="hover:underline block"
+                      >
+                        🙍‍♂️ 내 정보 조회
+                      </Link>
+                      <Link
+                        to="/main/password"
+                        className="hover:underline block pt-4"
+                      >
+                        🔐 비밀번호 변경
+                      </Link>
+                    </div>
+                  )}
+                </div>
 
                 <div className="flex flex-col mt-2 mb-2">
                   <button
@@ -132,6 +157,12 @@ const BasicLayout = () => {
             {userRole === "ADMIN" && (
               <>
                 <Link
+                  to="/main/noticelist"
+                  className="hover:bg-blue-500 px-6 py-3 mt-6"
+                >
+                  공지사항 ▶
+                </Link>
+                <Link
                   to="/main/admin/user-list"
                   className="hover:bg-blue-500 px-6 py-3 mt-6"
                 >
@@ -157,6 +188,12 @@ const BasicLayout = () => {
 
             {userRole === "PROFESSOR" && (
               <>
+                <Link
+                  to="/main/noticelist"
+                  className="hover:bg-blue-500 px-6 py-3 mt-6"
+                >
+                  공지사항 ▶
+                </Link>
                 <Link
                   to="/main/professor/classes"
                   className="hover:bg-blue-500 px-6 py-3 mt-6"
