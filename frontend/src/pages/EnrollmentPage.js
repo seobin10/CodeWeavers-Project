@@ -25,13 +25,15 @@ const EnrollmentPage = () => {
     totalCount: 0,
   });
 
-   // 수강신청 가능 기간 확인
-   useEffect(() => {
+  // 수강신청 가능 기간 확인
+  useEffect(() => {
     const checkPeriod = async () => {
       const isOpen = await checkEnrollPeriod();
       if (!isOpen) {
         // 수강신청 기간이 아니면 제한 페이지로 리다이렉트
-        navigate("/main/period-expired", { state: { message: "현재는 수강신청 기간이 아닙니다!" } });
+        navigate("/main/period-expired", {
+          state: { message: "현재는 수강신청 기간이 아닙니다!" },
+        });
       }
     };
 
