@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { writeQna } from "../api/qnaApi";
-import AlertModal from "../components/AlertModal";
-import { getAuthHeader } from "../util/authHeader";
-import axios from "axios";
+import { getAuthHeader } from "../../util/authHeader";
+import { writeNotice } from "../../api/noticeApi";
+import AlertModal from "../../components/AlertModal";
+
 
 // 날짜 데이터 포맷팅
 let date = new Date();
@@ -14,38 +15,21 @@ let month =
 let day = date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
 let today = year + "-" + month + "-" + day;
 
-const QnaWritePage = () => {
+const NoticeWritePage = () => {
   const navigate = useNavigate();
-  // 모달 데이터 정의(useState)
-  const [goTarget, setGoTarget] = useState(null); // 모달 종료 후 이동할 곳 정의
+  // 모달 데이터
+  const [goTarget, setGoTarget] = useState(null);
   const [alertModalOpen, setAlertModalOpen] = useState(false);
-  const [userName, setUserName] = useState(null);
-  const [type, setType] = useState(""); // 모달 스타일 정의
-  const [msg, setMsg] = useState(""); // 모달 메시지
+  const [type, setType] = useState("");
+  const [msg, setMsg] = useState("");
 
-  // 유저 데이터 불러오기 및 작성할 데이터 형식 정의
-  const userId = useSelector((state) => state.auth?.userId);
-  useEffect(() => {
-    if (userId) {
-      fetchStudentInfo(userId);
-    }
-  }, [userId]);
+  // 관리자 아이디 불러오기
+  const adminId = useSelector((state) => state.auth?.userId);
 
-  const fetchStudentInfo = async (userId) => {
-    try {
-      const response = await axios.get(
-        `http://localhost:8080/api/user/${userId}`,
-        getAuthHeader()
-      );
-      setUserName(response.data.userName);
-    } catch (error) {
-      console.log("정보를 불러올 수 없습니다.");
-    }
-  };
   const [formData, setFormData] = useState({
     title: "",
     content: "",
-    status: "OPEN",
+    pin: 0,
     viewCount: 0,
   });
 
@@ -65,11 +49,10 @@ const QnaWritePage = () => {
     }
   };
 
-  const handleSecret = (title) => {
-    const isSecret = document.getElementById("secret").checked;
-    return isSecret
-      ? `🔒 ${title.replace(/^🔒\s*/, "")}`
-      : title.replace(/^🔒\s*/, "");
+  // 공지 상단 고정 여부를 결정하는 함수 (체크하면 위에 고정되게 함)
+  const handlePinned = () => {
+    const isPinned = document.getElementById("pin").checked;
+    return isPinned ? 1 : 0;
   };
 
   const handleChange = (e) => {
@@ -85,23 +68,25 @@ const QnaWritePage = () => {
 
     const data = {
       ...formData,
-      title: handleSecret(formData.title),
-      userId,
-      userName,
-      createdAt: today,
+      pin: handlePinned(),
+      noticeDate: today,
+      noticeId: null,
+      adminId: adminId,
     };
 
     try {
-      await writeQna(userId, data);
-      setAlertData("success", "질문이 등록되었습니다", "/main/qnalist");
+      console.log(data);
+      await writeNotice(adminId, data);
+      setAlertData("success", "공지가 등록되었습니다", "/main/noticelist");
     } catch (error) {
-      setAlertData("error", "질문 등록에 실패했습니다.", null);
+      console.error("에러 내용:", error.response?.data || error.message);
+      setAlertData("error", "공지 등록에 실패했습니다.", null);
     }
   };
 
   return (
     <div className="max-w-7xl mx-auto p-8 bg-white shadow-md rounded-md mt-10">
-      <h1 className="text-md font-bold text-left mb-6">Q&A</h1>
+      <h1 className="text-md font-bold text-left mb-6">공지사항</h1>
       <hr />
       <br />
       <table className="table-auto border-collapse border border-gray-400 w-full">
@@ -128,7 +113,7 @@ const QnaWritePage = () => {
               <input
                 readOnly
                 className="w-full focus-visible:outline-none"
-                value={userName || ""}
+                value={"관리자"}
               />
             </td>
           </tr>
@@ -149,7 +134,7 @@ const QnaWritePage = () => {
           <tr className="w-full h-96 flex-auto shadow-md">
             <td colSpan={2} className="p-4">
               <textarea
-                placeholder="질문 내용을 작성하세요."
+                placeholder="공지 내용을 작성하세요."
                 name="content"
                 className="w-full h-96 focus-visible:outline-none resize-none"
                 maxLength={255}
@@ -161,12 +146,12 @@ const QnaWritePage = () => {
         </tbody>
       </table>
       <div className="mt-4">
-        <p title="비밀 글을 작성하고 싶다면 체크하세요">
-          <input type="checkbox" id="secret" /> 비밀 글
+        <p title="공지를 상단에 고정하고 싶다면 체크하세요">
+          <input type="checkbox" id="pin" /> 고정📌
         </p>
         <div className="flex float-right mb-10">
           <Link
-            to="/main/qnalist"
+            to="/main/noticelist"
             className="text-blue-500 hover:text-blue-700 text-lg font-semibold px-3 rounded transition"
           >
             ← 돌아가기
@@ -192,4 +177,4 @@ const QnaWritePage = () => {
   );
 };
 
-export default QnaWritePage;
+export default NoticeWritePage;

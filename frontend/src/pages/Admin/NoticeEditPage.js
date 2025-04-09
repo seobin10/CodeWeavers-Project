@@ -1,21 +1,21 @@
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { getQnaDetail, getQnaWriterId, updateQna } from "../api/qnaApi";
-import AlertModal from "../components/AlertModal";
+import { useLocation, useNavigate } from "react-router-dom";
+import { getData, updateNotice } from "../../api/noticeApi";
+import AlertModal from "../../components/AlertModal";
 
-const QnaEditPage = () => {
+
+const NoticeEditPage = () => {
   const location = useLocation();
-  const questionId = location.state?.questionId;
+  const noticeId = location.state?.noticeId;
   const navigate = useNavigate();
   const userId = useSelector((state) => state.auth?.userId);
 
-  const [writerId, setWriterId] = useState(null);
   const [message, setMessage] = useState("");
   const [contentData, setContentData] = useState({
     title: "",
     content: "",
-    questionId,
+    noticeId,
   });
 
   const [alertModalOpen, setAlertModalOpen] = useState(false);
@@ -24,41 +24,34 @@ const QnaEditPage = () => {
   const [goTarget, setGoTarget] = useState(null);
 
   useEffect(() => {
-    if (questionId) {
+    if (userId) {
       fetchContent();
-      fetchWriter();
     }
-  }, [questionId]);
+  }, [userId]);
 
   const fetchContent = async () => {
     try {
-      const res = await getQnaDetail(questionId);
-      const qna = res.data[0];
+      const res = await getData(noticeId);
+      console.log("getData 응답:", res);
+      const notice = res.data;
       setContentData({
-        questionId: qna.questionId,
-        title: qna.title,
-        content: qna.questionContent,
-        createdAt: qna.createdAt,
-        viewCount: qna.viewCount,
-        userName: qna.userName,
+        noticeId: notice.noticeId,
+        title: notice.title,
+        content: notice.content,
+        pin: notice.pin,
+        viewCount: notice.viewCount,
+        noticeDate: notice.noticeDate,
       });
+      console.log(contentData);
     } catch (err) {
-      setMessage("질문을 불러올 수 없습니다.");
+      setMessage("공지를 불러올 수 없습니다.");
     }
   };
 
-  const fetchWriter = async () => {
-    try {
-      const res = await getQnaWriterId(questionId);
-      setWriterId(res.data);
-    } catch (err) {
-      setMessage("작성자 정보를 불러올 수 없습니다.");
-    }
-  };
-
-  const handleSecret = (title) => {
-    const isSecret = document.getElementById("secret").checked;
-    return isSecret ? `🔒 ${title.replace(/^🔒\s*/, "")}` : title.replace(/^🔒\s*/, "");
+  // 공지 상단 고정 여부를 결정하는 함수 (체크하면 위에 고정되게 함)
+  const handlePinned = () => {
+    const isPinned = document.getElementById("pin").checked;
+    return isPinned ? 1 : 0;
   };
 
   const handleChange = (e) => {
@@ -76,7 +69,7 @@ const QnaEditPage = () => {
   const handleClose = () => {
     setAlertModalOpen(false);
     if (goTarget) {
-      navigate(goTarget, { state: { questionId } });
+      navigate(goTarget, { state: { noticeId } });
       setGoTarget(null);
     }
   };
@@ -87,17 +80,10 @@ const QnaEditPage = () => {
       return;
     }
 
-    if (userId != writerId) {
-      console.log("u ", userId);
-      console.log("w ", writerId);
-      setAlertData("error", "작성자만 수정할 수 있습니다.", "/main/qnalist");
-      return;
-    }
-
     try {
-      const updatedTitle = handleSecret(contentData.title);
-      await updateQna(questionId, { ...contentData, title: updatedTitle });
-      setAlertData("success", "성공적으로 수정되었습니다.", "/main/qnadata");
+      const updatedPin = handlePinned(contentData.pin);
+      await updateNotice(noticeId, { ...contentData, pin: updatedPin });
+      setAlertData("success", "성공적으로 수정되었습니다.", "/main/noticedata");
     } catch (err) {
       setAlertData("error", "수정에 실패했습니다.");
     }
@@ -105,33 +91,39 @@ const QnaEditPage = () => {
 
   return (
     <div className="max-w-7xl mx-auto p-8 bg-white shadow-md rounded-md mt-10">
-      <h1 className="text-md font-bold text-left mb-6">Q&A 수정</h1>
+      <h1 className="text-md font-bold text-left mb-6">공지 수정</h1>
       <hr />
       <br />
       {message && <p className="text-red-500 text-center">{message}</p>}
       <table className="table-auto border-collapse border border-gray-400 w-full">
         <thead className="bg-blue-800">
           <tr>
-            <th className="border border-gray-400 px-4 py-2 text-white">제목</th>
+            <th className="border border-gray-400 px-4 py-2 text-white">
+              제목
+            </th>
             <td className="border border-gray-400 px-4 py-2 bg-white">
               <input
                 name="title"
                 className="w-full focus-visible:outline-none"
-                value={contentData.title.replace(/^🔒\s*/, "")}
                 onChange={handleChange}
+                value={contentData.title}
               />
             </td>
           </tr>
           <tr>
-            <th className="border border-gray-400 px-4 py-2 text-white">작성자</th>
+            <th className="border border-gray-400 px-4 py-2 text-white">
+              작성자
+            </th>
             <td className="border border-gray-400 px-4 py-2 bg-white">
-              {contentData.userName || ""}
+              {"관리자"}
             </td>
           </tr>
           <tr>
-            <th className="border border-gray-400 px-4 py-2 text-white">작성일 / 조회수</th>
+            <th className="border border-gray-400 px-4 py-2 text-white">
+              작성일
+            </th>
             <td className="border border-gray-400 px-4 py-2 bg-white">
-              {contentData.createdAt} / {contentData.viewCount}
+              {contentData.noticeDate}
             </td>
           </tr>
         </thead>
@@ -139,7 +131,7 @@ const QnaEditPage = () => {
           <tr className="w-full h-96 flex-auto shadow-md">
             <td colSpan={2} className="p-4">
               <textarea
-                placeholder="질문 내용을 수정하세요."
+                placeholder="공지사항을 수정하세요."
                 name="content"
                 className="w-full h-96 focus-visible:outline-none resize-none"
                 maxLength={255}
@@ -152,12 +144,7 @@ const QnaEditPage = () => {
       </table>
       <div className="mt-4">
         <label>
-          <input
-            type="checkbox"
-            id="secret"
-            defaultChecked={/^🔒/.test(contentData.title)}
-          />{" "}
-          비밀 글
+          <input type="checkbox" id="pin" /> 고정📌
         </label>
         <div className="flex float-right mb-10">
           <button
@@ -179,4 +166,4 @@ const QnaEditPage = () => {
   );
 };
 
-export default QnaEditPage;
+export default NoticeEditPage;
