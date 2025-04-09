@@ -11,6 +11,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class ClassEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "class_id")
@@ -24,8 +25,9 @@ public class ClassEntity {
     @JoinColumn(name = "professor_id", referencedColumnName = "user_id")
     private User professor;
 
-    @Column(name = "class_semester", nullable = false)
-    private String semester;
+    @ManyToOne
+    @JoinColumn(name = "semester_id", nullable = false)
+    private Semester semester;
 
     @Column(name = "class_day", nullable = false)
     private String day;

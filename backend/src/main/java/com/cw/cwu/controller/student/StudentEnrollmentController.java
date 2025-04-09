@@ -1,8 +1,10 @@
 package com.cw.cwu.controller.student;
 
+import com.cw.cwu.domain.ScheduleType;
 import com.cw.cwu.dto.EnrollmentRequestDTO;
 import com.cw.cwu.dto.PageRequestDTO;
 import com.cw.cwu.dto.PageResponseDTO;
+import com.cw.cwu.service.admin.AdminScheduleService;
 import com.cw.cwu.service.student.StudentEnrollmentService;
 
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ import java.util.Map;
 public class StudentEnrollmentController {  // 학생 수강 신청 관리 컨트롤러
 
     private final StudentEnrollmentService studentEnrollmentService;
+    private final AdminScheduleService adminScheduleService;
 
     // 학생이 수강 신청 가능한 강의 목록 조회
     @GetMapping("/{studentId}/enrollment")
@@ -105,5 +108,11 @@ public class StudentEnrollmentController {  // 학생 수강 신청 관리 컨�
     @GetMapping("/{studentId}/history")
     public ResponseEntity<List<Map<String, Object>>> getEnrolledCourses(@PathVariable String studentId) {
         return ResponseEntity.ok(studentEnrollmentService.getConfirmedCourses(studentId));
+    }
+
+    @GetMapping("/is-enroll-open")
+    public ResponseEntity<Boolean> isEnrollOpen() {
+        boolean result = adminScheduleService.isScheduleOpen(ScheduleType.ENROLL);
+        return ResponseEntity.ok(result);
     }
 }

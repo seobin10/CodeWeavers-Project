@@ -1,9 +1,11 @@
 package com.cw.cwu.controller.professor;
 
+import com.cw.cwu.domain.ScheduleType;
 import com.cw.cwu.dto.GradeDetailDTO;
 import com.cw.cwu.dto.GradeRegisterDTO;
 import com.cw.cwu.dto.PageRequestDTO;
 import com.cw.cwu.dto.PageResponseDTO;
+import com.cw.cwu.service.admin.AdminScheduleService;
 import com.cw.cwu.service.professor.ProfessorGradeService;
 import com.cw.cwu.util.UserRequestUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,6 +22,7 @@ public class ProfessorGradeController {
 
     private final ProfessorGradeService gradeService;
     private final UserRequestUtil userRequestUtil;
+    private final AdminScheduleService adminScheduleService;
 
     @PostMapping
     public ResponseEntity<String> registerGrade(
@@ -64,5 +67,11 @@ public class ProfessorGradeController {
         String professorId = userRequestUtil.extractUserId(request);
         PageResponseDTO<GradeDetailDTO> response = gradeService.getGradesByClass(professorId, classId, pageRequestDTO);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/is-grade-open")
+    public ResponseEntity<Boolean> isGradeOpen() {
+        boolean result = adminScheduleService.isScheduleOpen(ScheduleType.GRADE);
+        return ResponseEntity.ok(result);
     }
 }

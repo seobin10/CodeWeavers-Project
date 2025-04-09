@@ -18,4 +18,5 @@ public class GradeDetailDTO {
 
     private Integer enrollmentId;
     private Integer gradeId;
+    private Boolean isCurrentSemester;
 }

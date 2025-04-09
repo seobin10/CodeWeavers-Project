@@ -4,6 +4,7 @@ import com.cw.cwu.domain.Grade;
 import com.cw.cwu.dto.GradeDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -20,4 +21,15 @@ public interface GradeRepository extends JpaRepository<Grade, Integer> {
     """, nativeQuery = true)
     List<GradeDTO> findGrade(String studentId);
 
+    // 학생의 총 취득 학점(SUM(earned)) 조회 (F학점 제외)
+    @Query("""
+    SELECT SUM(c.credit)
+    FROM Grade g
+    JOIN g.enrollment e
+    JOIN e.enrolledClassEntity ce
+    JOIN ce.course c
+    WHERE e.student.userId = :studentId
+      AND g.grade <> 'F'
+""")
+    Integer findTotalEarnedCreditsByStudent(@Param("studentId") String studentId);
 }
