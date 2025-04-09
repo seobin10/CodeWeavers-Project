@@ -3,6 +3,7 @@ package com.cw.cwu.service.student;
 import com.cw.cwu.domain.*;
 import com.cw.cwu.dto.GradeDTO;
 import com.cw.cwu.repository.*;
+import com.cw.cwu.util.AuthUtil;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -40,7 +41,8 @@ public class StudentGradeServiceImpl implements StudentGradeService {
 
     // 학생 성적 기록 업데이트 (학점, 취득 학점, GPA 계산 후 저장)
     @Override
-    public void updateStudentRecords(String studentId) {
+    public void updateStudentRecords(String studentId, String requesterId) {
+        AuthUtil.checkOwnership(studentId, requesterId);
         List<Enrollment> enrollments = enrollmentRepository.findEnrollmentsByStudentId(studentId);
 
         int totalEnrolled = 0;

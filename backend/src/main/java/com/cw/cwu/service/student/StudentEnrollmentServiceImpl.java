@@ -9,6 +9,7 @@ import com.cw.cwu.repository.EnrollmentRepository;
 import com.cw.cwu.repository.SemesterRepository;
 import com.cw.cwu.repository.UserRepository;
 import com.cw.cwu.service.admin.AdminScheduleService;
+import com.cw.cwu.util.AuthUtil;
 import com.cw.cwu.util.PageUtil;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -138,7 +139,8 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
     }
 
     @Override
-    public String deleteCourse(String studentId, Integer classId) {
+    public String deleteCourse(String studentId, Integer classId, String requesterId) {
+        AuthUtil.checkOwnership(studentId, requesterId);
         if (!adminScheduleService.isScheduleOpen(ScheduleType.ENROLL)) {
             throw new IllegalStateException("현재는 수강신청 기간이 아닙니다!");
         }
@@ -181,7 +183,10 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
 
     // 수강 신청 처리
     @Override
-    public String applyToClass(EnrollmentRequestDTO requestDTO) {
+    public String applyToClass(EnrollmentRequestDTO requestDTO, String requesterId) {
+        // 권한 체크
+        AuthUtil.checkOwnership(requestDTO.getStudentId(), requesterId);
+
         // 수강신청 가능 기간인지 확인
         if (!adminScheduleService.isScheduleOpen(ScheduleType.ENROLL)) {
             throw new IllegalStateException("현재는 수강신청 기간이 아닙니다!");
