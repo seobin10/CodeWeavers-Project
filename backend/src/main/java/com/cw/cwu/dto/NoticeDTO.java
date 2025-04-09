@@ -18,6 +18,6 @@ public class NoticeDTO {
     private String title;
     private String content;
     private LocalDate noticeDate;
-    private boolean pin;
+    private Integer pin;
     private Integer viewCount;
 }

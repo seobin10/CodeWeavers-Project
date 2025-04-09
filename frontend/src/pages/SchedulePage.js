@@ -40,7 +40,7 @@ const getColorClass = (courseName) => {
 };
 
 const SchedulePage = () => {
-  const { userId } = useSelector((state) => state.login || {});
+  const userId = useSelector((state) => state.auth.userId);
   const [schedule, setSchedule] = useState([]);
 
   const fetchSchedule = useCallback(async () => {
