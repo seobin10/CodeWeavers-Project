@@ -2,6 +2,8 @@ package com.cw.cwu.controller.student;
 
 import com.cw.cwu.dto.StudentStatusDTO;
 import com.cw.cwu.service.student.StudentInfoServiceImpl;
+import com.cw.cwu.util.UserRequestUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 public class StudentInfoController { // 학생 학사 정보 컨트롤러
 
     private final StudentInfoServiceImpl studentInfoService;
+    private final UserRequestUtil userRequestUtil;
 
     // 학생의 현재 학년 조회 (학점 기준 계산)
     @GetMapping("/{studentId}/year")
@@ -28,9 +31,10 @@ public class StudentInfoController { // 학생 학사 정보 컨트롤러
     }
 
     //  학생의 학적 상태 + 학년 정보 조회
-    @GetMapping("/{studentId}/status")
-    public ResponseEntity<StudentStatusDTO> getStudentStatus(@PathVariable("studentId") String studentId) {
-        StudentStatusDTO dto = studentInfoService.getStudentStatusInfo(studentId);
+    @GetMapping("/status")
+    public ResponseEntity<StudentStatusDTO> getStudentStatus(HttpServletRequest request) {
+        String requesterId = userRequestUtil.extractUserId(request);
+        StudentStatusDTO dto = studentInfoService.getStudentStatusInfo(requesterId, requesterId);
         return ResponseEntity.ok(dto);
     }
 }

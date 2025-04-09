@@ -7,6 +7,8 @@ import com.cw.cwu.dto.PageResponseDTO;
 import com.cw.cwu.service.admin.AdminScheduleService;
 import com.cw.cwu.service.student.StudentEnrollmentService;
 
+import com.cw.cwu.util.UserRequestUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +23,7 @@ public class StudentEnrollmentController {  // 학생 수강 신청 관리 컨�
 
     private final StudentEnrollmentService studentEnrollmentService;
     private final AdminScheduleService adminScheduleService;
+    private final UserRequestUtil userRequestUtil;
 
     // 학생이 수강 신청 가능한 강의 목록 조회
     @GetMapping("/{studentId}/enrollment")
@@ -77,9 +80,10 @@ public class StudentEnrollmentController {  // 학생 수강 신청 관리 컨�
 
     // 수강 신청 요청
     @PostMapping("/{studentId}/enrollment")
-    public ResponseEntity<String> enroll(@RequestBody EnrollmentRequestDTO requestDTO) {
+    public ResponseEntity<String> enroll(@RequestBody EnrollmentRequestDTO requestDTO, HttpServletRequest request) {
         System.out.println("등록  controller ");
-        String result=  studentEnrollmentService.applyToClass(requestDTO);
+        String studentId = userRequestUtil.extractUserId(request);
+        String result=  studentEnrollmentService.applyToClass(requestDTO, studentId);
         System.out.println("result controller:"+result);
         return ResponseEntity.ok(result);
     }
@@ -94,10 +98,12 @@ public class StudentEnrollmentController {  // 학생 수강 신청 관리 컨�
     @DeleteMapping("/{studentId}/course/{classId}")
     public ResponseEntity<String> deleteCourse(
             @PathVariable String studentId,
-            @PathVariable Integer classId) {
+            @PathVariable Integer classId,
+            HttpServletRequest request) {
         // 요청 로그
         System.out.println("강의 삭제: studentId=" + studentId + ", classId=" + classId);
-        String result = studentEnrollmentService.deleteCourse(studentId, classId);
+        String requesterId = userRequestUtil.extractUserId(request);
+        String result = studentEnrollmentService.deleteCourse(studentId, classId, requesterId);
 
         // 응답 로그
         System.out.println(" 응답 " + result);

@@ -10,17 +10,25 @@ import java.util.Optional;
 
 public interface UserService {
     public UserDTO login(UserDTO request);
-    public UserDTO getUserInfo(String userId);
     Optional<User> findByUserId(String email);
+
+    // 정보 조회
+    UserDTO getUserInfo(String userId, String requesterId);
+
     public String findUserIdByUserName(String username);
+
+    // 이메일과 전화번호 업데이트
+    UserDTO updateUser(String userId, UserDTO request, String requesterId);
+
     //Qna
     public List<QuestionDTO> findAllQna();
     public List<QnADTO> findAnswer(Integer questionId);
     public QuestionDTO updateCount(Integer questionId);
     public Integer writeQna(QuestionDTO dto, String userId);
-    public void deleteQna(Integer questionId);
+    void deleteQna(Integer questionId, String requesterId);
+
     public String findQnaId(Integer questionId);
-    public void editQna(QuestionDTO dto);
+    void editQna(QuestionDTO dto, String requesterId);
 
     // User 엔티티 -> UserDTO 변환
     default UserDTO convertToDTO(User user) {
@@ -37,5 +45,6 @@ public interface UserService {
         dto.setDepartmentName(user.getDepartment() != null ? user.getDepartment().getDepartmentName() : null);
         return dto;
     }
+
 
 }
