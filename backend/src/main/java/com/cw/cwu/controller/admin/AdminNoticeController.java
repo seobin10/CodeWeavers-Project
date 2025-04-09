@@ -4,9 +4,11 @@ import com.cw.cwu.dto.NoticeDTO;
 import com.cw.cwu.service.admin.AdminNoticeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 
 @RestController
 @RequestMapping("api/notice")
@@ -22,6 +24,7 @@ public class AdminNoticeController {
     }
 
     //공지사항 등록
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/write")
     public ResponseEntity<String> writeNotice(@RequestBody NoticeDTO dto, @RequestParam String adminId) {
         Integer noticeId = adminNoticeService.writeNotice(dto, adminId);
@@ -42,6 +45,7 @@ public class AdminNoticeController {
     }
 
     //공지사항 수정
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/edit/{noticeId}")
     public ResponseEntity<String> editNotice(@PathVariable(name = "noticeId") Integer noticeId, @RequestBody NoticeDTO dto) {
         adminNoticeService.updateNotice(noticeId, dto);
@@ -49,6 +53,7 @@ public class AdminNoticeController {
     }
 
     //공지사항 삭제
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/delete/{noticeId}")
     public  ResponseEntity<String> clearNotice(@PathVariable(name = "noticeId") Integer noticeId) {
         adminNoticeService.deleteNotice(noticeId);
