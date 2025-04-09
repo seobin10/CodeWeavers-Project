@@ -6,8 +6,9 @@ import studentRouter from "./studentRouter";
 import adminRouter from "./adminRouter";
 import professorRouter from "./professorRouter";
 import qnaRouter from "./qnaRouter";
+import noticeRouter from "./noticeRouter";
 import UnauthorizedPage from "../pages/UnauthorizedPage";
-import PeriodExpiredPage from "../pages/users/PeriodExpiredPage"
+import PeriodExpiredPage from "../pages/users/PeriodExpiredPage";
 import Loading from "../components/Loading";
 import { Suspense, lazy } from "react";
 
@@ -21,6 +22,7 @@ const root = createBrowserRouter([
       ...adminRouter,
       ...professorRouter,
       ...qnaRouter,
+      ...noticeRouter,
       {
         path: "unauthorized",
         element: (
