@@ -14,6 +14,7 @@ import java.time.LocalDate;
 @Builder
 public class Notice { // 공지사항 엔터티
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "notice_id")
     private Integer noticeId;
 
@@ -35,4 +36,8 @@ public class Notice { // 공지사항 엔터티
 
     @Column(name= "view_count")
     private Integer viewCount;
+
+    public void editTitle(String title){this.title=title;}
+    public void editContent(String content){this.content=content;}
+    public void editPin(boolean pin){this.pin=pin;}
 }
