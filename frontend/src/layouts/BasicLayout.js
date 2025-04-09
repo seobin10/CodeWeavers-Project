@@ -138,7 +138,7 @@ const BasicLayout = () => {
                   사용자 관리 ▶
                 </Link>
                 <Link to="/main/users" className="hover:bg-blue-500 px-6 py-3">
-                  관리자 대시보드 ▶
+                  일정 관리 ▶
                 </Link>
                 <Link
                   to="/main/classes"

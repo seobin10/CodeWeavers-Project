@@ -9,16 +9,16 @@ const ProfessorClassEditPage = ({ classData, onSuccess, onClose }) => {
   const [lectureRooms, setLectureRooms] = useState([]);
 
   useEffect(() => {
-    const { semester, day, startTime, endTime } = form;
-
-    if (semester && day && startTime && endTime) {
-      getLectureRooms({ semester, day, startTime, endTime })
+    const { day, startTime, endTime } = form;
+  
+    if (day && startTime && endTime) {
+      getLectureRooms({ day, startTime, endTime })
         .then((res) => setLectureRooms(res.data))
         .catch(() => setLectureRooms([]));
     } else {
       setLectureRooms([]);
     }
-  }, [form.semester, form.day, form.startTime, form.endTime]);
+  }, [form.day, form.startTime, form.endTime]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

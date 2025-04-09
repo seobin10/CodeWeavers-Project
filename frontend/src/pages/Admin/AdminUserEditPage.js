@@ -101,7 +101,7 @@ const AdminUserEditPage = ({ user, onSuccess, onClose }) => {
         typeof response.data === "string"
           ? response.data
           : response.data.message ?? "응답 메시지를 확인할 수 없습니다.";
-  
+
       dispatch(showModal({ message: msg }));
       onSuccess();
       onClose();
@@ -111,7 +111,7 @@ const AdminUserEditPage = ({ user, onSuccess, onClose }) => {
       if (typeof errorData === "string") message = errorData;
       else if (typeof errorData === "object" && errorData.message)
         message = errorData.message;
-  
+
       dispatch(showModal({ message, type: "error" }));
     }
   };
@@ -131,7 +131,7 @@ const AdminUserEditPage = ({ user, onSuccess, onClose }) => {
       if (typeof errorData === "string") message = errorData;
       else if (typeof errorData === "object" && errorData.message)
         message = errorData.message;
-  
+
       dispatch(showModal({ message, type: "error" }));
       setIsConfirmModalOpen(false);
     }
@@ -317,7 +317,7 @@ const AdminUserEditPage = ({ user, onSuccess, onClose }) => {
 
       <ConfirmModal
         isOpen={isConfirmModalOpen}
-        message="비밀번호를 초기화하시겠습니까?"
+        message={`비밀번호를 초기화하시겠습니까?\n( 기본값 : 생년월일 6자리 + ! )`}
         onConfirm={handleConfirmResetPassword}
         onCancel={() => setIsConfirmModalOpen(false)}
       />

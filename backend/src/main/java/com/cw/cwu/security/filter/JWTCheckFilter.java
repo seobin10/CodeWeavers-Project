@@ -45,6 +45,9 @@ public class JWTCheckFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+
+        log.info("🔐 JWTCheckFilter 실행됨 - URI: {}", request.getRequestURI());
+
         log.info("----- JWTCheckFilter -----");
 
         String authHeaderStr = request.getHeader("Authorization");
@@ -60,7 +63,14 @@ public class JWTCheckFilter extends OncePerRequestFilter {
                 throw new IllegalArgumentException("토큰이 비어있습니다.");
             }
 
-            Map<String, Object> claims = jwtUtil.getClaims(accessToken);
+            Map<String, Object> claims;
+            try {
+                claims = jwtUtil.getClaims(accessToken);
+                log.info("✅ JWT claims 추출 성공: {}", claims);
+            } catch (Exception ex) {
+                log.error("❌ JWT claims 파싱 실패: {}", ex.getMessage(), ex);
+                throw new IllegalArgumentException("JWT 클레임 추출 실패");
+            }
             log.info("JWT claims : {}", claims);
 
             Integer userId = parseUserId(claims.get("userId"));

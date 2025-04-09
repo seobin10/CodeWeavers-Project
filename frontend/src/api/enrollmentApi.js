@@ -38,3 +38,14 @@ export const getEnrolledCourses = (userId) => {
 export const deleteCourse = (userId, classId) => {
   return axios.delete(`${prefix}/${userId}/course/${classId}`, getAuthHeader());
 };
+
+// 수강신청 기간 확인
+export const checkEnrollPeriod = async () => {
+  try {
+    const response = await axios.get(`${prefix}/is-enroll-open`, getAuthHeader());
+    return response.data;  // true 또는 false
+  } catch (error) {
+    console.error("수강신청 기간 확인 실패:", error);
+    return false;
+  }
+};

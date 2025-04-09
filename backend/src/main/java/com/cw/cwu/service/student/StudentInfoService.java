@@ -1,5 +1,7 @@
 package com.cw.cwu.service.student;
 
+import com.cw.cwu.dto.StudentStatusDTO;
+
 public interface StudentInfoService {
 
     /**
@@ -22,4 +24,6 @@ public interface StudentInfoService {
      * @return 졸업 가능 여부 (true: 가능, false: 불가)
      */
     boolean checkGraduationEligibility(String studentId);
+
+    StudentStatusDTO getStudentStatusInfo(String studentId);
 }

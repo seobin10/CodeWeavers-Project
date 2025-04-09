@@ -10,7 +10,6 @@ import { showModal } from "../../slices/modalSlice";
 const initialForm = {
   courseId: "",
   professorId: "",
-  semester: "",
   day: "",
   startTime: "",
   endTime: "",
@@ -29,19 +28,19 @@ const ProfessorClassCreatePage = ({ onSuccess, professorId }) => {
     getCourses()
       .then((res) => setCourses(res.data))
       .catch(() => setCourses([]));
-  }, []); 
+  }, []);
 
   useEffect(() => {
-    const { semester, day, startTime, endTime } = form;
+    const { day, startTime, endTime } = form;
 
-    if (semester && day && startTime && endTime) {
-      getLectureRooms({ semester, day, startTime, endTime })
+    if (day && startTime && endTime) {
+      getLectureRooms({ day, startTime, endTime })
         .then((res) => setRooms(res.data))
         .catch(() => setRooms([]));
     } else {
       setRooms([]);
     }
-  }, [form.semester, form.day, form.startTime, form.endTime]);
+  }, [form.day, form.startTime, form.endTime]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -74,6 +73,7 @@ const ProfessorClassCreatePage = ({ onSuccess, professorId }) => {
       <h2 className="text-xl font-bold mb-4 text-center">강의 등록</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* 과목 */}
         <div>
           <label className="text-sm font-medium">과목 *</label>
           <select
@@ -82,32 +82,24 @@ const ProfessorClassCreatePage = ({ onSuccess, professorId }) => {
             value={form.courseId || ""}
             onChange={handleChange}
           >
-            <option value="">과목 선택</option>
-            {courses.map((c) => (
-              <option key={c.courseId} value={c.courseId}>
-                {c.courseType === "MAJOR" ? "전공" : "교양"} - {c.courseName}
-              </option>
-            ))}
+            <option value="">강의 선택</option>
+            {[...courses]
+              .sort((a, b) => {
+                if (a.courseType !== b.courseType) {
+                  return a.courseType === "MAJOR" ? -1 : 1;
+                }
+                return a.courseYear - b.courseYear;
+              })
+              .map((c) => (
+                <option key={c.courseId} value={c.courseId}>
+                  {c.courseType === "MAJOR" ? "전공" : "교양"} - {c.courseName}{" "}
+                  ({c.courseYear}학년)
+                </option>
+              ))}
           </select>
         </div>
 
-        <div>
-          <label className="text-sm font-medium">학기 *</label>
-          <select
-            name="semester"
-            className="w-full p-2 border rounded"
-            value={form.semester || ""}
-            onChange={handleChange}
-          >
-            <option value="">학기 선택</option>
-            {getSemesterOptions().map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        </div>
-
+        {/* 요일 */}
         <div>
           <label className="text-sm font-medium">요일 *</label>
           <select
@@ -125,35 +117,35 @@ const ProfessorClassCreatePage = ({ onSuccess, professorId }) => {
           </select>
         </div>
 
-        <div className="flex gap-2">
-          <div>
-            <label className="text-sm font-medium">시작 교시 *</label>
-            <input
-              type="number"
-              name="startTime"
-              min={1}
-              max={10}
-              className="w-full p-2 border rounded"
-              value={form.startTime}
-              onChange={handleChange}
-              placeholder="예: 3"
-            />
-          </div>
-          <div>
-            <label className="text-sm font-medium">종료 교시 *</label>
-            <input
-              type="number"
-              name="endTime"
-              min={form.startTime || 1}
-              max={10}
-              className="w-full p-2 border rounded"
-              value={form.endTime}
-              onChange={handleChange}
-              placeholder="예: 5"
-            />
-          </div>
+        {/* 시작/종료 교시 */}
+        <div>
+          <label className="text-sm font-medium">시작 교시 *</label>
+          <input
+            type="number"
+            name="startTime"
+            min={1}
+            max={10}
+            className="w-full p-2 border rounded"
+            value={form.startTime}
+            onChange={handleChange}
+            placeholder="예: 3"
+          />
+        </div>
+        <div>
+          <label className="text-sm font-medium">종료 교시 *</label>
+          <input
+            type="number"
+            name="endTime"
+            min={form.startTime || 1}
+            max={10}
+            className="w-full p-2 border rounded"
+            value={form.endTime}
+            onChange={handleChange}
+            placeholder="예: 5"
+          />
         </div>
 
+        {/* 강의실 */}
         <div className="md:col-span-2">
           <label className="text-sm font-medium">강의실 *</label>
           <select
@@ -171,6 +163,7 @@ const ProfessorClassCreatePage = ({ onSuccess, professorId }) => {
           </select>
         </div>
 
+        {/* 정원 */}
         <div className="md:col-span-2">
           <label className="text-sm font-medium">수강 정원 *</label>
           <input
