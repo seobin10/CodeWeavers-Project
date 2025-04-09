@@ -8,9 +8,11 @@ import com.cw.cwu.util.UserRequestUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/professor")
@@ -21,6 +23,7 @@ public class ProfessorClassController {
     private final UserRequestUtil userRequestUtil;
     private final AdminScheduleService adminScheduleService;
 
+    @PreAuthorize("hasRole('PROFESSOR')")
     @PostMapping("/classes")
     public ResponseEntity<String> createClass(@RequestBody ClassCreateRequestDTO dto) {
         String result = professorClassService.createClass(dto);
@@ -30,6 +33,7 @@ public class ProfessorClassController {
         return ResponseEntity.ok("강의 등록이 완료되었습니다.");
     }
 
+    @PreAuthorize("hasRole('PROFESSOR')")
     @GetMapping("/classes")
     public ResponseEntity<PageResponseDTO<ClassDTO>> getMyClasses(
             PageRequestDTO pageRequestDTO,
@@ -41,6 +45,7 @@ public class ProfessorClassController {
         return ResponseEntity.ok(result);
     }
 
+    @PreAuthorize("hasRole('PROFESSOR')")
     @PutMapping("/classes")
     public ResponseEntity<String> updateClass(@RequestBody ClassUpdateRequestDTO dto, HttpServletRequest request) {
         String professorId = userRequestUtil.extractUserId(request);
@@ -51,6 +56,7 @@ public class ProfessorClassController {
         return ResponseEntity.ok(result);
     }
 
+    @PreAuthorize("hasRole('PROFESSOR')")
     @DeleteMapping("/classes/{classId}")
     public ResponseEntity<String> deleteClass(
             @PathVariable Integer classId,
@@ -65,6 +71,7 @@ public class ProfessorClassController {
         return ResponseEntity.ok(result);
     }
 
+    @PreAuthorize("hasRole('PROFESSOR')")
     @GetMapping("/courses")
     public ResponseEntity<List<CourseSimpleDTO>> getCoursesByProfessor(HttpServletRequest request) {
         String professorId = userRequestUtil.extractUserId(request); // 토큰에서 교수 ID 추출

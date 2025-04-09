@@ -8,9 +8,11 @@ import com.cw.cwu.dto.SemesterResponseDTO;
 import com.cw.cwu.service.admin.AdminScheduleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/admin/schedule")
@@ -20,12 +22,14 @@ public class AdminScheduleController {
     private final AdminScheduleService adminScheduleService;
 
     // 학기 등록
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/semester")
     public ResponseEntity<String> createSemester(@RequestBody SemesterRequestDTO dto) {
         adminScheduleService.createSemester(dto);
         return ResponseEntity.ok("학기가 등록되었습니다.");
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/semester/{semesterId}")
     public ResponseEntity<String> updateSemester(
             @PathVariable("semesterId") Integer semesterId,
@@ -34,6 +38,7 @@ public class AdminScheduleController {
         return ResponseEntity.ok("학기가 수정되었습니다.");
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/semester/{semesterId}")
     public ResponseEntity<String> deleteSemester(@PathVariable("semesterId") Integer semesterId) {
         adminScheduleService.deleteSemester(semesterId);
@@ -48,6 +53,7 @@ public class AdminScheduleController {
     }
 
     //  일정 등록 또는 수정
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<String> setSchedule(@RequestBody ScheduleRequestDTO dto) {
         String result = adminScheduleService.setSchedule(dto);
