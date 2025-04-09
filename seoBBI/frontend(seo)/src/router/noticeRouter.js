@@ -1,0 +1,27 @@
+import { lazy, Suspense } from "react";
+// import RoleGuard from "../components/RoleGuard";
+import Loading from "../components/Loading";
+
+const NoticeListPage = lazy(() => import("../pages/NoticeListPage"));
+const NoticeDataPage = lazy(() => import("../pages/NoticeDataPage"));
+
+const noticeRouter = [
+  {
+    path: "noticelist",
+    element: (
+      <Suspense fallback={<Loading />}>
+        <NoticeListPage />
+      </Suspense>
+    ),
+  },
+  {
+    path: "noticedata",
+    element: (
+      <Suspense fallback={<Loading />}>
+        <NoticeDataPage />
+      </Suspense>
+    ),
+  },
+];
+
+export default noticeRouter;
