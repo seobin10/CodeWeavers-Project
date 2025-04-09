@@ -7,10 +7,12 @@ import com.cw.cwu.service.admin.AdminUserService;
 import com.cw.cwu.util.FileUploadUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+
 
 @RestController
 @RequestMapping("/api/admin")
@@ -21,7 +23,7 @@ public class AdminUserController {
     private final DepartmentRepository departmentRepository;
     private final FileUploadUtil fileUploadUtil;
 
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/users")
     public ResponseEntity<String> createUser(@RequestBody UserCreateRequestDTO dto) {
         String result = adminUserService.createUser(dto);
@@ -38,6 +40,7 @@ public class AdminUserController {
         return ResponseEntity.ok(departmentRepository.findAll());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/profile")
     public ResponseEntity<String> uploadProfile(@RequestParam("file") MultipartFile file,
                                                 @RequestParam("userId") String userId) {
@@ -49,6 +52,7 @@ public class AdminUserController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/users")
     public ResponseEntity<PageResponseDTO<UserDTO>> getAllUsers(
             PageRequestDTO pageRequestDTO,
@@ -58,6 +62,7 @@ public class AdminUserController {
         return ResponseEntity.ok(result);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/users/{userId}")
     public ResponseEntity<String> deleteUser(@PathVariable String userId) {
         String result = adminUserService.deleteUser(userId);
@@ -69,6 +74,7 @@ public class AdminUserController {
         return ResponseEntity.ok(result);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/users")
     public ResponseEntity<String> updateUser(@RequestBody UserUpdateRequestDTO dto) {
         String result = adminUserService.updateUser(dto);
@@ -78,6 +84,7 @@ public class AdminUserController {
         return ResponseEntity.ok(result);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/users/{userId}/reset-password")
     public ResponseEntity<String> resetPassword(@PathVariable String userId) {
         String result = adminUserService.resetPassword(userId);

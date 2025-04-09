@@ -11,10 +11,12 @@ import com.cw.cwu.util.UserRequestUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+
 
 @RestController
 @RequestMapping("/api/students/enrollment")
@@ -79,6 +81,7 @@ public class StudentEnrollmentController {  // 학생 수강 신청 관리 컨�
     }
 
     // 수강 신청 요청
+    @PreAuthorize("hasRole('STUDENT')")
     @PostMapping("/{studentId}/enrollment")
     public ResponseEntity<String> enroll(@RequestBody EnrollmentRequestDTO requestDTO, HttpServletRequest request) {
         System.out.println("등록  controller ");
@@ -89,12 +92,14 @@ public class StudentEnrollmentController {  // 학생 수강 신청 관리 컨�
     }
 
     // 임시 수강 목록 조회
+    @PreAuthorize("hasRole('STUDENT')")
     @GetMapping("/{studentId}/mycourses")
     public ResponseEntity<List<Map<String, Object>>> getMyCourses(@PathVariable String studentId) {
         return ResponseEntity.ok(studentEnrollmentService.getMyCourses(studentId));
     }
 
-    // 강의 삭제
+    // 강의 취소
+    @PreAuthorize("hasRole('STUDENT')")
     @DeleteMapping("/{studentId}/course/{classId}")
     public ResponseEntity<String> deleteCourse(
             @PathVariable String studentId,
@@ -111,6 +116,7 @@ public class StudentEnrollmentController {  // 학생 수강 신청 관리 컨�
     }
 
     // 수강 신청 내역 조회
+    @PreAuthorize("hasRole('STUDENT')")
     @GetMapping("/{studentId}/history")
     public ResponseEntity<List<Map<String, Object>>> getEnrolledCourses(@PathVariable String studentId) {
         return ResponseEntity.ok(studentEnrollmentService.getConfirmedCourses(studentId));
