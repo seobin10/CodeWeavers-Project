@@ -12,7 +12,7 @@ const BasicLayout = () => {
   const [openEnrollmentMenu, setOpenEnrollmentMenu] = useState(false);
   const [openGradeMenu, setOpenGradeMenu] = useState(false);
   const [openInfoMenu, setOpenInfoMenu] = useState(false);
-  
+
   const handleLogout = useCallback(() => {
     dispatch(logout());
     localStorage.removeItem("id");
@@ -205,6 +205,12 @@ const BasicLayout = () => {
                   className="hover:bg-blue-500 px-6 py-3"
                 >
                   성적 관리 ▶
+                </Link>
+                <Link
+                  to="/main/professor/msg"
+                  className="hover:bg-blue-500 px-6 py-3"
+                >
+                  문자 발송 ▶
                 </Link>
               </>
             )}
