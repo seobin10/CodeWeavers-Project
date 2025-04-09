@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setUserId as setUserIdAction } from "../slices/authSlice";
 import axios from "axios";
+import { getAuthHeader } from "../util/authHeader";
 
 const GradePage = () => {
   const dispatch = useDispatch();
@@ -22,7 +23,8 @@ const GradePage = () => {
   const fetchStudentInfo = async (id) => {
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/students/grade/${id}/grade`
+        `http://localhost:8080/api/students/grade/grade`,
+      getAuthHeader()
       );
       setGradeInfo(response.data);
     } catch (error) {

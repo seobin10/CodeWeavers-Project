@@ -42,10 +42,8 @@ const HistoryPage = () => {
     const checkPeriod = async () => {
       try {
         const isOpen = await checkEnrollPeriod();
-        console.log("수강 정정 가능 여부:", isOpen);
         setIsClassRegPeriod(isOpen);
       } catch (e) {
-        console.error("기간 확인 실패:", e);
         setIsClassRegPeriod(false);
       }
     };
