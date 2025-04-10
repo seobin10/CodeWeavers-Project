@@ -168,10 +168,10 @@ const BasicLayout = () => {
                 >
                   사용자 관리 ▶
                 </Link>
-                <Link to="/main/users" className="hover:bg-blue-500 px-6 py-3">
+                <Link to="/main/admin/users" className="hover:bg-blue-500 px-6 py-3">
                   일정 관리 ▶
                 </Link>
-                <Link to="/main/grades" className="hover:bg-blue-500 px-6 py-3">
+                <Link to="/main/admin/grades" className="hover:bg-blue-500 px-6 py-3">
                   성적 집계 ▶
                 </Link>
                 <Link
