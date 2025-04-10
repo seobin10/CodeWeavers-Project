@@ -1,77 +1,76 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setUserId as setUserIdAction } from "../slices/authSlice";
-import axios from "axios";
-import { getAuthHeader } from "../util/authHeader";
+import { fetchStudentGrades } from "../api/studentGradeApi";
+import { convertGradeLabel } from "../util/gradeUtil";
 
 const GradePage = () => {
   const dispatch = useDispatch();
   const userId = useSelector((state) => state.auth.userId);
+
+  const [grades, setGrades] = useState([]);
   const [message, setMessage] = useState("");
-  const [gradeInfo, setGradeInfo] = useState([]);
 
   useEffect(() => {
     const localId = localStorage.getItem("id");
     if (!userId && localId) {
       dispatch(setUserIdAction(localId));
-      fetchStudentInfo(localId);
+      loadGrades();
     } else if (userId) {
-      fetchStudentInfo(userId);
+      loadGrades();
     }
-  }, [userId, dispatch]);
+  }, [userId]);
 
-  const fetchStudentInfo = async (id) => {
+  const loadGrades = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:8080/api/students/grade/grade`,
-      getAuthHeader()
-      );
-      setGradeInfo(response.data);
-    } catch (error) {
+      const res = await fetchStudentGrades();
+      setGrades(res.data);
+    } catch {
       setMessage("성적 정보를 불러올 수 없습니다.");
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-2xl bg-white shadow-lg rounded-lg p-8">
-        <h1 className="text-3xl font-bold text-center mb-6">성적 정보 조회</h1>
-        {message && <p className="text-red-500 text-center">{message}</p>}
-
-        {gradeInfo.length > 0 ? (
-          gradeInfo.map((grade, i) => (
-            <div key={i} className="mb-4 p-4 border rounded-lg bg-gray-50">
-              <label className="block font-semibold p-2">강의 명</label>
-              <input
-                type="text"
-                value={grade.courseName || ""}
-                readOnly
-                className="w-full p-2 border rounded bg-gray-200"
-              />
-
-              <label className="block font-semibold p-2 mt-2">학점</label>
-              <input
-                type="text"
-                value={grade.credit || ""}
-                readOnly
-                className="w-full p-2 border rounded bg-gray-200"
-              />
-
-              <label className="block font-semibold p-2 mt-2">등급</label>
-              <input
-                type="text"
-                value={grade.grade || ""}
-                readOnly
-                className="w-full p-2 border rounded bg-gray-200"
-              />
-            </div>
-          ))
-        ) : (
-          <p className="text-center text-gray-500">
-            성적 정보를 불러오는 중...
-          </p>
-        )}
+    <div className="max-w-7xl mx-auto p-8 bg-white shadow-md rounded-md mt-10">
+      <div className="flex justify-between items-center border-b pb-3 mb-6">
+        <h2 className="text-2xl font-semibold text-gray-700">내 성적 조회</h2>
       </div>
+
+      {message && (
+        <div className="text-red-500 text-center font-medium mb-6">
+          {message}
+        </div>
+      )}
+
+      {/* 성적 테이블 */}
+      <table className="min-w-full table-auto shadow-sm border border-gray-200 rounded-md text-sm">
+        <thead className="bg-gray-50 text-gray-600 uppercase text-sm leading-normal">
+          <tr className="text-center">
+            <th className="py-3 px-4">강의명</th>
+            <th className="py-3 px-4">학점</th>
+            <th className="py-3 px-4">성적</th>
+          </tr>
+        </thead>
+        <tbody className="text-center text-gray-700">
+          {grades.length === 0 ? (
+            <tr>
+              <td colSpan={3} className="py-4 text-gray-400">
+                조회할 성적이 없습니다.
+              </td>
+            </tr>
+          ) : (
+            grades.map((g, i) => (
+              <tr key={i} className="hover:bg-gray-50 border-t">
+                <td className="py-2 px-4">{g.courseName}</td>
+                <td className="py-2 px-4">{g.credit}</td>
+                <td className="py-2 px-4">
+                  {g.grade ? convertGradeLabel(g.grade) : "미등록"}
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
     </div>
   );
 };
