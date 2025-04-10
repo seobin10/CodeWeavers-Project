@@ -28,9 +28,9 @@ public class ProfessorGradeController {
     @PostMapping
     public ResponseEntity<String> registerGrade(
             @RequestBody GradeRegisterDTO dto,
-            HttpServletRequest request  // 이걸 통해 Authorization 헤더에 접근
+            HttpServletRequest request
     ) throws AccessDeniedException {
-        String professorId = userRequestUtil.extractUserId(request);    // 토큰에서 추출된 사용자 ID
+        String professorId = userRequestUtil.extractUserId(request);
         String result = gradeService.registerGrade(dto, professorId);
         return result.contains("완료") ?
                 ResponseEntity.ok(result) : ResponseEntity.badRequest().body(result);
