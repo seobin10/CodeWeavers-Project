@@ -1,16 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { getAuthHeader } from "../../util/authHeader";
+import AlertModal from "../../components/AlertModal";
 
 function SendMessageCard() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [error, setError] = useState("");
+  const [alertModalOpen, setAlertModalOpen] = useState(false);
+  const [type, setType] = useState("");
+  const [alertMsg, setAlertMsg] = useState("");
   const [message, setMessage] = useState("");
-  const [isSent, setIsSent] = useState(false);
-  const [msgLength, setMsgLength] = useState(0); 
+  const [msgLength, setMsgLength] = useState(0);
   const handleSendMessage = async () => {
     if (!phoneNumber.trim() || !message.trim()) {
-      alert("전화번호와 메시지를 모두 입력해주세요.");
+      setError("전화번호와 메시지를 모두 입력해주세요.");
       return;
     }
 
@@ -27,13 +30,10 @@ function SendMessageCard() {
           },
         }
       );
-
-      console.log("메시지 전송 성공:", response.data);
-      alert("메시지가 전송되었습니다!");
-      setIsSent(true);
+      setError("")
+      setAlertData("success", "메시지 전송에 성공했습니다.");
     } catch (error) {
-      console.error("메시지 전송 실패:", error.response?.data || error.message);
-      alert("메시지 전송에 실패했습니다.");
+      setAlertData("error", "메시지 전송에 실패했습니다.\n 번호와 메시지를 올바르게\n 입력했는지 확인하세요!");
     }
   };
 
@@ -41,10 +41,22 @@ function SendMessageCard() {
   const handleMsg = () => {
     setMsgLength(document.getElementById("msg").value.length);
     console.log(msgLength);
-    if(msgLength > 45) {
+    if (msgLength > 46) {
       setError("글자 수는 45자가 최대입니다.");
     }
   };
+
+  // 모달 닫기
+  const handleClose = () => {
+    setAlertModalOpen(false);
+  };
+
+    // 모달을 일괄 설정하기 위한 메서드, 곧 사용할 예정
+    const setAlertData = (modalType, modalMsg) => {
+      setType(modalType);
+      setAlertMsg(modalMsg);
+      setAlertModalOpen(true);
+    };
 
   return (
     <div className="max-w-xl mx-auto p-6 bg-white shadow-md rounded-md mt-10 space-y-6">
@@ -76,6 +88,7 @@ function SendMessageCard() {
           maxLength={45}
           id="msg"
         />
+        {error && <p className="text-red-500 text-left">{error}</p>}
         <p className="text-right text-gray-400">{msgLength} / 45</p>
       </div>
 
@@ -85,12 +98,14 @@ function SendMessageCard() {
       >
         메시지 전송
       </button>
-      {error && <p className="text-red-500 text-center">{error}</p>}
-      {isSent && (
-        <p className="text-green-600 text-center font-medium">
-          메시지 전송 완료!
-        </p>
-      )}
+
+      {/* 메시지 모달 */}
+      <AlertModal
+        isOpen={alertModalOpen}
+        message={alertMsg}
+        onClose={handleClose}
+        type={type}
+      />
     </div>
   );
 }

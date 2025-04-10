@@ -7,19 +7,16 @@ import BaseModal from "../components/BaseModal";
 import ConfirmModal from "../components/ConfirmModal";
 import { useSelector } from "react-redux";
 import { getAuthHeader } from "../util/authHeader";
+import Navbar from "../components/Navbar";
 
 const QnaDataPage = () => {
-  // 모달
   const [alertModalOpen, setAlertModalOpen] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [baseModalOpen, setBaseModalOpen] = useState(false);
-
-  // 모달 설정용 useState
   const [msg, setMsg] = useState("");
   const [type, setType] = useState("error");
   const [goTarget, setGoTarget] = useState(null);
   const [props, setProps] = useState();
-
   const [writerId, setWriterId] = useState();
   const [message, setMessage] = useState("");
   const [contentInfo, setContentInfo] = useState([]);
@@ -58,7 +55,6 @@ const QnaDataPage = () => {
   useEffect(() => {
     handleView();
     const localQnaNumber = localStorage.getItem("No.");
-
     if (questionId) {
       localStorage.setItem("No.", questionId);
       fetchContentInfo(questionId);
@@ -133,215 +129,140 @@ const QnaDataPage = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-8 bg-white shadow-md rounded-md mt-10">
-      {message && <p className="text-red-500 text-center">{message}</p>}
-      <h1 className=" font-bold text-left mb-6 ml-6">Q&A</h1>
-      {contentInfo.length > 0 ? (
-        contentInfo.map((qna, i) => (
-          <div key={i}>
-            <table className="table-auto w-full">
-              <thead className="bg-gray-200">
-                <tr>
-                  <td className="px-4 py-2 bg-white">
-                    <div className="flex justify-between items-center relative">
-                      <span className="text-blue-800 text-5xl font-semibold">
-                        {qna.title}
-                      </span>
+    <div className="min-h-screen">
+      <div className="max-w-7xl mx-auto mt-10 bg-white rounded-lg shadow-md overflow-hidden">
+        <Navbar
+          name="Q&A"
+          onListClick={() =>
+            navigate("/main/qnalist", { state: { page: currentPage } })
+          }
+          onEditClick={() => {
+            if (userId != writerId) {
+              setMsg("작성자만 수정할 수 있습니다!");
+              setType("error");
+              setGoTarget(null);
+              setAlertModalOpen(true);
+            } else {
+              navigate("/main/qnaedit", {
+                state: { page: currentPage, questionId: questionId },
+              });
+            }
+          }}
+          onDelClick={() => {
+            if (userId != writerId && userRole !== "ADMIN"){
+              setMsg("작성자 혹은 관리자만\n 삭제할 수 있습니다!");
+              setType("error");
+              setGoTarget(null);
+              setAlertModalOpen(true);
+            } else {
+              handleDelete(questionId);
+            }
+          }}
+        />
 
-                      <div className="relative">
-                        <button
-                          onClick={() => setMenuOpen(!menuOpen)}
-                          className="text-gray-700 hover:text-gray-950  text-xl px-2"
-                        >
-                          ⋮
-                        </button>
+        <div className="p-8">
+          {message && <p className="text-red-500 text-center">{message}</p>}
+          {contentInfo.length > 0 ? (
+            contentInfo.map((qna, i) => (
+              <div key={i}>
+                <h2 className="text-blue-800 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold transition-all duration-300 mb-2">
+                  {qna.title}
+                </h2>
+                <p className="text-xs sm:text-sm text-gray-500 mb-8 transition-all duration-300">
+                  {qna.userName} | {qna.createdAt} | {qna.viewCount}
+                </p>
+                <div className="whitespace-pre-line leading-relaxed text-base sm:text-lg md:text-lg transition-all duration-300 mb-6">
+                  {qna.questionContent}
+                </div>
+                <hr className="my-10" />
+                <div className="text-xl font-semibold text-white bg-blue-800 rounded-md px-4 py-2 mb-2">
+                  답변내용
+                </div>
+                <div
+                  className={`p-5 rounded-md shadow-md ${
+                    !qna.answerContent ? "text-gray-400" : ""
+                  }`}
+                >
+                  {qna.answerContent || "아직 답변이 작성되지 않았습니다."}
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-center text-gray-500">
+              {" "}
+              데이터를 불러오는 중...
+            </p>
+          )}
 
-                        {menuOpen && (
-                          <div className="absolute right-0 mt-2 w-24 bg-white border rounded shadow z-10 text-sm ">
-                            <Link
-                              onClick={
-                                userId == writerId || userRole == "ADMIN"
-                                  ? async () => {
-                                      await handleDelete(questionId);
-                                      setMsg("삭제되었습니다.");
-                                      setType("success");
-                                      setGoTarget({
-                                        path: "/main/qnalist",
-                                        options: {
-                                          state: { page: currentPage },
-                                        },
-                                      });
-                                      setAlertModalOpen(true);
-                                    }
-                                  : () => {
-                                      setMsg("작성자만 삭제할 수 있습니다!");
-                                      setType("error");
-                                      setGoTarget(null);
-                                      setAlertModalOpen(true);
-                                    }
-                              }
-                              state={{ questionId }}
-                              className="block px-4 py-2 hover:bg-gray-100 text-gray-800 border border-solid"
-                            >
-                              삭제
-                            </Link>
-                            {qna.answerContent ? (
-                              <button
-                                onClick={() => {
-                                  setMsg("답변 완료 게시글은 수정 불가입니다.");
-                                  setType("error");
-                                  setGoTarget(null);
-                                  setAlertModalOpen(true);
-                                }}
-                                className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-gray-800 border border-solid border-t-0"
-                              >
-                                수정불가
-                              </button>
-                            ) : (
-                              <Link
-                                to={userId == writerId ? "/main/qnaedit" : ""}
-                                onClick={
-                                  userId == writerId
-                                    ? undefined
-                                    : () => {
-                                        setMsg("작성자만 수정할 수 있습니다!");
-                                        setType("error");
-                                        setGoTarget(null);
-                                        setAlertModalOpen(true);
-                                      }
-                                }
-                                state={{ questionId }}
-                                className="block px-4 py-2 hover:bg-gray-100 text-gray-800 border border-solid border-t-0"
-                              >
-                                수정
-                              </Link>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-4 pb-2 pt-5 text-gray-600 bg-white">
-                    {qna.userName} | {qna.createdAt} | {qna.viewCount}
-                  </td>
-                </tr>
-              </thead>
-            </table>
-            <br />
-            <table className="w-full border border-gray-400 border-x-0">
-              <tbody>
-                <tr>
-                  <td className="pl-6 px-0 pt-24 pb-24 text-lg w-full whitespace-pre-line leading-10">
-                    {qna.questionContent}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <hr />
-            <br />
-            <table className="table-auto rounded-md w-full text-left">
-              <tfoot>
-                <tr>
-                  <th className="bg-blue-800 text-white px-4 py-2 text-xl rounded-md">
-                    답변내용
-                  </th>
-                </tr>
-                <tr>
-                  <td
-                    className={`p-5 rounded-md shadow-md ${
-                      !qna.answerContent ? "text-gray-400" : ""
-                    }`}
-                  >
-                    {qna.answerContent || "아직 답변이 작성되지 않았습니다."}
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
+          <div className="float-right mt-4">
+            {userRole === "ADMIN" && contentInfo.length > 0 && (
+              <>
+                <button
+                  onClick={() => {
+                    const qna = contentInfo[0];
+                    if (!qna.answerContent || qna.answerContent.trim() === "") {
+                      setProps(
+                        <QnaAnswerWritePage
+                          qno={questionId}
+                          page={currentPage}
+                        />
+                      );
+                      setBaseModalOpen(true);
+                    } else {
+                      setMsg("이미 답변이 작성되었습니다.");
+                      setType("error");
+                      setGoTarget(null);
+                      setAlertModalOpen(true);
+                    }
+                  }}
+                  className="text-green-500 hover:text-green-700 text-lg font-semibold px-3 rounded transition"
+                >
+                  📗답변 작성
+                </button>
+                &nbsp;
+                <button
+                  onClick={() => {
+                    const qna = contentInfo[0];
+                    if (qna.answerContent) {
+                      setConfirmModalOpen(true);
+                    } else {
+                      setMsg("삭제할 답변이 없습니다.");
+                      setType("error");
+                      setGoTarget(null);
+                      setAlertModalOpen(true);
+                    }
+                  }}
+                  className="text-red-500 hover:text-red-700 text-lg font-semibold py-2.5 px-3 rounded transition"
+                >
+                  ❌답변 삭제
+                </button>
+              </>
+            )}
           </div>
-        ))
-      ) : (
-        <p className="text-center text-gray-500"> 데이터를 불러오는 중...</p>
-      )}
+        </div>
 
-      <br />
-      <Link
-        to="/main/qnalist"
-        className="text-blue-500 hover:text-blue-700 bg-white text-lg font-semibold py-2.5 px-3 rounded transition"
-        state={{ page: currentPage }}
-        onClick={() => {
-          localStorage.removeItem("No.");
-        }}
-      >
-        ← 목록
-      </Link>
-
-      {/* 관리자 전용 버튼 */}
-      <div className="float-right">
-        {userRole === "ADMIN" && contentInfo.length > 0 && (
-          <>
-            <button
-              onClick={() => {
-                const qna = contentInfo[0];
-                if (!qna.answerContent || qna.answerContent.trim() === "") {
-                  setProps(
-                    <QnaAnswerWritePage qno={questionId} page={currentPage} />
-                  );
-                  setBaseModalOpen(true);
-                } else {
-                  setMsg("이미 답변이 작성되었습니다.");
-                  setType("error");
-                  setGoTarget(null);
-                  setAlertModalOpen(true);
-                }
-              }}
-              className="text-green-500 hover:text-green-700 text-lg font-semibold px-3 rounded transition"
-            >
-              📗답변 작성
-            </button>
-            &nbsp;
-            <button
-              onClick={() => {
-                const qna = contentInfo[0];
-                if (qna.answerContent) {
-                  setConfirmModalOpen(true);
-                } else {
-                  setMsg("삭제할 답변이 없습니다.");
-                  setType("error");
-                  setGoTarget(null);
-                  setAlertModalOpen(true);
-                }
-              }}
-              className="text-red-500 hover:text-red-700 text-lg font-semibold py-2.5 px-3 rounded transition"
-            >
-              ❌답변 삭제
-            </button>
-          </>
-        )}
+        {/* 모달 */}
+        <AlertModal
+          isOpen={alertModalOpen}
+          message={msg}
+          onClose={handleClose}
+          type={type}
+        />
+        <BaseModal
+          isOpen={baseModalOpen}
+          onClose={handleClose}
+          children={props}
+        />
+        <ConfirmModal
+          isOpen={confirmModalOpen}
+          message={"답변을 삭제하시겠습니까?"}
+          onCancel={handleClose}
+          onConfirm={() => {
+            setConfirmModalOpen(false);
+            handleClickDelete(questionId);
+          }}
+        />
       </div>
-
-      {/* 모달 */}
-      <AlertModal
-        isOpen={alertModalOpen}
-        message={msg}
-        onClose={handleClose}
-        type={type}
-      />
-      <BaseModal
-        isOpen={baseModalOpen}
-        onClose={handleClose}
-        children={props}
-      />
-      <ConfirmModal
-        isOpen={confirmModalOpen}
-        message={"답변을 삭제하시겠습니까?"}
-        onCancel={handleClose}
-        onConfirm={() => {
-          setConfirmModalOpen(false);
-          handleClickDelete(questionId);
-        }}
-      />
     </div>
   );
 };
