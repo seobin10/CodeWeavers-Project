@@ -18,7 +18,7 @@ const adminRouter = [
     ),
   },
   {
-    path: "users",
+    path: "admin/users",
     element: (
       <RoleGuard allowedRoles={["ADMIN"]}>
         <Suspense fallback={<Loading />}>
@@ -28,7 +28,7 @@ const adminRouter = [
     ),
   },
   {
-    path: "grades", 
+    path: "admin/grades", 
     element: (
       <RoleGuard allowedRoles={["ADMIN"]}>
         <Suspense fallback={<Loading />}>
