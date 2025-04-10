@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getAllSemesters } from "../../api/adminScheduleApi";
-import { getDepartments } from "../../api/adminUserApi"; 
+import { getDepartments } from "../../api/adminUserApi";
 import { finalizeGradesByDepartment } from "../../api/adminGradeApi";
 import { useDispatch } from "react-redux";
 import { showModal } from "../../slices/modalSlice";
@@ -20,13 +20,28 @@ const AdminGradePage = () => {
   const handleFinalize = async () => {
     try {
       if (!selectedSemesterId || !selectedDepartmentId) {
-        dispatch(showModal({ message: "학기와 학과를 모두 선택해주세요.", type: "error" }));
+        dispatch(
+          showModal({
+            message: "학기와 학과를 모두 선택해주세요.",
+            type: "error",
+          })
+        );
         return;
       }
-      await finalizeGradesByDepartment(selectedSemesterId, selectedDepartmentId);
+
+      await finalizeGradesByDepartment(
+        selectedSemesterId,
+        selectedDepartmentId
+      );
       dispatch(showModal("성적 집계가 완료되었습니다."));
     } catch (e) {
-      dispatch(showModal({ message: "성적 집계 실패", type: "error" }));
+      // 💡 문자열 추출 처리
+      const errorMsg =
+        typeof e.response?.data === "string"
+          ? e.response.data
+          : e.response?.data?.error || "성적 집계 실패";
+
+      dispatch(showModal({ message: errorMsg, type: "error" }));
     }
   };
 

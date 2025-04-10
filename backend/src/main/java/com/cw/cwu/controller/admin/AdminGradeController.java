@@ -19,7 +19,11 @@ public class AdminGradeController {
             @RequestParam Integer semesterId,
             @RequestParam Integer departmentId
     ) {
-        adminGradeService.finalizeStudentRecordsByDepartment(semesterId, departmentId);
-        return ResponseEntity.ok("해당 학과의 성적 집계가 완료되었습니다.");
+        try {
+            adminGradeService.finalizeStudentRecordsByDepartment(semesterId, departmentId);
+            return ResponseEntity.ok("해당 학과의 성적 집계가 완료되었습니다.");
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }
