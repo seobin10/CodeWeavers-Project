@@ -11,7 +11,6 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-
 public class AdminGradeServiceImpl implements AdminGradeService {
 
     private final UserRepository userRepository;
@@ -20,93 +19,80 @@ public class AdminGradeServiceImpl implements AdminGradeService {
     private final StudentRecordRepository studentRecordRepository;
     private final DepartmentRepository departmentRepository;
 
-    // 전체 학생에 대해 GPA 집계 실행 (학과 기준)
-    // 성적이 하나라도 누락된 학생이 있다면 전체 집계를 중단하고 예외 발생
+    /**
+     * 전체 학생에 대해 GPA 집계 실행 (학과 기준)
+     * - 성적이 하나라도 누락된 학생이 있다면 전체 집계를 중단하고 예외 발생
+     * - 이미 집계된 학생이 존재하면 값 비교 후 동일하면 생략, 다르면 기존 record를 삭제 후 재저장
+     */
     @Transactional
     @Override
     public void finalizeStudentRecordsByDepartment(Integer semesterId, Integer departmentId) {
-        // departmentId로 실제 Department 객체를 조회
+        // 1. 학과 조회
         Department department = departmentRepository.findById(departmentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 학과를 찾을 수 없습니다."));
 
-        // UserRole과 Department 객체로 학생 목록 조회
-        List<User> students = userRepository.findByUserRoleAndDepartment(UserRole.STUDENT, department);
-
-
-        //학기 조회
+        // 2. 학기 조회
         Semester semester = semesterRepository.findById(semesterId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 학기를 찾을 수 없습니다."));
 
-        // 이미 해당 학기 성적이 집계된 학생이 존재하면 중단
-        boolean alreadyFinalized = students.stream()
-                .anyMatch(student -> studentRecordRepository.existsByStudentAndSemester(student, semester));
+        // 3. 해당 학과의 전체 학생 조회
+        List<User> students = userRepository.findByUserRoleAndDepartment(UserRole.STUDENT, department);
 
-        if (alreadyFinalized) {
-            throw new IllegalStateException("해당 학과는 이미 성적 집계가 완료되었습니다.");
-        }
-
-        // 성적 미입력된 학생 ID 목록
+        // 4. 성적 누락 여부 검사
         List<String> invalidStudents = new ArrayList<>();
-
-        // 먼저 전체 학생에 대해 성적 누락 여부 사전 검사
         for (User student : students) {
             List<Enrollment> enrollments = enrollmentRepository.findEnrollmentsByStudentId(student.getUserId());
-
             for (Enrollment enrollment : enrollments) {
                 ClassEntity classEntity = enrollment.getEnrolledClassEntity();
-
-                // 강의가 없거나, 대상 학기가 아닌 경우 무시
                 if (classEntity == null || !classEntity.getSemester().getId().equals(semesterId)) continue;
 
-                // 성적 정보가 없으면 유효하지 않은 학생으로 간주 > 목록 추가 후 break
                 Grade grade = enrollment.getGrade();
                 if (grade == null || grade.getGrade() == null) {
                     invalidStudents.add(student.getUserId());
-                    break; // 이 학생은 이미 집계 불가 > 추가 검사 생략
+                    break;
                 }
             }
         }
 
-        // 성적 미입력 학생이 존재할 경우 전체 집계를 중단하고 예외 발생
+        // 5. 누락된 학생이 있다면 전체 집계 중단
         if (!invalidStudents.isEmpty()) {
-            throw new IllegalStateException("성적이 미입력된 학생이 있습니다. \n\n학생 ID: " + String.join(", ", invalidStudents));
+            throw new IllegalStateException("성적이 미입력된 학생이 있습니다.\n\n학생 ID: " + String.join(", ", invalidStudents));
         }
 
-        // 모든 검증을 통과한 학생에 대해 GPA 집계 실행
+        // 6. 검증 통과한 학생들 성적 집계 실행
         for (User student : students) {
             updateStudentRecordAsAdmin(student.getUserId(), semesterId);
         }
     }
 
+    /**
+     * 단일 학생의 성적 집계 후 저장
+     * - 기존 기록이 있다면 GPA, 학점 비교 후 동일하면 생략
+     * - 값이 다르면 기존 record 삭제 후 재저장
+     */
     @Transactional
     @Override
     public void updateStudentRecordAsAdmin(String studentId, Integer semesterId) {
-        // 1. 해당 학생이 수강한 모든 강의 조회
+        // 1. 수강 정보 조회
         List<Enrollment> enrollments = enrollmentRepository.findEnrollmentsByStudentId(studentId);
 
         // 2. 초기값 설정
-        int totalEnrolled = 0;         // 총 수강 학점
-        int totalEarned = 0;           // F 제외한 이수 학점
-        double totalGradePoints = 0.0; // GPA 계산용 점수 누적
-        int totalCredits = 0;          // GPA 분모가 될 학점 수
-
-        boolean hasValidEnrollment = false; // 유효한 수강 내역 존재 여부 체크
+        int totalEnrolled = 0;
+        int totalEarned = 0;
+        double totalGradePoints = 0.0;
+        int totalCredits = 0;
+        boolean hasValidEnrollment = false;
 
         for (Enrollment enrollment : enrollments) {
             ClassEntity classEntity = enrollment.getEnrolledClassEntity();
-
-            // 3. 대상 학기가 아닌 경우 무시
             if (classEntity == null || !classEntity.getSemester().getId().equals(semesterId)) continue;
 
-            // 4. 과목 성적 확인 (null 이면 예외 던지기)
             Grade grade = enrollment.getGrade();
             if (grade == null || grade.getGrade() == null) {
                 throw new IllegalStateException("성적이 입력되지 않은 과목이 존재합니다.");
             }
 
-            hasValidEnrollment = true; // 유효한 수강 내역 존재
-
-            // 5. 학점 및 GPA 계산
+            hasValidEnrollment = true;
             Course course = classEntity.getCourse();
             int credit = course.getCredit();
             double gradePoint = convertGradeToPoint(grade.getGrade());
@@ -117,23 +103,39 @@ public class AdminGradeServiceImpl implements AdminGradeService {
             if (gradePoint > 0.0) totalEarned += credit;
         }
 
-        // 6. 수강 내역이 전혀 없다면 저장하지 않음
+        // 3. 수강 내역이 없다면 저장하지 않음
         if (!hasValidEnrollment) {
-            System.out.println(" 수강 내역 없음 → 학생 ID: " + studentId + " → 성적 집계 생략");
+            System.out.println("수강 내역 없음. 학생 ID: " + studentId);
             return;
         }
 
-        // 7. GPA 계산 (총 학점이 0인 경우 0 처리)
+        // 4. GPA 계산
         float gpa = totalCredits == 0 ? 0.0f : (float) (totalGradePoints / totalCredits);
 
-        // 8. 엔티티 조회
+        // 5. 엔티티 조회
         User student = userRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 학생을 찾을 수 없습니다"));
         Semester semester = semesterRepository.findById(semesterId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 학기를 찾을 수 없습니다"));
 
+        final int finalEnrolled = totalEnrolled;
+        final int finalEarned = totalEarned;
+        final float finalGpa = gpa;
 
-        // 9. 성적 기록 생성 및 저장
+
+        // 6. 기존 성적 기록이 있다면 값 비교 후 동일하면 생략, 다르면 삭제
+        studentRecordRepository.findByStudentAndSemester(student, semester)
+                .ifPresent(existing -> {
+                    if (existing.getEnrolled() == finalEnrolled &&
+                            existing.getEarned() == finalEarned &&
+                            existing.getGpa() == finalGpa) {
+                        throw new IllegalStateException("이미 동일한 성적이 집계되어 있습니다.");
+                    }
+                    studentRecordRepository.delete(existing);
+                    System.out.println("기존 성적 기록 덮어씀. 학생: " + studentId);
+                });
+
+        // 7. 새 성적 기록 저장
         StudentRecord record = StudentRecord.builder()
                 .student(student)
                 .semester(semester)
@@ -145,6 +147,9 @@ public class AdminGradeServiceImpl implements AdminGradeService {
         studentRecordRepository.save(record);
     }
 
+    /**
+     * 성적 등급을 GPA 점수로 변환
+     */
     private double convertGradeToPoint(StudentGrade grade) {
         if (grade == null) return 0.0;
         return switch (grade) {

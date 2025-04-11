@@ -196,8 +196,10 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
         System.out.println("service applyToClass : " + requestDTO);
         User student = userRepository.getReferenceById(requestDTO.getStudentId());
 
-        ClassEntity classEntity = classEntityRepository.getReferenceById(requestDTO.getClassId());
+        ClassEntity classEntity = classEntityRepository.findByClassIdWithLock(requestDTO.getClassId()).get();
 
+//        ClassEntity classEntity = classEntityRepository.getReferenceById(requestDTO.getClassId());
+        System.out.println("클래스 엔티티"+classEntity);
         // 중복 신청 방지
         if (enrollmentRepository.existsByStudentAndEnrolledClassEntity(student, classEntity)) {
             return "이미 신청한 강의입니다.";
@@ -205,6 +207,7 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
 
         // 정원 체크
         if (classEntity.getEnrolled() >= classEntity.getCapacity()) {
+
             return "수강 정원이 초과되었습니다!";
         }
 
