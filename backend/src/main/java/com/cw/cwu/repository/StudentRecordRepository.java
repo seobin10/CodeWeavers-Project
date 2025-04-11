@@ -7,9 +7,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
+
 public interface StudentRecordRepository extends JpaRepository<StudentRecord, Long> {
 
-
-    boolean existsByStudentAndSemester(User student, Semester semester);
+    Optional<StudentRecord> findByStudentAndSemester(User student, Semester semester);
 }
 
