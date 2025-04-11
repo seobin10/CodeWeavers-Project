@@ -7,6 +7,8 @@ import com.cw.cwu.dto.QuestionDTO;
 import com.cw.cwu.dto.UserDTO;
 import com.cw.cwu.service.user.UserServiceImpl;
 import com.cw.cwu.util.JWTUtil;
+import com.cw.cwu.util.UserRequestUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,6 +29,7 @@ public class UserController {
     private final UserServiceImpl userService;
     private final PasswordEncoder passwordEncoder;
     private final JWTUtil jwtUtil;
+    private final UserRequestUtil userRequestUtil;
 
     // 로그인
     @PostMapping("/login")
@@ -98,16 +101,19 @@ public class UserController {
 
     // 사용자 정보 조회
     @GetMapping("/{userId}")
-    public ResponseEntity<UserDTO> getUserInfo(@PathVariable("userId") String userId) {
-        return ResponseEntity.ok(userService.getUserInfo(userId));
+    public ResponseEntity<UserDTO> getUserInfo(@PathVariable("userId") String userId, HttpServletRequest request) {
+        String requesterId = userRequestUtil.extractUserId(request);
+        return ResponseEntity.ok(userService.getUserInfo(userId, requesterId));
     }
 
     // 사용자 정보 업데이트 (이메일, 전화번호)
     @PutMapping("/{userId}/update")
     public ResponseEntity<UserDTO> updateUser(
             @PathVariable("userId") String userId,
-            @RequestBody UserDTO request) {
-        return ResponseEntity.ok(userService.updateUser(userId, request));
+            @RequestBody UserDTO request,
+            HttpServletRequest httpRequest) {
+        String requesterId = userRequestUtil.extractUserId(httpRequest);
+        return ResponseEntity.ok(userService.updateUser(userId, request, requesterId));
     }
 
     // 질의응답 게시판 리스트를 출력
@@ -140,8 +146,9 @@ public class UserController {
 
     // 질의응답 게시판 글 삭제
     @DeleteMapping("/qna/delete/{questionId}")
-    public Map<String, String> clearText(@PathVariable(name = "questionId") Integer questionId){
-        userService.deleteQna(questionId);
+    public Map<String, String> clearText(@PathVariable(name = "questionId") Integer questionId, HttpServletRequest request){
+        String requesterId = userRequestUtil.extractUserId(request);
+        userService.deleteQna(questionId, requesterId);
         return Map.of("삭제 수행 결과", "성공");
     }
 
@@ -155,9 +162,11 @@ public class UserController {
     @PutMapping("qna/edit/{questionId}")
     public Map<String, String> edited(
             @PathVariable(name = "questionId") Integer questionId,
-            @RequestBody QuestionDTO dto) {
+            @RequestBody QuestionDTO dto,
+            HttpServletRequest request) {
         dto.setQuestionId(questionId);
-        userService.editQna(dto);
+        String requesterId = userRequestUtil.extractUserId(request);
+        userService.editQna(dto, requesterId);
         return Map.of("수정 수행 결과", "성공");
     }
 }

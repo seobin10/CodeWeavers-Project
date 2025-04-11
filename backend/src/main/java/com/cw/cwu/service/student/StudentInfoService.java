@@ -25,5 +25,5 @@ public interface StudentInfoService {
      */
     boolean checkGraduationEligibility(String studentId);
 
-    StudentStatusDTO getStudentStatusInfo(String studentId);
+    StudentStatusDTO getStudentStatusInfo(String studentId, String requesterId);
 }

@@ -8,6 +8,7 @@ import com.cw.cwu.dto.UserDTO;
 import com.cw.cwu.domain.User;
 import com.cw.cwu.repository.QuestionRepository;
 import com.cw.cwu.repository.UserRepository;
+import com.cw.cwu.util.AuthUtil;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
@@ -50,7 +51,8 @@ public class UserServiceImpl implements UserService {
 
     // 정보 조회
     @Override
-    public UserDTO getUserInfo(String userId) {
+    public UserDTO getUserInfo(String userId, String requesterId) {
+        AuthUtil.checkOwnership(userId, requesterId);
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
         return modelMapper.map(user, UserDTO.class);
@@ -80,7 +82,10 @@ public class UserServiceImpl implements UserService {
     }
 
     // 이메일과 전화번호 업데이트
-    public UserDTO updateUser(String userId, UserDTO request) {
+    @Override
+    public UserDTO updateUser(String userId, UserDTO request, String requesterId) {
+        AuthUtil.checkOwnership(userId, requesterId);
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."));
         modelMapper.getConfiguration().setPropertyCondition(context -> context.getSource() != null);
@@ -179,8 +184,14 @@ public class UserServiceImpl implements UserService {
 
     // Q&A 삭제
     @Override
-    public void deleteQna(Integer questionId) {
-        qnaRepository.deleteById(questionId);
+    public void deleteQna(Integer questionId, String requesterId) {
+        Question question = qnaRepository.findById(questionId)
+                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+
+        // 작성자 본인만 삭제 가능
+        AuthUtil.checkOwnership(question.getUserId().getUserId(), requesterId);
+
+        qnaRepository.delete(question);
     }
 
     // Q&A 작성자 Id 가져오기
@@ -192,10 +203,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void editQna(QuestionDTO dto) {
+    public void editQna(QuestionDTO dto, String requesterId) {
         Optional<Question> result = qnaRepository.findById(dto.getQuestionId());
 
         Question question = result.orElseThrow();
+
+        AuthUtil.checkOwnership(question.getUserId().getUserId(), requesterId);
         question.editTitle(dto.getTitle());
         question.editContent(dto.getContent());
 

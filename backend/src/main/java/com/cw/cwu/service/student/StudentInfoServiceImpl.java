@@ -2,7 +2,7 @@ package com.cw.cwu.service.student;
 
 import com.cw.cwu.dto.StudentStatusDTO;
 import com.cw.cwu.repository.GradeRepository;
-import com.cw.cwu.repository.StudentRecordRepository;
+import com.cw.cwu.util.AuthUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +30,8 @@ public class StudentInfoServiceImpl implements StudentInfoService {
     }
 
     @Override
-    public StudentStatusDTO getStudentStatusInfo(String studentId) {
+    public StudentStatusDTO getStudentStatusInfo(String studentId, String requesterId) {
+        AuthUtil.checkOwnership(studentId, requesterId);
         int year = calculateStudentYear(studentId);
         boolean graduated = checkGraduationEligibility(studentId);
 

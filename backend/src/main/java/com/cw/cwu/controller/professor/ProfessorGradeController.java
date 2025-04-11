@@ -12,8 +12,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
 
 @RestController
 @RequestMapping("/api/professor/grades")
@@ -24,17 +24,19 @@ public class ProfessorGradeController {
     private final UserRequestUtil userRequestUtil;
     private final AdminScheduleService adminScheduleService;
 
+    @PreAuthorize("hasRole('PROFESSOR')")
     @PostMapping
     public ResponseEntity<String> registerGrade(
             @RequestBody GradeRegisterDTO dto,
-            HttpServletRequest request  // 이걸 통해 Authorization 헤더에 접근
+            HttpServletRequest request
     ) throws AccessDeniedException {
-        String professorId = userRequestUtil.extractUserId(request);    // 토큰에서 추출된 사용자 ID
+        String professorId = userRequestUtil.extractUserId(request);
         String result = gradeService.registerGrade(dto, professorId);
         return result.contains("완료") ?
                 ResponseEntity.ok(result) : ResponseEntity.badRequest().body(result);
     }
 
+    @PreAuthorize("hasRole('PROFESSOR')")
     @PutMapping
     public ResponseEntity<String> updateGrade(
             @RequestBody GradeRegisterDTO dto,
@@ -46,6 +48,7 @@ public class ProfessorGradeController {
                 ResponseEntity.ok(result) : ResponseEntity.badRequest().body(result);
     }
 
+    @PreAuthorize("hasRole('PROFESSOR')")
     @DeleteMapping("/{gradeId}")
     public ResponseEntity<String> deleteGrade(
             @PathVariable Integer gradeId,
@@ -57,6 +60,7 @@ public class ProfessorGradeController {
                 ResponseEntity.ok(result) : ResponseEntity.badRequest().body(result);
     }
 
+    @PreAuthorize("hasRole('PROFESSOR')")
     @GetMapping("/class/{classId}")
     public ResponseEntity<PageResponseDTO<GradeDetailDTO>> getGradesByClass(
             @PathVariable Integer classId,
