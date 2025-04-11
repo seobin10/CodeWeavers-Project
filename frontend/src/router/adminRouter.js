@@ -1,14 +1,10 @@
-// 📁 src/routers/adminRouter.js
 import { lazy, Suspense } from "react";
 import RoleGuard from "../components/RoleGuard";
 import Loading from "../components/Loading";
 
-const AdminUserListPage = lazy(() =>
-  import("../pages/Admin/AdminUserListPage")
-);
-const AdminSchedulePage = lazy(() =>
-  import("../pages/Admin/AdminSchedulePage")
-);
+const AdminUserListPage = lazy(() => import("../pages/Admin/AdminUserListPage"));
+const AdminSchedulePage = lazy(() => import("../pages/Admin/AdminSchedulePage"));
+const AdminGradePage = lazy(() => import("../pages/Admin/AdminGradePage")); 
 
 const adminRouter = [
   {
@@ -21,13 +17,22 @@ const adminRouter = [
       </RoleGuard>
     ),
   },
-
   {
-    path: "users",
+    path: "admin/users",
     element: (
       <RoleGuard allowedRoles={["ADMIN"]}>
         <Suspense fallback={<Loading />}>
           <AdminSchedulePage />
+        </Suspense>
+      </RoleGuard>
+    ),
+  },
+  {
+    path: "admin/grades", 
+    element: (
+      <RoleGuard allowedRoles={["ADMIN"]}>
+        <Suspense fallback={<Loading />}>
+          <AdminGradePage />
         </Suspense>
       </RoleGuard>
     ),

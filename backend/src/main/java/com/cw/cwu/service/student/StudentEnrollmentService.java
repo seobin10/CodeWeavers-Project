@@ -81,7 +81,7 @@ public interface StudentEnrollmentService {
      * @param classId 강의 ID
      * @return 성공/실패 메시지
      */
-    String deleteCourse(String studentId, Integer classId);
+    String deleteCourse(String studentId, Integer classId, String requesterId);
 
     /**
      * [수강 확정된 강의 목록 조회]
@@ -97,5 +97,6 @@ public interface StudentEnrollmentService {
      * @param requestDTO 수강 신청 요청 DTO
      * @return 성공/실패 메시지
      */
-    String applyToClass(EnrollmentRequestDTO requestDTO);
+    // 수강 신청 처리
+    String applyToClass(EnrollmentRequestDTO requestDTO, String requesterId);
 }

@@ -10,7 +10,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { showModal } from "../slices/modalSlice";
 import { setUserId as setUserIdAction } from "../slices/authSlice";
-
+import { checkEnrollPeriod } from "../api/enrollmentApi";
 import FloatingPopup from "../components/FloatingPopup";
 import PageComponent from "../components/PageComponent";
 
@@ -25,6 +25,21 @@ const EnrollmentPage = () => {
     current: 1,
     totalCount: 0,
   });
+
+  // 수강신청 가능 기간 확인
+  useEffect(() => {
+    const checkPeriod = async () => {
+      const isOpen = await checkEnrollPeriod();
+      if (!isOpen) {
+        // 수강신청 기간이 아니면 제한 페이지로 리다이렉트
+        navigate("/main/period-expired", {
+          state: { message: "현재는 수강신청 기간이 아닙니다!" },
+        });
+      }
+    };
+
+    checkPeriod();
+  }, [navigate]);
 
   const [timetable, setTimetable] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -147,21 +162,25 @@ const EnrollmentPage = () => {
 
       const msg = response.data;
 
-      if (msg === "성공") {
+      if (msg.includes("성공")) {
         dispatch(
           showModal({
             message: `"${course.강의명}" 강의가 시간표에 추가되었습니다!`,
             type: "success",
           })
         );
-        setTimeout(() => {
-          navigate("/main/history");
-        }, 1000);
+
+        const updated = await getEnrolledCourses(userId);
+        setTimetable(updated.data);
       } else {
-        dispatch(showModal({ message: msg, type: "error" }));
+        dispatch(
+          showModal({
+            message: msg,
+            type: "error",
+          })
+        );
       }
     } catch (error) {
-      console.error("수강 신청 실패:", error);
       const msg =
         error.response?.data?.message ?? error.response?.data ?? error.message;
 
