@@ -20,7 +20,6 @@ const QnaDataPage = () => {
   const [writerId, setWriterId] = useState();
   const [message, setMessage] = useState("");
   const [contentInfo, setContentInfo] = useState([]);
-  const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const questionId = location.state?.questionId;

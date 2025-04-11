@@ -2,6 +2,7 @@
 import { lazy, Suspense } from "react";
 import RoleGuard from "../components/RoleGuard";
 import Loading from "../components/Loading";
+import EvaluationPage from "../pages/EvaluationPage";
 
 const StudentPage = lazy(() => import("../pages/StudentPage"));
 const GradePage = lazy(() => import("../pages/GradePage"));
@@ -70,6 +71,10 @@ const studentRouter = [
     path: "password",
     element: <ChangepwPage />,
   },
+  {
+    path: "evaluation",
+    element: <EvaluationPage/>
+  }
 ];
 
 export default studentRouter;
