@@ -3,12 +3,14 @@ import { getEnrolledCourses, deleteCourse } from "../api/enrollmentApi";
 import { useDispatch, useSelector } from "react-redux";
 import { showModal } from "../slices/modalSlice";
 import { useNavigate } from "react-router-dom";
+import { checkEnrollPeriod } from "../api/enrollmentApi";
 
 const HistoryPage = () => {
   const [timetable, setTimetable] = useState([]);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const userId = useSelector((state) => state.auth.userId);
+  const [isClassRegPeriod, setIsClassRegPeriod] = useState(false);
 
   const fetchMyTimetable = useCallback(async () => {
     try {
@@ -36,6 +38,19 @@ const HistoryPage = () => {
     }
   };
 
+  useEffect(() => {
+    const checkPeriod = async () => {
+      try {
+        const isOpen = await checkEnrollPeriod();
+        setIsClassRegPeriod(isOpen);
+      } catch (e) {
+        setIsClassRegPeriod(false);
+      }
+    };
+
+    checkPeriod();
+  }, []);
+
   return (
     <div className="max-w-5xl mx-auto p-4 bg-white shadow-md mt-6 rounded-md">
       <h2 className="text-3xl font-bold text-center mb-6"> 수강 신청 내역 </h2>
@@ -44,7 +59,7 @@ const HistoryPage = () => {
         <div className="mt-6">
           <h3 className="text-xl text-center font-semibold mb-6">
             {" "}
-            📚 확정된 수강 목록 📚{" "}
+            📚 수강 목록 📚{" "}
           </h3>
 
           <table className="w-full border border-gray-300">
@@ -55,7 +70,7 @@ const HistoryPage = () => {
                 <th className="border p-2">교시</th>
                 <th className="border p-2">학점</th>
                 <th className="border p-2">교수</th>
-                <th className="border p-2">삭제</th>
+                {isClassRegPeriod && <th className="border p-2">삭제</th>}
               </tr>
             </thead>
 
@@ -69,14 +84,16 @@ const HistoryPage = () => {
                   </td>
                   <td className="border p-2">{course.classCredit || "N/A"}</td>
                   <td className="border p-2">{course.professorName}</td>
-                  <td className="border p-2">
-                    <button
-                      onClick={() => handleRemove(course.강의번호)}
-                      className="bg-red-500 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
-                    >
-                      삭제 🗑️
-                    </button>
-                  </td>
+                  {isClassRegPeriod && (
+                    <td className="border p-2">
+                      <button
+                        onClick={() => handleRemove(course.강의번호)}
+                        className="bg-red-500 hover:bg-red-700 text-white px-3 py-1 rounded text-sm"
+                      >
+                        삭제 🗑️
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

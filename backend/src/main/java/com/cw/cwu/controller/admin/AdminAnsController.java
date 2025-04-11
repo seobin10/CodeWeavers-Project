@@ -4,9 +4,11 @@ import com.cw.cwu.dto.AnswerDTO;
 import com.cw.cwu.dto.QnADTO;
 import com.cw.cwu.service.admin.AdminAnsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+
 
 @RestController
 @RequestMapping("api/admin")
@@ -16,6 +18,7 @@ public class AdminAnsController {
     private final AdminAnsService adminAnsService;
 
     // 답변 작성
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("ans/write")
     public String writeAns(@RequestBody AnswerDTO dto){
         String userId = dto.getUserId();
@@ -24,6 +27,7 @@ public class AdminAnsController {
     }
 
     // 답변 삭제
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("ans/delete/{questionId}")
     public Map<String, String>clearAns(@PathVariable(name = "questionId") Integer questionId){
         adminAnsService.deleteAns(questionId);
