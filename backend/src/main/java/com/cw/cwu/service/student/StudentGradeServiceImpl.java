@@ -39,8 +39,4 @@ public class StudentGradeServiceImpl implements StudentGradeService {
                 .collect(Collectors.toList());
     }
 
-
-
-
-
 }
