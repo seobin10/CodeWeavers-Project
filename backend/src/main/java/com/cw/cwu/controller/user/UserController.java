@@ -106,11 +106,11 @@ public class UserController {
     public ResponseEntity<Map<String, String>> findPassword(@RequestBody UserDTO dto) {
         System.out.println("🔍 비밀번호 찾기 요청: " + dto);
         Map<String, String> response = userService.findUserPasswordByUserIdAndEmail(dto.getUserId(), dto.getUserEmail());
-
+        log.info("password:{}",response);
         if (response.containsKey("error")) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
-
+        log.info("response:{}",response);
         return ResponseEntity.ok(response);
     }
 
@@ -131,6 +131,39 @@ public class UserController {
         String requesterId = userRequestUtil.extractUserId(httpRequest);
         return ResponseEntity.ok(userService.updateUser(userId, request, requesterId));
     }
+
+    @PutMapping("/{userId}/password")
+    public ResponseEntity<?> changePassword(
+            @PathVariable String userId,
+            @RequestBody Map<String, String> body,
+            HttpServletRequest request) {
+
+        String requesterId = userRequestUtil.extractUserId(request); // JWT에서 사용자 ID 추출
+        if (!userId.equals(requesterId)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "본인의 비밀번호만 변경할 수 있습니다."));
+        }
+
+        String currentPassword = body.get("currentPassword");
+        String newPassword = body.get("newPassword");
+
+        // 사용자 찾기
+        User user = userService.findByUserId(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+
+        // 현재 비밀번호 확인
+        if (!passwordEncoder.matches(currentPassword, user.getUserPassword())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "현재 비밀번호가 일치하지 않습니다."));
+        }
+
+        // 새 비밀번호로 변경
+        user.setUserPassword(passwordEncoder.encode(newPassword));
+        userService.save(user); // 또는 userRepository.save(user)
+
+        return ResponseEntity.ok(Map.of("message", "비밀번호가 성공적으로 변경되었습니다."));
+    }
+
 
     // 질의응답 게시판 리스트를 출력
     @GetMapping("/qna/list")

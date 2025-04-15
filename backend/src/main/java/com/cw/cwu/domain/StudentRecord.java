@@ -6,7 +6,12 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "student_records")
+@Table(
+        name = "student_records",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"student_id", "semester_id"})
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -33,10 +38,10 @@ public class StudentRecord {
     private float gpa;
 
     @Builder.Default
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @ManyToOne
-    @JoinColumn(name = "semester_id")
+    @JoinColumn(name = "semester_id", nullable = false)
     private Semester semester;
 }
