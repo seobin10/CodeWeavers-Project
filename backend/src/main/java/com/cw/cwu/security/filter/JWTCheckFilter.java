@@ -38,6 +38,10 @@ public class JWTCheckFilter extends OncePerRequestFilter {
         return request.getMethod().equals("OPTIONS")
                 || path.startsWith("/uploads/")
                 || path.startsWith("/api/user/login")
+                || path.equals("/api/user/finduserId")
+                || path.equals("/api/user/finduserPassword")  // ✅
+                || path.startsWith("/api/user/reset-password")     // ✅ 추가되어야 함// 여기 추가
+                || path.startsWith("/uploads")
                 || path.equals("/api/atelier/logout");
     }
 
