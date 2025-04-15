@@ -6,7 +6,12 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "schedule_settings")
+@Table(
+        name = "schedule_settings",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"semester_id", "schedule_type"})
+        }
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -20,7 +25,7 @@ public class ScheduleSetting {
     private Integer id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "schedule_type", nullable = false, unique = true)
+    @Column(name = "schedule_type", nullable = false)
     private ScheduleType scheduleType;
 
     @Column(name = "start_date", nullable = false)

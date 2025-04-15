@@ -22,7 +22,7 @@ public class Enrollment {
 
     @Getter
     @ManyToOne
-    @JoinColumn(name = "class_id")
+    @JoinColumn(name = "class_id", nullable = true)
     private ClassEntity enrolledClassEntity;
 
     @Column(name = "enrollment_date")
