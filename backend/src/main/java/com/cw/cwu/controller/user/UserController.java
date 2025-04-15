@@ -1,29 +1,37 @@
 package com.cw.cwu.controller.user;
 
+import com.cw.cwu.domain.PasswordResetToken;
 import com.cw.cwu.domain.User;
 import com.cw.cwu.dto.LoginResponseDTO;
 import com.cw.cwu.dto.QnADTO;
 import com.cw.cwu.dto.QuestionDTO;
 import com.cw.cwu.dto.UserDTO;
+import com.cw.cwu.repository.PasswordResetTokenRepository;
 import com.cw.cwu.service.user.UserServiceImpl;
 import com.cw.cwu.util.JWTUtil;
 import com.cw.cwu.util.UserRequestUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
+@Slf4j
 public class UserController {
 
     private final UserServiceImpl userService;
@@ -31,13 +39,18 @@ public class UserController {
     private final JWTUtil jwtUtil;
     private final UserRequestUtil userRequestUtil;
 
+    @Value("${frontend.url:http://localhost:3000}")
+    private String frontendUrl;
+
+    @Autowired
+    private PasswordResetTokenRepository passwordResetTokenRepository;
     // 로그인
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserDTO loginRequestDTO) {
         // 사용자 DB 조회
         User user = userService.findByUserId(loginRequestDTO.getUserId())
                 .orElseThrow(() -> new UsernameNotFoundException("해당 사용자가 존재하지 않습니다."));
-
+        log.info("user:" +user);
         // 비밀번호 검증
         if (!passwordEncoder.matches(loginRequestDTO.getUserPassword(), user.getUserPassword())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -91,13 +104,16 @@ public class UserController {
     // pw 찾기
     @PostMapping("/finduserPassword")
     public ResponseEntity<Map<String, String>> findPassword(@RequestBody UserDTO dto) {
-        System.out.println("find userpassword controller : " + dto);
+        System.out.println("🔍 비밀번호 찾기 요청: " + dto);
         Map<String, String> response = userService.findUserPasswordByUserIdAndEmail(dto.getUserId(), dto.getUserEmail());
+
         if (response.containsKey("error")) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
+
         return ResponseEntity.ok(response);
     }
+
 
     // 사용자 정보 조회
     @GetMapping("/{userId}")
@@ -169,4 +185,61 @@ public class UserController {
         userService.editQna(dto, requesterId);
         return Map.of("수정 수행 결과", "성공");
     }
+
+    @PostMapping("/send-reset-link")
+    public ResponseEntity<?> sendResetLink(@RequestBody UserDTO dto) {
+        log.info("비밀번호 reset 요청: {}", dto);
+
+        User user = userService.findByUserId(dto.getUserId()).get();
+
+        if(user == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "해당 사용자가 존재하지 않습니다."));
+        }
+
+
+        if (!user.getUserEmail().equals(dto.getUserEmail())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "이메일이 일치하지 않습니다."));
+        }
+
+        String token = UUID.randomUUID().toString();
+        userService.savePasswordResetToken(user, token);
+
+        String resetLink = frontendUrl + "/reset-password?token=" + token;
+        userService.sendResetEmail(dto.getUserEmail(), resetLink);
+
+        return ResponseEntity.ok(Map.of("message", "비밀번호 재설정 링크가 이메일로 전송되었습니다."));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> body) {
+        String token = body.get("token");
+        String newPassword = body.get("password");
+        log.info("🔐 비밀번호 재설정 요청: token={}, newPassword=****", token);
+
+        // 1. 토큰 확인
+        PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(token)
+                .orElseThrow(() -> new RuntimeException("유효하지 않은 토큰입니다."));
+
+        // 2. 토큰 유효성 확인
+        if (resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "토큰이 만료되었습니다."));
+        }
+
+        // 3. 사용자 비밀번호 변경
+        User user = resetToken.getUser();
+        user.setUserPassword(passwordEncoder.encode(newPassword));  // ❗ 실제 필드 사용
+
+        // 4. 저장
+        userService.save(user);  // ❗
+
+        // 5. 토큰 삭제
+        passwordResetTokenRepository.delete(resetToken);
+
+        return ResponseEntity.ok(Map.of("message", "비밀번호가 성공적으로 변경되었습니다."));
+    }
+
+
 }
