@@ -6,17 +6,20 @@ import com.cw.cwu.dto.QuestionDTO;
 import com.cw.cwu.dto.UserDTO;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface UserService {
     public UserDTO login(UserDTO request);
-    Optional<User> findByUserId(String email);
+    public Optional<User> findByUserId(String userId);
 
     // 정보 조회
     UserDTO getUserInfo(String userId, String requesterId);
-
+    public Map<String, String> findUserPasswordByUserIdAndEmail(String userId, String userEmail);
     public String findUserIdByUserName(String username);
-
+    void savePasswordResetToken(User user, String token);
+    void sendResetEmail(String toEmail, String resetLink);
+    void save(User user);
     // 이메일과 전화번호 업데이트
     UserDTO updateUser(String userId, UserDTO request, String requesterId);
 

@@ -16,7 +16,7 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
         Optional<User> findByUserId(String userId);
-
+        Optional<User> findByUserIdAndUserEmail(String userId, String userEmail);
         // JPQL을 사용하여 userName으로 userId만 조회하는 메서드
         @Query("select u.userId from User u where u.userName = :userName")
         Optional<String> findUserIdByUserName(@Param("userName") String userName);

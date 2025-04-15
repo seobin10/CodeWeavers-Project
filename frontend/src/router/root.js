@@ -10,7 +10,10 @@ import noticeRouter from "./noticeRouter";
 import UnauthorizedPage from "../pages/UnauthorizedPage";
 import PeriodExpiredPage from "../pages/users/PeriodExpiredPage";
 import Loading from "../components/Loading";
+import MainPage from "../pages/MainPage";
+import CalenderPage from "../pages/CalenderPage";
 import { Suspense, lazy } from "react";
+import ResetPasswordPage from "../pages/users/ResetPasswordPage";
 
 const root = createBrowserRouter([
   { path: "/", element: <Navigate to="/member/login" /> },
@@ -18,6 +21,22 @@ const root = createBrowserRouter([
     path: "/main",
     element: <BasicLayout />,
     children: [
+      {
+        path: "",
+        element: (
+          <Suspense fallback={<Loading />}>
+            <MainPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "calender",
+        element: (
+          <Suspense fallback={<Loading />}>
+            <CalenderPage />
+          </Suspense>
+        ),
+      },
       ...studentRouter,
       ...adminRouter,
       ...professorRouter,
@@ -44,6 +63,10 @@ const root = createBrowserRouter([
   {
     path: "/member",
     children: memberRouter(),
+  },
+  {
+    path: "/reset-password",
+    element: <ResetPasswordPage />,
   },
 ]);
 
