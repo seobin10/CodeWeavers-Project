@@ -26,7 +26,7 @@ async function findUserPw(formData) {
       throw new Error(data.error || "서버 오류 발생");
     }
 
-    return data; // { password: "비밀번호값" } 또는 { error: "사용자를 찾을 수 없습니다." }
+    return data;
   } catch (error) {
     console.error("비밀번호 찾기 요청 실패:", error);
     throw error;
@@ -39,6 +39,7 @@ function FindpwPage() {
     userEmail: "",
   });
 
+  const [message, setMessage] = useState(""); // ✅ 메시지 상태 추가
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
@@ -46,7 +47,6 @@ function FindpwPage() {
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
     }, sliderInterval);
-
     return () => clearInterval(interval);
   }, []);
 
@@ -60,27 +60,27 @@ function FindpwPage() {
   const handleFindPassword = async (e) => {
     e.preventDefault();
     if (!formData.userId || !formData.userEmail) {
-      alert("학번과 이메일을 입력해주세요.");
+      setMessage("학번과 이메일을 입력해주세요.");
       return;
     }
 
     try {
       const data = await findUserPw(formData);
-      console.log("응답 데이터:", data);
-
-      if (data.password) {
-        alert(`비밀번호: ${data.password}`);
+      if (data.message) {
+        setMessage(data.message); // 서버 응답 메시지 표시
+      } else if (data.password) {
+        setMessage(`비밀번호: ${data.password}`);
       } else {
-        alert("비밀번호 찾기에 실패했습니다.");
+        setMessage("비밀번호 찾기에 실패했습니다.");
       }
     } catch (error) {
-      console.error("비밀번호 찾기 요청 중 오류 발생:", error);
-      alert(error.message);
+      setMessage(error.message || "비밀번호 찾기 요청 중 오류 발생");
     }
   };
 
   return (
     <div className="relative w-full h-screen overflow-hidden">
+      {/* 배경 이미지 */}
       <div className="absolute top-0 left-0 w-full h-full">
         {images.map((src, index) => (
           <img
@@ -93,6 +93,7 @@ function FindpwPage() {
         ))}
       </div>
 
+      {/* 로그인 폼 */}
       <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 bg-opacity-40">
         <div className="w-full max-w-md bg-white bg-opacity-90 p-6 rounded-lg shadow-md flex flex-col items-center">
           <img
@@ -101,7 +102,14 @@ function FindpwPage() {
             className="w-20 h-20 rounded-full mb-4"
           />
 
-          <form onSubmit={handleFindPassword} className="space-y-3">
+          {/* 메시지 출력 */}
+          {message && (
+            <div className="text-white bg-blue-600 p-2 rounded mt-4 text-center w-full">
+              {message}
+            </div>
+          )}
+
+          <form onSubmit={handleFindPassword} className="space-y-3 mt-4 w-full">
             <input
               type="text"
               name="userId"

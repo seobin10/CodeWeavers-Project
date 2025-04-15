@@ -40,7 +40,10 @@ public class CustomSecurityConfig {
 
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.POST, "/api/user/login").permitAll()
-                .requestMatchers("/uploads/**").permitAll()  // 이미지 경로 인증 없이 허용
+                .requestMatchers(HttpMethod.POST, "/api/user/finduserId").permitAll()  // 이미지 경로 인증 없이 허용
+                .requestMatchers(HttpMethod.POST, "/api/user/finduserPassword").permitAll()  // 이미지 경로 인증 없이 허용
+                .requestMatchers(HttpMethod.POST, "/api/user/reset-password").permitAll()  // 이미지 경로 인증 없이 허용
+                .requestMatchers("/uploads/**").permitAll()  // ✅ 파일 접근 허용
                 .requestMatchers("/error").permitAll()
                 .anyRequest().authenticated()
         );

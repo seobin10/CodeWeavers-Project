@@ -1,33 +1,43 @@
 package com.cw.cwu.service.user;
 
+import com.cw.cwu.domain.PasswordResetToken;
 import com.cw.cwu.domain.Question;
 import com.cw.cwu.domain.Status;
 import com.cw.cwu.dto.QnADTO;
 import com.cw.cwu.dto.QuestionDTO;
 import com.cw.cwu.dto.UserDTO;
 import com.cw.cwu.domain.User;
+import com.cw.cwu.repository.PasswordResetTokenRepository;
 import com.cw.cwu.repository.QuestionRepository;
 import com.cw.cwu.repository.UserRepository;
 import com.cw.cwu.util.AuthUtil;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final QuestionRepository qnaRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final JavaMailSender mailSender;
 
     // 로그인
     @Override
@@ -65,21 +75,79 @@ public class UserServiceImpl implements UserService {
         return userRepository.findUserIdByUserName(username).get();
     }
 
+    // ✅ 비밀번호 재설정 토큰 저장
+    @Override
+    public void savePasswordResetToken(User user, String token) {
+        PasswordResetToken resetToken = PasswordResetToken.builder()
+                .token(token)
+                .user(user)
+                .expiryDate(LocalDateTime.now().plusMinutes(30))  // 30분 유효기간
+                .build();
+
+        passwordResetTokenRepository.save(resetToken);
+    }
+
+    // ✅ 재설정 이메일 전송
+    @Override
+    public void sendResetEmail(String toEmail, String resetLink) {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+
+        try {
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+            helper.setTo(toEmail);
+            helper.setSubject("비밀번호 재설정 링크");
+
+            String htmlContent = "<p>아래 링크를 클릭하여 비밀번호를 재설정하세요:</p>"
+                    + "<a href=\"" + resetLink + "\">비밀번호 재설정</a>";
+
+            helper.setText(htmlContent, true);  // HTML true로 설정
+            helper.setFrom("eonuniversity@naver.com");
+
+            mailSender.send(mimeMessage);
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+    @Override
+    public void save(User user) {
+        userRepository.save(user);
+    }
+
     // pw 찾기
+    @Override
     public Map<String, String> findUserPasswordByUserIdAndEmail(String userId, String userEmail) {
-        System.out.println("service user id와 이메일로 userpassword(비밀번호) 찾기 : " + userId + ", " + userEmail);
+        Optional<User> optionalUser = userRepository.findByUserIdAndUserEmail(userId, userEmail);
 
         Map<String, String> response = new HashMap<>();
-        Optional<String> userPassword = userRepository.findUserPasswordByUserIdAndEmail(userId, userEmail);
 
-        if (userPassword.isPresent()) {
-            response.put("password", userPassword.get());
-        } else {
-            response.put("error", "해당 학번과 이메일을 가진 사용자를 찾을 수 없습니다.");
+        if (optionalUser.isEmpty()) {
+            response.put("error", "해당 정보를 가진 사용자를 찾을 수 없습니다.");
+            return response;
         }
 
+        String token = UUID.randomUUID().toString();
+        User user = optionalUser.get();
+        // ✅ 기존 토큰 제거
+        passwordResetTokenRepository.deleteByUser(user);
+        PasswordResetToken resetToken = PasswordResetToken.builder()
+                .token(token)
+                .user(user)
+                .expiryDate(LocalDateTime.now().plusMinutes(30))
+                .build();
+
+        passwordResetTokenRepository.save(resetToken);
+
+        String resetLink = "http://localhost:3000/reset-password?token=" + token;
+        sendResetEmail(user.getUserEmail(), resetLink);
+
+        response.put("message", "비밀번호 재설정 링크가 이메일로 전송되었습니다.");
+        response.put("email", user.getUserEmail());
         return response;
     }
+
 
     // 이메일과 전화번호 업데이트
     @Override
