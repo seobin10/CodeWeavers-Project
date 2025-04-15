@@ -19,10 +19,10 @@ public class Question {
     private Integer questionId;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User userId;
 
-    @Column(name = "title", length = 255)
+    @Column(name = "title", length = 255, nullable = false)
     private String title;
 
     @Column(name = "content", length = 255)
