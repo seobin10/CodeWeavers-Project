@@ -19,10 +19,10 @@ public class Notice { // 공지사항 엔터티
     private Integer noticeId;
 
     @ManyToOne
-    @JoinColumn(name = "admin_id")
+    @JoinColumn(name = "admin_id", nullable = true)
     private User adminId;
 
-    @Column(name = "title", length = 255)
+    @Column(name = "title", nullable = false, length = 255)
     private String title;
 
     @Column(name = "content")
