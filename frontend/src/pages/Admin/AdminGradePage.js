@@ -148,8 +148,16 @@ const AdminGradeStatusPage = () => {
                   {s.status === "미입력" ? (
                     <span className="text-red-600">미입력</span>
                   ) : (
-                    <span className="text-yellow-600">수정</span>
+                    <span className="text-yellow-600">수정됨</span>
                   )}
+
+                  {/* {s.status === "미입력" ? (
+                    <span className="text-red-600">미입력</span>
+                  ) : s.status === "수정됨" ? (
+                    <span className="text-yellow-600">수정됨</span>
+                  ) : s.status === "입력완료" ? (
+                    <span className="text-green-600">입력완료</span>
+                  ) : null} */}
                 </td>
                 <td className="py-2 px-4">{s.recordedGpa ?? "-"}</td>
                 <td className="py-2 px-4">{s.calculatedGpa ?? "-"}</td>
