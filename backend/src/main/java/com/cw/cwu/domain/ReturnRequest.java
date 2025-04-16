@@ -3,11 +3,11 @@ package com.cw.cwu.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(
-        name = "student_records",
+        name = "return_requests",
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = {"student_id", "semester_id"})
         }
@@ -17,31 +17,32 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class StudentRecord {
+public class ReturnRequest {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "record_id")
-    private Integer recordId;
+    @Column(name = "return_id")
+    private Integer returnId;
 
     @ManyToOne
     @JoinColumn(name = "student_id", nullable = false)
     private User student;
 
-    @Column(name = "enrolled", nullable = false)
-    private int enrolled;
-
-    @Column(name = "earned", nullable = false)
-    private int earned;
-
-    @Column(name = "gpa", nullable = false, columnDefinition = "FLOAT")
-    private float gpa;
-
-    @Builder.Default
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(name = "request_date", nullable = false)
+    private LocalDate requestDate;
 
     @ManyToOne
     @JoinColumn(name = "semester_id", nullable = false)
     private Semester semester;
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private RequestStatus status = RequestStatus.PENDING;
+
+    @Column(name = "approved_date")
+    private LocalDate approvedDate;
+
+    @Column(name = "denial_reason")
+    private String denialReason;
 }

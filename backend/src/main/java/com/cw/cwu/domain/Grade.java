@@ -18,7 +18,7 @@ public class Grade {
     private Integer gradeId;
 
     @OneToOne
-    @JoinColumn(name = "enrollment_id")
+    @JoinColumn(name = "enrollment_id", nullable = false)
     private Enrollment enrollment;
 
     @Enumerated(EnumType.STRING)

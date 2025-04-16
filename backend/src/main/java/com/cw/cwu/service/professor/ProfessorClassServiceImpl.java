@@ -4,6 +4,7 @@ import com.cw.cwu.domain.*;
 import com.cw.cwu.dto.*;
 import com.cw.cwu.repository.*;
 import com.cw.cwu.service.admin.AdminScheduleService;
+import com.cw.cwu.service.user.UserSemesterService;
 import com.cw.cwu.util.AuthUtil;
 import com.cw.cwu.util.PageUtil;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
     private final UserRepository userRepository;
     private final SemesterRepository semesterRepository;
     private final AdminScheduleService adminScheduleService;
+    private final UserSemesterService userSemesterService;
 
     // 시간 중복 체크
     private boolean isTimeOverlap(int start1, int end1, int start2, int end2) {
@@ -72,13 +74,9 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
         return null;
     }
 
-    private Semester getCurrentSemester() {
-        return semesterRepository.findCurrentSemester(LocalDate.now())
-                .orElseThrow(() -> new IllegalArgumentException("현재 학기를 찾을 수 없습니다."));
-    }
 
     private void validateCurrentSemester(Semester semester) {
-        Semester current = getCurrentSemester();
+        Semester current = userSemesterService.getCurrentSemester();
         if (!semester.getId().equals(current.getId())) {
             throw new IllegalStateException("현재 학기에만 강의 등록/수정/삭제가 가능합니다.");
         }
@@ -91,7 +89,7 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
         if (!adminScheduleService.isScheduleOpen(ScheduleType.CLASS)) {
             throw new IllegalStateException("현재는 강의 등록 기간이 아닙니다!");
         }
-        Semester currentSemester = getCurrentSemester();
+        Semester currentSemester = userSemesterService.getCurrentSemester();
         validateCurrentSemester(currentSemester);
 
         // 기본 검증
@@ -108,7 +106,7 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
             return "해당 교수를 찾을 수 없습니다.";
         }
 
-        Semester semester = getCurrentSemester();
+        Semester semester = userSemesterService.getCurrentSemester();
 
         // 시간 및 강의실 중복 검증
         String validationError = validateClassConstraints(
@@ -168,7 +166,7 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
             dto.setCourseYear(entity.getCourse().getYear());
 
             // 현재 학기와 비교
-            Semester currentSemester = getCurrentSemester();
+            Semester currentSemester = userSemesterService.getCurrentSemester();
             dto.setIsCurrentSemester(semester.getId().equals(currentSemester.getId()));
 
             return dto;
@@ -189,7 +187,7 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
 
         validateCurrentSemester(entity.getSemester());
 
-        Semester semester = getCurrentSemester();
+        Semester semester = userSemesterService.getCurrentSemester();
 
         // 검증
         String validationError = validateClassConstraints(
@@ -251,7 +249,7 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
 
     @Override
     public List<LectureRoomSimpleDTO> getAvailableLectureRooms(String day, int startTime, int endTime) {
-        Semester semester = getCurrentSemester();
+        Semester semester = userSemesterService.getCurrentSemester();
 
         List<LectureRoom> allRooms = lectureRoomRepository.findAll();
 
@@ -271,4 +269,5 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
                 ))
                 .collect(Collectors.toList());
     }
+
 }

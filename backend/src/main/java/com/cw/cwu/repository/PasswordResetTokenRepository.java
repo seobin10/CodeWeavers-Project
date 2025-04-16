@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-public interface PasswordResetTokenRepository extends JpaRepository<PasswordResetToken, String> {
+public interface PasswordResetTokenRepository extends JpaRepository<PasswordResetToken, Integer> {
     Optional<PasswordResetToken> findByToken(String token);
     @Modifying
     @Transactional
