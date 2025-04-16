@@ -18,14 +18,17 @@ public class ClassEntity {
     @Column(name = "class_id")
     private Integer id;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "course_id", nullable = false)
     private Course course;
 
+    @ToString.Exclude
     @ManyToOne
-    @JoinColumn(name = "professor_id", referencedColumnName = "user_id")
+    @JoinColumn(name = "professor_id", referencedColumnName = "user_id", nullable = true)
     private User professor;
 
+    @ToString.Exclude
     @ManyToOne
     @JoinColumn(name = "semester_id", nullable = false)
     private Semester semester;
@@ -45,7 +48,9 @@ public class ClassEntity {
     @Column(name = "class_enrolled", nullable = false)
     private Integer enrolled;
 
+    @ToString.Exclude
     @ManyToOne
-    @JoinColumn(name = "room_id", referencedColumnName = "room_id")
+    @JoinColumn(name = "room_id", referencedColumnName = "room_id", nullable = true)
     private LectureRoom lectureRoom;
 }
+

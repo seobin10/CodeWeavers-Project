@@ -50,7 +50,10 @@ const AdminUserListPage = () => {
           fetchUsers(currentPage);
         } catch (err) {
           dispatch(
-            showModal({ message: "사용자 삭제 중 오류가 발생했습니다.", type: "error" })
+            showModal({
+              message: "사용자 삭제 중 오류가 발생했습니다.",
+              type: "error",
+            })
           );
         }
       }
@@ -93,7 +96,7 @@ const AdminUserListPage = () => {
           placeholder="ID 또는 이름으로 검색"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="border-gray-300 rounded px-3 py-2 shadow-sm w-64 focus:ring-blue-500 focus:border-blue-500"
+          className="border border-gray-300 rounded px-3 py-2 shadow-sm w-64 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
         />
       </div>
 

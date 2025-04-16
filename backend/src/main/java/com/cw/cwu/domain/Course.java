@@ -28,7 +28,7 @@ public class Course {
     private Integer credit;
 
     @ManyToOne
-    @JoinColumn(name = "department_id")
+    @JoinColumn(name = "department_id", nullable = true)
     private Department department;
 
     @Column(name = "course_year", nullable = false)
