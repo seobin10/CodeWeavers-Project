@@ -228,12 +228,12 @@ public class AdminGradeServiceImpl implements AdminGradeService {
             if (missingCount > 0) {
                 status = "미입력";
             } else if (recordedGpa != null && !recordedGpa.equals(calculatedGpa)) {
-                status = "수정";
+                status = "수정됨";
             } else {
-                status = "이상없음";
+                status = "입력완료";
             }
 
-            if (!status.equals("이상없음")) {
+            if (!status.equals("입력완료")) {
                 result.add(GradeStatusDTO.builder()
                         .studentId(student.getUserId())
                         .studentName(student.getUserName())
