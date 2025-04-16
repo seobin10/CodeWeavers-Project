@@ -15,15 +15,33 @@ public class AdminGradeController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/finalize")
-    public ResponseEntity<String> finalizeStudentRecordsByDepartment(
-            @RequestParam Integer semesterId,
+    public ResponseEntity<String> finalizeCurrentSemesterRecords(
             @RequestParam Integer departmentId
     ) {
         try {
+            Integer semesterId = adminGradeService.getCurrentSemesterDTO().getSemesterId();
             adminGradeService.finalizeStudentRecordsByDepartment(semesterId, departmentId);
-            return ResponseEntity.ok("해당 학과의 성적 집계가 완료되었습니다.");
+            return ResponseEntity.ok("현재 학기의 성적 집계가 완료되었습니다.");
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/summary")
+    public ResponseEntity<?> getCurrentGradeStatusSummary(
+            @RequestParam Integer departmentId
+    ) {
+        Integer semesterId = adminGradeService.getCurrentSemesterDTO().getSemesterId();
+        return ResponseEntity.ok(
+                adminGradeService.getGradeStatusSummary(semesterId, departmentId)
+        );
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/current-semester")
+    public ResponseEntity<?> getCurrentSemester() {
+        return ResponseEntity.ok(adminGradeService.getCurrentSemesterDTO());
+    }
+
 }

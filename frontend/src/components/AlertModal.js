@@ -29,7 +29,13 @@ const AlertModal = ({ isOpen, message, onClose, type = "success" }) => {
     <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg text-center w-80">
         <img src={gifSrc} alt={modalType} className="w-20 h-20 mx-auto mb-4" />
-        <p className="mb-4 whitespace-pre-line">{message}</p>
+        <p className="mb-4 whitespace-pre-line">
+          {typeof message === "string"
+            ? message
+            : typeof message === "object"
+            ? JSON.stringify(message, null, 2)
+            : "알 수 없는 오류가 발생했습니다."}
+        </p>
         <button
           ref={buttonRef}
           autoFocus

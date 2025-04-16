@@ -10,6 +10,7 @@ import com.cw.cwu.repository.EnrollmentRepository;
 import com.cw.cwu.repository.GradeRepository;
 import com.cw.cwu.repository.SemesterRepository;
 import com.cw.cwu.service.admin.AdminScheduleService;
+import com.cw.cwu.service.user.UserSemesterService;
 import com.cw.cwu.util.AuthUtil;
 import com.cw.cwu.util.PageUtil;
 import lombok.RequiredArgsConstructor;
@@ -31,15 +32,11 @@ public class ProfessorGradeServiceImpl implements ProfessorGradeService {
     private final ClassEntityRepository classEntityRepository;
     private final AdminScheduleService adminScheduleService;
     private final SemesterRepository semesterRepository;
+    private final UserSemesterService userSemesterService;
 
-    // 현재 학기를 가져오는 메서드
-    private Semester getCurrentSemester() {
-        return semesterRepository.findCurrentSemester(LocalDate.now())
-                .orElseThrow(() -> new IllegalArgumentException("현재 학기를 찾을 수 없습니다."));
-    }
 
     private void validateCurrentSemester(Semester semester) {
-        Semester current = getCurrentSemester();
+        Semester current = userSemesterService.getCurrentSemester();
         if (!semester.getId().equals(current.getId())) {
             throw new IllegalStateException("현재 학기에만 성적 등록/수정/삭제가 가능합니다.");
         }
@@ -126,7 +123,7 @@ public class ProfessorGradeServiceImpl implements ProfessorGradeService {
 
         AuthUtil.checkOwnership(classEntity.getProfessor().getUserId(), professorId);
 
-        Semester currentSemester = getCurrentSemester(); // 현재 학기 확인
+        Semester currentSemester = userSemesterService.getCurrentSemester(); // 현재 학기 확인
 
         Pageable pageable = PageUtil.toPageable(pageRequestDTO, "enrollment");
         Page<Enrollment> page = enrollmentRepository.findByEnrolledClassEntity_Id(classId, pageable);

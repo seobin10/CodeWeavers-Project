@@ -1,6 +1,13 @@
 package com.cw.cwu.service.admin;
 
+import com.cw.cwu.dto.GradeStatusDTO;
+import com.cw.cwu.dto.SemesterDTO;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
 public interface AdminGradeService {
+
     /**
      * 특정 학기의 모든 학생에 대해 GPA 집계를 수행합니다.
      * 성적 입력 마감 이후, 관리자에 의해 수동 트리거됩니다.
@@ -20,4 +27,11 @@ public interface AdminGradeService {
      * @param semesterId  집계 대상 학기의 ID
      */
     void updateStudentRecordAsAdmin(String studentId, Integer semesterId);
+
+
+    List<GradeStatusDTO> getGradeStatusSummary(Integer semesterId, Integer departmentId);
+
+
+    SemesterDTO getCurrentSemesterDTO();
+
 }
