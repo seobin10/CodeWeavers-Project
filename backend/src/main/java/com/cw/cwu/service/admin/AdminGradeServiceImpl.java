@@ -1,13 +1,20 @@
 package com.cw.cwu.service.admin;
 
 import com.cw.cwu.domain.*;
+import com.cw.cwu.dto.GradeStatusDTO;
+import com.cw.cwu.dto.SemesterDTO;
 import com.cw.cwu.repository.*;
+import com.cw.cwu.service.user.UserSemesterService;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +25,10 @@ public class AdminGradeServiceImpl implements AdminGradeService {
     private final SemesterRepository semesterRepository;
     private final StudentRecordRepository studentRecordRepository;
     private final DepartmentRepository departmentRepository;
+    private final ModelMapper modelMapper;
+    private final UserSemesterService userSemesterService;
+    private final ScheduleSettingRepository scheduleSettingRepository;
+
 
     /**
      * 전체 학생에 대해 GPA 집계 실행 (학과 기준)
@@ -27,6 +38,23 @@ public class AdminGradeServiceImpl implements AdminGradeService {
     @Transactional
     @Override
     public void finalizeStudentRecordsByDepartment(Integer semesterId, Integer departmentId) {
+        // 현재 집계 가능한 시점인지 확인
+        Semester current = userSemesterService.getCurrentSemester();
+        if (!semesterId.equals(current.getId())) {
+            throw new IllegalStateException("현재 학기에만 성적을 집계할 수 있습니다!");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        ScheduleSetting gradeSchedule = scheduleSettingRepository
+                .findBySemesterIdAndScheduleType(current.getId(), ScheduleType.GRADE)
+                .orElseThrow(() -> new IllegalStateException("성적 입력 일정이 존재하지 않습니다."));
+
+        if (now.isBefore(gradeSchedule.getStartDate()) ||
+                now.isAfter(current.getEndDate().atTime(23, 59, 59))) {
+            throw new IllegalStateException("성적 집계는 성적 입력 기간이 시작된 이후부터 학기 종료 전까지만 가능합니다.");
+        }
+
         // 1. 학과 조회
         Department department = departmentRepository.findById(departmentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 학과를 찾을 수 없습니다."));
@@ -34,6 +62,7 @@ public class AdminGradeServiceImpl implements AdminGradeService {
         // 2. 학기 조회
         Semester semester = semesterRepository.findById(semesterId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 학기를 찾을 수 없습니다."));
+
 
         // 3. 해당 학과의 전체 학생 조회
         List<User> students = userRepository.findByUserRoleAndDepartment(UserRole.STUDENT, department);
@@ -56,7 +85,7 @@ public class AdminGradeServiceImpl implements AdminGradeService {
 
         // 5. 누락된 학생이 있다면 전체 집계 중단
         if (!invalidStudents.isEmpty()) {
-            throw new IllegalStateException("성적이 미입력된 학생이 있습니다.\n\n학생 ID: " + String.join(", ", invalidStudents));
+            throw new IllegalStateException("성적이 미입력된 학생이 있어 집계를 진행할 수 없습니다.");
         }
 
         // 6. 검증 통과한 학생들 성적 집계 실행
@@ -132,6 +161,7 @@ public class AdminGradeServiceImpl implements AdminGradeService {
                         throw new IllegalStateException("이미 동일한 성적이 집계되어 있습니다.");
                     }
                     studentRecordRepository.delete(existing);
+                    studentRecordRepository.flush();
                     System.out.println("기존 성적 기록 덮어씀. 학생: " + studentId);
                 });
 
@@ -145,6 +175,84 @@ public class AdminGradeServiceImpl implements AdminGradeService {
                 .build();
 
         studentRecordRepository.save(record);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public List<GradeStatusDTO> getGradeStatusSummary(Integer semesterId, Integer departmentId) {
+        // 학기 & 학과 조회
+        Semester semester = semesterRepository.findById(semesterId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 학기를 찾을 수 없습니다."));
+        Department department = departmentRepository.findById(departmentId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 학과를 찾을 수 없습니다."));
+
+        // 학과 소속 전체 학생 조회
+        List<User> students = userRepository.findByUserRoleAndDepartment(UserRole.STUDENT, department);
+        List<GradeStatusDTO> result = new ArrayList<>();
+
+        for (User student : students) {
+            List<Enrollment> enrollments = enrollmentRepository.findEnrollmentsByStudentId(student.getUserId());
+
+            int missingCount = 0;
+            int totalCredits = 0;
+            int totalEarned = 0;
+            double totalGradePoints = 0.0;
+
+            for (Enrollment enrollment : enrollments) {
+                ClassEntity classEntity = enrollment.getEnrolledClassEntity();
+                if (classEntity == null || !classEntity.getSemester().getId().equals(semesterId)) continue;
+
+                Grade grade = enrollment.getGrade();
+                Course course = classEntity.getCourse();
+                int credit = course.getCredit();
+
+                if (grade == null || grade.getGrade() == null) {
+                    missingCount++;
+                    continue;
+                }
+
+                double point = convertGradeToPoint(grade.getGrade());
+                totalCredits += credit;
+                totalGradePoints += point * credit;
+                if (point > 0.0) totalEarned += credit;
+            }
+
+            Float calculatedGpa = (totalCredits == 0) ? null : (float)(totalGradePoints / totalCredits);
+
+            // 기존 기록 조회
+            Optional<StudentRecord> recordOpt = studentRecordRepository.findByStudentAndSemester(student, semester);
+            Float recordedGpa = recordOpt.map(StudentRecord::getGpa).orElse(null);
+
+            // 상태 판별
+            String status;
+            if (missingCount > 0) {
+                status = "미입력";
+            } else if (recordedGpa != null && !recordedGpa.equals(calculatedGpa)) {
+                status = "수정";
+            } else {
+                status = "이상없음";
+            }
+
+            if (!status.equals("이상없음")) {
+                result.add(GradeStatusDTO.builder()
+                        .studentId(student.getUserId())
+                        .studentName(student.getUserName())
+                        .departmentName(department.getDepartmentName())
+                        .status(status)
+                        .recordedGpa(recordedGpa)
+                        .calculatedGpa(calculatedGpa)
+                        .missingGradesCount(missingCount)
+                        .build());
+            }
+        }
+
+        return result;
+    }
+
+    @Override
+    public SemesterDTO getCurrentSemesterDTO() {
+        Semester semester = userSemesterService.getCurrentSemester();
+        return modelMapper.map(semester, SemesterDTO.class);
     }
 
     /**
