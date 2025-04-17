@@ -287,7 +287,7 @@ const EnrollmentPage = () => {
             <input
               type="text"
               className="bg-blue-50 border p-2 rounded w-full"
-              placeholder="강의명 검색"
+              placeholder="과목명 검색"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -308,7 +308,7 @@ const EnrollmentPage = () => {
               <th className="border p-2">구분</th>
               <th className="border p-2">개설학과</th>
               <th className="border p-2">강의학년</th>
-              <th className="border p-2">강의명</th>
+              <th className="border p-2">과목명</th>
               <th className="border p-2">강의요일</th>
               <th className="border p-2">강의실</th>
               <th className="border p-2">강의시간</th>
