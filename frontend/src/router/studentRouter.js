@@ -9,8 +9,9 @@ const CurrentPage = lazy(() => import("../pages/CurrentPage"));
 const EnrollmentPage = lazy(() => import("../pages/EnrollmentPage"));
 const HistoryPage = lazy(() => import("../pages/HistoryPage"));
 const SchedulePage = lazy(() => import("../pages/SchedulePage"));
-const ChangepwPage =  lazy(() => import("../components/ChangepwPage"));
-
+const ChangepwPage = lazy(() => import("../components/ChangepwPage"));
+const EvaluationPage = lazy(() => import("../pages/EvaluationPage"));
+const EvaluationListPage = lazy(() => import("../pages/EvaluationListPage"));
 const studentRouter = [
   {
     path: "student",
@@ -69,6 +70,26 @@ const studentRouter = [
   {
     path: "password",
     element: <ChangepwPage />,
+  },
+  {
+    path: "evaluationlist",
+    element: (
+      <RoleGuard allowedRoles={["STUDENT"]}>
+        <Suspense fallback={<Loading />}>
+          <EvaluationListPage />
+        </Suspense>
+      </RoleGuard>
+    ),
+  },
+  {
+    path: "evaluation",
+    element: (
+      <RoleGuard allowedRoles={["STUDENT"]}>
+        <Suspense fallback={<Loading />}>
+          <EvaluationPage />
+        </Suspense>
+      </RoleGuard>
+    ),
   },
 ];
 
