@@ -2,6 +2,7 @@ package com.cw.cwu.service.admin;
 
 import com.cw.cwu.domain.*;
 import com.cw.cwu.dto.GradeStatusDTO;
+import com.cw.cwu.dto.GradeStatusResponseDTO;
 import com.cw.cwu.dto.SemesterDTO;
 import com.cw.cwu.repository.*;
 import com.cw.cwu.service.user.UserSemesterService;
@@ -70,7 +71,7 @@ public class AdminGradeServiceImpl implements AdminGradeService {
         // 4. 성적 누락 여부 검사
         List<String> invalidStudents = new ArrayList<>();
         for (User student : students) {
-            List<Enrollment> enrollments = enrollmentRepository.findEnrollmentsByStudentId(student.getUserId());
+            List<Enrollment> enrollments = enrollmentRepository.findEnrollmentsByStudentIdAndSemesterId(student.getUserId(), semesterId);
             for (Enrollment enrollment : enrollments) {
                 ClassEntity classEntity = enrollment.getEnrolledClassEntity();
                 if (classEntity == null || !classEntity.getSemester().getId().equals(semesterId)) continue;
@@ -103,7 +104,7 @@ public class AdminGradeServiceImpl implements AdminGradeService {
     @Override
     public void updateStudentRecordAsAdmin(String studentId, Integer semesterId) {
         // 1. 수강 정보 조회
-        List<Enrollment> enrollments = enrollmentRepository.findEnrollmentsByStudentId(studentId);
+        List<Enrollment> enrollments = enrollmentRepository.findEnrollmentsByStudentIdAndSemesterId(studentId, semesterId);
 
         // 2. 초기값 설정
         int totalEnrolled = 0;
@@ -152,14 +153,9 @@ public class AdminGradeServiceImpl implements AdminGradeService {
         final float finalGpa = gpa;
 
 
-        // 6. 기존 성적 기록이 있다면 값 비교 후 동일하면 생략, 다르면 삭제
+        // 6. 기존 record 삭제 덮어쓰기
         studentRecordRepository.findByStudentAndSemester(student, semester)
                 .ifPresent(existing -> {
-                    if (existing.getEnrolled() == finalEnrolled &&
-                            existing.getEarned() == finalEarned &&
-                            existing.getGpa() == finalGpa) {
-                        throw new IllegalStateException("이미 동일한 성적이 집계되어 있습니다.");
-                    }
                     studentRecordRepository.delete(existing);
                     studentRecordRepository.flush();
                     System.out.println("기존 성적 기록 덮어씀. 학생: " + studentId);
@@ -179,7 +175,7 @@ public class AdminGradeServiceImpl implements AdminGradeService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<GradeStatusDTO> getGradeStatusSummary(Integer semesterId, Integer departmentId) {
+    public GradeStatusResponseDTO getGradeStatusSummary(Integer semesterId, Integer departmentId) {
         // 학기 & 학과 조회
         Semester semester = semesterRepository.findById(semesterId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 학기를 찾을 수 없습니다."));
@@ -188,10 +184,13 @@ public class AdminGradeServiceImpl implements AdminGradeService {
 
         // 학과 소속 전체 학생 조회
         List<User> students = userRepository.findByUserRoleAndDepartment(UserRole.STUDENT, department);
+
+        boolean hasStudentRecords = studentRecordRepository.existsBySemesterAndStudent_Department(semester, department);
+
         List<GradeStatusDTO> result = new ArrayList<>();
 
         for (User student : students) {
-            List<Enrollment> enrollments = enrollmentRepository.findEnrollmentsByStudentId(student.getUserId());
+            List<Enrollment> enrollments = enrollmentRepository.findEnrollmentsByStudentIdAndSemesterId(student.getUserId(), semesterId);
 
             int missingCount = 0;
             int totalCredits = 0;
@@ -246,7 +245,10 @@ public class AdminGradeServiceImpl implements AdminGradeService {
             }
         }
 
-        return result;
+        return GradeStatusResponseDTO.builder()
+                .hasStudentRecords(hasStudentRecords)
+                .gradeStatusList(result)
+                .build();
     }
 
     @Override

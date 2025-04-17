@@ -1,6 +1,7 @@
 package com.cw.cwu.service.admin;
 
 import com.cw.cwu.dto.GradeStatusDTO;
+import com.cw.cwu.dto.GradeStatusResponseDTO;
 import com.cw.cwu.dto.SemesterDTO;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +30,7 @@ public interface AdminGradeService {
     void updateStudentRecordAsAdmin(String studentId, Integer semesterId);
 
 
-    List<GradeStatusDTO> getGradeStatusSummary(Integer semesterId, Integer departmentId);
+    GradeStatusResponseDTO getGradeStatusSummary(Integer semesterId, Integer departmentId);
 
 
     SemesterDTO getCurrentSemesterDTO();
