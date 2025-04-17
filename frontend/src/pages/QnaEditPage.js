@@ -24,37 +24,39 @@ const QnaEditPage = () => {
   const [goTarget, setGoTarget] = useState(null);
 
   useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const res = await getQnaDetail(questionId);
+        const qna = res.data[0];
+        setContentData({
+          questionId: qna.questionId,
+          title: qna.title,
+          content: qna.questionContent,
+          createdAt: qna.createdAt,
+          viewCount: qna.viewCount,
+          userName: qna.userName,
+        });
+      } catch (err) {
+        setMessage("질문을 불러올 수 없습니다.");
+      }
+    };
+  
+    const fetchWriter = async () => {
+      try {
+        const res = await getQnaWriterId(questionId);
+        setWriterId(String(res.data));
+      } catch (err) {
+        setMessage("작성자 정보를 불러올 수 없습니다.");
+      }
+    };
+
     if (questionId) {
       fetchContent();
       fetchWriter();
     }
   }, [questionId]);
 
-  const fetchContent = async () => {
-    try {
-      const res = await getQnaDetail(questionId);
-      const qna = res.data[0];
-      setContentData({
-        questionId: qna.questionId,
-        title: qna.title,
-        content: qna.questionContent,
-        createdAt: qna.createdAt,
-        viewCount: qna.viewCount,
-        userName: qna.userName,
-      });
-    } catch (err) {
-      setMessage("질문을 불러올 수 없습니다.");
-    }
-  };
 
-  const fetchWriter = async () => {
-    try {
-      const res = await getQnaWriterId(questionId);
-      setWriterId(res.data);
-    } catch (err) {
-      setMessage("작성자 정보를 불러올 수 없습니다.");
-    }
-  };
 
   const handleSecret = (title) => {
     const isSecret = document.getElementById("secret").checked;
@@ -87,9 +89,7 @@ const QnaEditPage = () => {
       return;
     }
 
-    if (userId != writerId) {
-      console.log("u ", userId);
-      console.log("w ", writerId);
+    if (userId !== writerId) {
       setAlertData("error", "작성자만 수정할 수 있습니다.", "/main/qnalist");
       return;
     }

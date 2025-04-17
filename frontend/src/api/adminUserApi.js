@@ -36,7 +36,7 @@ export const getAllUsers = (
       sortField,
       sortDir,
     },
-    ...getAuthHeader(), // ✅ headers 병합
+    ...getAuthHeader(), // headers 병합
   });
 };
 

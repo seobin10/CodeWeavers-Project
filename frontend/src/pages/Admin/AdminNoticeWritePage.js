@@ -1,11 +1,8 @@
-import axios from "axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import { getAuthHeader } from "../../util/authHeader";
 import { writeNotice } from "../../api/noticeApi";
 import AlertModal from "../../components/AlertModal";
-
 
 // 날짜 데이터 포맷팅
 let date = new Date();
@@ -15,7 +12,7 @@ let month =
 let day = date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
 let today = year + "-" + month + "-" + day;
 
-const NoticeWritePage = () => {
+const AdminNoticeWritePage = () => {
   const navigate = useNavigate();
   // 모달 데이터
   const [goTarget, setGoTarget] = useState(null);
@@ -177,4 +174,4 @@ const NoticeWritePage = () => {
   );
 };
 
-export default NoticeWritePage;
+export default AdminNoticeWritePage;
