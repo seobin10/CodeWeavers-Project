@@ -99,10 +99,11 @@ public class StudentEvaluationServiceImpl implements StudentEvaluationService {
     // 강의 평가 완료 여부 체크를 위해 관련 데이터 불러오기
     @Override
     public List<EvaluationLectureDTO> findEvaluationStatus(String studentId) {
-        EvaluationLectureDTO dto = new EvaluationLectureDTO();
         List<EvaluationLecture> filteredList = lectureRepository.findAll().stream()
-                .filter(e -> e.getStudentId().getUserId().equals(studentId))
+                // [수정] 이제 studentId가 null인 경우가 존재할 수 있어서, null 체크 추가
+                .filter(e -> e.getStudentId() != null && studentId.equals(e.getStudentId().getUserId()))
                 .toList();
+
         List<EvaluationLectureDTO> lectList = new ArrayList<>();
         for (EvaluationLecture l : filteredList) {
             lectList.add(domainToDTO(l));
