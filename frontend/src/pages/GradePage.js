@@ -37,11 +37,11 @@ const GradePage = () => {
 
   return (
     <div className="max-w-7xl mx-auto p-8 space-y-10">
-      
       {record && (
         <div className="bg-white shadow-md rounded-md p-6">
           <h2 className="text-2xl font-semibold text-gray-700 mb-4">
-            {record.semester.year}년 {record.semester.term === "FIRST" ? "1학기" : "2학기"} 성적
+            {record.semester.year}년{" "}
+            {record.semester.term === "FIRST" ? "1학기" : "2학기"} 성적
           </h2>
           <table className="min-w-full table-auto border border-gray-200 rounded-md text-sm">
             <thead className="bg-gray-50 text-gray-600 uppercase text-sm leading-normal">
@@ -49,7 +49,7 @@ const GradePage = () => {
                 <th className="py-3 px-4">연도</th>
                 <th className="py-3 px-4">학기</th>
                 <th className="py-3 px-4">신청학점</th>
-                <th className="py-3 px-4">이수학점</th>
+                <th className="py-3 px-4">취득학점</th>
                 <th className="py-3 px-4">평균평점</th>
               </tr>
             </thead>
@@ -73,6 +73,16 @@ const GradePage = () => {
           과목별 성적
         </h2>
 
+        {record && (
+          <div className="flex items-center gap-2 text-gray-600 text-base mt-4 mb-6">
+            <span className="text-gray-500 text-base">📅</span>
+            <span className="font-semibold">
+              {record.semester.year}년{" "}
+              {record.semester.term === "FIRST" ? "1학기" : "2학기"}
+            </span>
+          </div>
+        )}
+
         {message && (
           <div className="text-red-500 text-center font-medium mb-6">
             {message}
@@ -82,10 +92,10 @@ const GradePage = () => {
         <table className="min-w-full table-auto border border-gray-200 rounded-md text-sm">
           <thead className="bg-gray-50 text-gray-600 uppercase text-sm leading-normal">
             <tr className="text-center">
-              <th className="py-3 px-4">강의명</th>
+              <th className="py-3 px-4">과목명</th>
               <th className="py-3 px-4">구분</th>
               <th className="py-3 px-4">학점</th>
-              <th className="py-3 px-4">성적</th>
+              <th className="py-3 px-4">등급</th>
               <th className="py-3 px-4">평점</th>
             </tr>
           </thead>
