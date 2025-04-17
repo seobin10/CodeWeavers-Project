@@ -11,7 +11,7 @@ let month =
 let day = date.getDate() < 10 ? "0" + date.getDate() : date.getDate();
 let today = year + "-" + month + "-" + day;
 
-const QnaAnswerWritePage = ({ qno }) => {
+const AdminQnaAnswerWritePage = ({ qno }) => {
   // 모달 데이터 정의(useState)
   const [alertModalOpen, setAlertModalOpen] = useState(false);
   const [type, setType] = useState(""); // 모달 스타일 정의
@@ -74,7 +74,7 @@ const QnaAnswerWritePage = ({ qno }) => {
       <hr />
       <br />
       <table className="table-auto border-collapse border border-gray-400 w-full">
-        <thead className="bg-blue-700">
+        <thead className="bg-blue-800">
           <tr>
             <th className="border border-gray-400 px-4 py-2 text-white">작성자ID</th>
             <td className="border border-gray-400 px-4 py-2 bg-white">
@@ -132,4 +132,4 @@ const QnaAnswerWritePage = ({ qno }) => {
   );
 };
 
-export default QnaAnswerWritePage;
+export default AdminQnaAnswerWritePage;

@@ -23,15 +23,16 @@ const BasicLayout = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
-      {/* Header */}
       <header className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 p-4 flex justify-between items-center bg-opacity-80">
         <Link to="/main" className="flex items-center space-x-3">
           <img src="/images/eonLogo.jpg" alt="학교 로고" className="h-16" />
-          <span className="text-lg font-extrabold text-blue-800">
-            이온 학사관리 시스템
+          <span className="text-2xl font-extrabold text-blue-800">
+            <ul>
+              <li> 이온대학교 </li>
+              <li> EON UNIVERSITY </li>
+            </ul>
           </span>
         </Link>
-
         <div className="flex items-center space-x-4">
           <UserInfo />
           {userId ? (
@@ -42,56 +43,63 @@ const BasicLayout = () => {
               로그아웃
             </button>
           ) : (
-            <>
-              <Link
-                to="/member/login"
-                className="bg-blue-500 hover:bg-blue-900 text-white text-sm font-semibold py-1 px-4 rounded transition"
-              >
-                로그인
-              </Link>
-            </>
+            <Link
+              to="/member/login"
+              className="bg-blue-500 hover:bg-blue-900 text-white text-sm font-semibold py-1 px-4 rounded transition"
+            >
+              로그인
+            </Link>
           )}
         </div>
       </header>
 
-      {/* Main */}
       <div className="flex flex-1">
-        {/* Sidebar */}
         <nav className="bg-blue-800 text-white w-64 p-4 flex flex-col min-h-full">
           <div className="flex flex-col space-y-8">
             {userRole === "STUDENT" && (
               <>
                 <Link
                   to="/main/noticelist"
-                  className="hover:bg-blue-500 px-6 py-3 mt-6"
+                  className="hover:bg-blue-500 px-6 py-3 mt-10"
                 >
                   공지사항 ▶
                 </Link>
-                <div className="flex flex-col mt-2 mb-2">
+
+                {/* 정보조회 */}
+                <div className="flex flex-col mt-5 mb-5">
                   <button
                     className="hover:bg-blue-500 px-6 py-3 text-left w-full"
                     onClick={() => setOpenInfoMenu((prev) => !prev)}
                   >
                     정보조회 {openInfoMenu ? "▼" : "▶"}
                   </button>
-                  {openInfoMenu && (
-                    <div className="pl-8 space-y-3 text-sm mt-5">
-                      <Link
-                        to="/main/student"
-                        className="hover:underline block"
-                      >
-                        🙍‍♂️ 내 정보 조회
-                      </Link>
-                      <Link
-                        to="/main/password"
-                        className="hover:underline block pt-4"
-                      >
-                        🔐 비밀번호 변경
-                      </Link>
-                    </div>
-                  )}
+                  <div
+                    className={`pl-8 overflow-hidden transition-all duration-700 ease-in-out ${
+                      openInfoMenu
+                        ? "max-h-60 opacity-100 mt-5"
+                        : "max-h-0 opacity-0"
+                    } space-y-3 text-sm`}
+                  >
+                    {openInfoMenu && (
+                      <>
+                        <Link
+                          to="/main/student"
+                          className="hover:underline block pt-3"
+                        >
+                          🙍‍♂️ 내 정보 조회
+                        </Link>
+                        <Link
+                          to="/main/password"
+                          className="hover:underline block pt-6"
+                        >
+                          🔐 비밀번호 변경
+                        </Link>
+                      </>
+                    )}
+                  </div>
                 </div>
 
+                {/* 수강 신청 */}
                 <div className="flex flex-col mt-2 mb-2">
                   <button
                     className="hover:bg-blue-500 px-6 py-3 text-left w-full"
@@ -99,30 +107,39 @@ const BasicLayout = () => {
                   >
                     수강 신청 {openEnrollmentMenu ? "▼" : "▶"}
                   </button>
-                  {openEnrollmentMenu && (
-                    <div className="pl-8 space-y-3 text-sm mt-5">
-                      <Link
-                        to="/main/enrollment"
-                        className="hover:underline block"
-                      >
-                        📋 수강신청 목록
-                      </Link>
-                      <Link
-                        to="/main/history"
-                        className="hover:underline block pt-4"
-                      >
-                        🗂 수강신청 내역
-                      </Link>
-                      <Link
-                        to="/main/schedule"
-                        className="hover:underline block pt-4"
-                      >
-                        ⏰ 시간표 조회
-                      </Link>
-                    </div>
-                  )}
+                  <div
+                    className={`pl-8 overflow-hidden transition-all duration-700 ease-in-out ${
+                      openEnrollmentMenu
+                        ? "max-h-60 opacity-100 mt-5"
+                        : "max-h-0 opacity-0"
+                    } space-y-3 text-sm`}
+                  >
+                    {openEnrollmentMenu && (
+                      <>
+                        <Link
+                          to="/main/enrollment"
+                          className="hover:underline block pt-3"
+                        >
+                          📋 수강신청 목록
+                        </Link>
+                        <Link
+                          to="/main/history"
+                          className="hover:underline block pt-6"
+                        >
+                          🗂 수강신청 내역
+                        </Link>
+                        <Link
+                          to="/main/schedule"
+                          className="hover:underline block pt-6"
+                        >
+                          ⏰ 시간표 조회
+                        </Link>
+                      </>
+                    )}
+                  </div>
                 </div>
 
+                {/* 성적 조회 */}
                 <div className="flex flex-col mt-2 mb-2">
                   <button
                     className="hover:bg-blue-500 px-6 py-3 text-left w-full"
@@ -130,19 +147,36 @@ const BasicLayout = () => {
                   >
                     성적 조회 {openGradeMenu ? "▼" : "▶"}
                   </button>
-                  {openGradeMenu && (
-                    <div className="pl-8 space-y-3 text-sm mt-5">
-                      <Link to="/main/grades" className="hover:underline block">
-                        📄 전체성적 조회
-                      </Link>
-                      <Link
-                        to="/main/currentgrades"
-                        className="hover:underline block pt-4"
+                  <div
+                    className={`pl-8 overflow-hidden transition-all duration-700 ease-in-out ${
+                      openGradeMenu
+                        ? "max-h-40 opacity-100 mt-5"
+                        : "max-h-0 opacity-0"
+                    } space-y-3 text-sm`}
+                  >
+                    {openGradeMenu && (
+                      <>
+                        <Link
+                          to="/main/grades"
+                          className="hover:underline block pt-3"
+                        >
+                          📄 전체성적 조회
+                        </Link>
+                        <Link
+                          to="/main/currentgrades"
+                          className="hover:underline block pt-6"
+                        >
+                          📑 현재학기 성적 조회
+                        </Link>
+                        <Link
+                        to="/main/evaluationlist"
+                        className="hover:underline block pt-6"
                       >
-                        📑 현재학기 성적 조회
+                        📝 강의 평가
                       </Link>
-                    </div>
-                  )}
+                      </>
+                    )}
+                  </div>
                 </div>
 
                 <Link
@@ -168,10 +202,16 @@ const BasicLayout = () => {
                 >
                   사용자 관리 ▶
                 </Link>
-                <Link to="/main/admin/users" className="hover:bg-blue-500 px-6 py-3">
+                <Link
+                  to="/main/admin/users"
+                  className="hover:bg-blue-500 px-6 py-3"
+                >
                   일정 관리 ▶
                 </Link>
-                <Link to="/main/admin/grades" className="hover:bg-blue-500 px-6 py-3">
+                <Link
+                  to="/main/admin/grades"
+                  className="hover:bg-blue-500 px-6 py-3"
+                >
                   성적 집계 ▶
                 </Link>
                 <Link
@@ -202,6 +242,12 @@ const BasicLayout = () => {
                   className="hover:bg-blue-500 px-6 py-3"
                 >
                   성적 관리 ▶
+                </Link>
+                <Link
+                  to="/main/professor/msg"
+                  className="hover:bg-blue-500 px-6 py-3"
+                >
+                  문자 발송 ▶
                 </Link>
               </>
             )}

@@ -9,6 +9,9 @@ const ProfessorClassPage = lazy(() =>
 const ProfessorGradePage = lazy(() =>
   import("../pages/Professor/ProfessorGradePage")
 );
+const MsgSendPage = lazy(() =>
+  import("../pages/Professor/ProfessorMsgSendPage")
+);
 
 const professorRouter = [
   {
@@ -27,6 +30,16 @@ const professorRouter = [
       <RoleGuard allowedRoles={["PROFESSOR"]}>
         <Suspense fallback={<Loading />}>
           <ProfessorGradePage />
+        </Suspense>
+      </RoleGuard>
+    ),
+  },
+  {
+    path: "professor/msg",
+    element: (
+      <RoleGuard allowedRoles={["PROFESSOR"]}>
+        <Suspense fallback={<Loading />}>
+          <MsgSendPage />
         </Suspense>
       </RoleGuard>
     ),
