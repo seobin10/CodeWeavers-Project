@@ -17,6 +17,7 @@ const AdminGradeStatusPage = () => {
     hasStudentRecords: false,
     gradeStatusList: [],
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const loadInitialData = async () => {
@@ -40,8 +41,10 @@ const AdminGradeStatusPage = () => {
   const handleDepartmentChange = async (e) => {
     const deptId = e.target.value;
     setSelectedDepartmentId(deptId);
+    setIsLoading(true);
     if (!deptId) {
       setGradeStatusResponse({ hasStudentRecords: false, gradeStatusList: [] });
+      setIsLoading(false);
       return;
     }
 
@@ -50,6 +53,8 @@ const AdminGradeStatusPage = () => {
       setGradeStatusResponse(res.data);
     } catch (e) {
       dispatch(showModal({ message: "조회에 실패했습니다.", type: "error" }));
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -84,13 +89,16 @@ const AdminGradeStatusPage = () => {
   const hasMissingData = gradeStatusResponse.gradeStatusList.some(
     (s) => s.status === "미입력"
   );
-  
+
   const hasFixableData = gradeStatusResponse.gradeStatusList.some(
     (s) => s.status === "수정됨"
   );
-  
+
   const isFinalizeDisabled =
-    !selectedDepartmentId || hasMissingData || (!hasFixableData && gradeStatusResponse.hasStudentRecords);
+    isLoading ||
+    !selectedDepartmentId ||
+    hasMissingData ||
+    (!hasFixableData && gradeStatusResponse.hasStudentRecords);
 
   return (
     <div className="max-w-7xl mx-auto p-8 bg-white shadow-md rounded-md mt-10 space-y-12">
@@ -125,7 +133,7 @@ const AdminGradeStatusPage = () => {
             className={`px-4 py-2 rounded transition
               ${
                 isFinalizeDisabled
-                  ? "bg-gray-300 cursor-not-allowed"
+                  ? "bg-gray-300 cursor-not-allowed text-white"
                   : "bg-blue-700 hover:bg-blue-800 text-white"
               }`}
           >

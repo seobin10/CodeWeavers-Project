@@ -1,7 +1,6 @@
 package com.cw.cwu.security.filter;
 
 import com.cw.cwu.domain.UserRole;
-import com.cw.cwu.dto.UserDTO;
 import com.cw.cwu.util.JWTUtil;
 import com.google.gson.Gson;
 import jakarta.servlet.FilterChain;
@@ -39,9 +38,8 @@ public class JWTCheckFilter extends OncePerRequestFilter {
                 || path.startsWith("/uploads/")
                 || path.startsWith("/api/user/login")
                 || path.equals("/api/user/finduserId")
-                || path.equals("/api/user/finduserPassword")  // ✅
-                || path.startsWith("/api/user/reset-password")     // ✅ 추가되어야 함// 여기 추가
-                || path.startsWith("/uploads")
+                || path.equals("/api/user/finduserPassword")
+                || path.startsWith("/api/user/reset-password")
                 || path.equals("/api/atelier/logout");
     }
 
@@ -51,8 +49,6 @@ public class JWTCheckFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
 
         log.info("🔐 JWTCheckFilter 실행됨 - URI: {}", request.getRequestURI());
-
-        log.info("----- JWTCheckFilter -----");
 
         String authHeaderStr = request.getHeader("Authorization");
         log.info("Authorization Header: {}", authHeaderStr);
@@ -67,44 +63,22 @@ public class JWTCheckFilter extends OncePerRequestFilter {
                 throw new IllegalArgumentException("토큰이 비어있습니다.");
             }
 
-            Map<String, Object> claims;
-            try {
-                claims = jwtUtil.getClaims(accessToken);
-                log.info("✅ JWT claims 추출 성공: {}", claims);
-            } catch (Exception ex) {
-                log.error("❌ JWT claims 파싱 실패: {}", ex.getMessage(), ex);
-                throw new IllegalArgumentException("JWT 클레임 추출 실패");
-            }
-            log.info("JWT claims : {}", claims);
+            Map<String, Object> claims = jwtUtil.getClaims(accessToken);
+            log.info("✅ JWT claims 추출 성공: {}", claims);
 
             Integer userId = parseUserId(claims.get("userId"));
-            String email = (String) claims.get("email");
-            String password = (String) claims.get("password");
-            String phone = (String) claims.get("phone");
-            String name = (String) claims.get("name");
             List<String> roleNames = extractRoleNames(claims.get("roleNames"));
 
-            if (email == null || name == null || roleNames == null || roleNames.isEmpty()) {
+            if (userId == null || roleNames == null || roleNames.isEmpty()) {
                 throw new IllegalArgumentException("필수 클레임이 누락되었습니다.");
             }
 
             UserRole role = UserRole.valueOf(roleNames.get(0).trim().toUpperCase(Locale.ROOT));
 
-            UserDTO userDTO = new UserDTO(
-                    String.valueOf(userId),
-                    name,
-                    email,
-                    null,
-                    phone,
-                    role.name(),  // 그대로 유지
-                    null
-            );
-
-            log.info("👤 인증된 사용자: {}", userDTO);
-
             GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role.name());
+
             UsernamePasswordAuthenticationToken authenticationToken =
-                    new UsernamePasswordAuthenticationToken(email, password, List.of(authority));
+                    new UsernamePasswordAuthenticationToken(String.valueOf(userId), null, List.of(authority));
 
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             log.info("✅ 인증 완료, 필터 통과");

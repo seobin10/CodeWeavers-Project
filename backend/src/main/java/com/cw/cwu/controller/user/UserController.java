@@ -60,9 +60,6 @@ public class UserController {
         // 토큰 발급을 위한 claims 생성
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", user.getUserId());
-        claims.put("email", user.getUserEmail());
-        claims.put("name", user.getUserName());
-        claims.put("phone", user.getUserPhone());
         claims.put("roleNames", user.getUserRole().name());
 
         // 토큰 발급
