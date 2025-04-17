@@ -2,8 +2,10 @@ package com.cw.cwu.util;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
@@ -16,8 +18,19 @@ import java.util.Map;
 @Component
 @Log4j2
 public class JWTUtil {
-    private final SecretKey secretKey = Keys.hmacShaKeyFor(Base64.getEncoder().encode("yourSecretKeyYourSecretKey".getBytes()));
+
+    @Value("${JWT_SECRET}") // .env에 있는 값 읽기
+    private String secretKeyString;
+
+    private SecretKey secretKey;
+
+
     private final long expireMs = 1000 * 60 * 60 * 1; // 1시간
+
+    @PostConstruct
+    public void init() {
+        this.secretKey = Keys.hmacShaKeyFor(Base64.getEncoder().encode(secretKeyString.getBytes()));
+    }
 
     // JWT 생성: userId를 subject로 사용
     public String generateToken(String userId, Map<String, Object> claims, int minutes) {
@@ -79,21 +92,4 @@ public class JWTUtil {
         throw new RuntimeException("Authorization 헤더가 없거나 올바르지 않습니다.");
     }
 
-
-
-
-
-
-//    // ✅ 로그인 성공 후 토큰 생성용 메서드
-//    public static String createToken(User user) {
-//        Map<String, Object> valueMap = new HashMap<>();
-//        valueMap.put("userId", user.getUserId());
-//        valueMap.put("email", user.getUserEmail());
-//        valueMap.put("name", user.getName());
-//        valueMap.put("phone", user.getUserPhone());
-//        valueMap.put("roleNames", user.getUserRole().name()); // enum
-//
-//        JWTUtil jwtUtil = new JWTUtil();
-//        return jwtUtil.generateToken(user.getUserId(), valueMap, 60); // 60분 유효
-//    }
 }

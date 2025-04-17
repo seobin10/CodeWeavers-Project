@@ -50,7 +50,7 @@ const GradePage = () => {
                 <th className="py-3 px-4">학기</th>
                 <th className="py-3 px-4">신청학점</th>
                 <th className="py-3 px-4">이수학점</th>
-                <th className="py-3 px-4">평점평균</th>
+                <th className="py-3 px-4">평균평점</th>
               </tr>
             </thead>
             <tbody className="text-center text-gray-700">
