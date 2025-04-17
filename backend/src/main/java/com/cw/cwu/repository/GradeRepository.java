@@ -10,16 +10,28 @@ import java.util.List;
 
 public interface GradeRepository extends JpaRepository<Grade, Integer> {
 
-    // 학생 성적 조회 기능 추가
-    @Query(value = """
-        SELECT e.student_id, co.course_name, co.credit, g.grade_grade
-        FROM enrollments e
-        JOIN grades g ON e.enrollment_id = g.enrollment_id
-        JOIN classes c ON e.class_id = c.class_id
-        JOIN courses co ON c.course_id = co.course_id
-        WHERE e.student_id = CAST(? AS CHAR)
-    """, nativeQuery = true)
-    List<GradeDTO> findGrade(String studentId);
+
+    @Query("""
+    SELECT g
+    FROM Grade g
+    JOIN FETCH g.enrollment e
+    JOIN FETCH e.enrolledClassEntity c
+    JOIN FETCH c.course co
+    WHERE e.student.userId = :studentId
+      AND c.semester.id = :semesterId
+""")
+    List<Grade> findGrade(@Param("studentId") String studentId, @Param("semesterId") Integer semesterId);
+
+//    // 학생 성적 조회 기능 추가
+//    @Query("""
+//    SELECT g
+//    FROM Grade g
+//    JOIN FETCH g.enrollment e
+//    JOIN FETCH e.enrolledClassEntity c
+//    JOIN FETCH c.course co
+//    WHERE e.student.userId = :studentId
+//""")
+//    List<Grade> findGrade(@Param("studentId") String studentId);
 
     // 학생의 총 취득 학점(SUM(earned)) 조회 (F학점 제외)
     @Query("""

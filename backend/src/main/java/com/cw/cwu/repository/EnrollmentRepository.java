@@ -67,11 +67,22 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
 
 
     // 특정 학생이 수강한 모든 과목 조회
-    @Query("SELECT e FROM Enrollment e WHERE e.student.userId = :studentId AND e.enrolledClassEntity IS NOT NULL")
-    List<Enrollment> findEnrollmentsByStudentId(@Param("studentId") String studentId);
+    @Query("""
+    SELECT e FROM Enrollment e
+    WHERE e.student.userId = :studentId
+    AND e.enrolledClassEntity IS NOT NULL
+    AND e.enrolledClassEntity.semester.id = :semesterId
+""")
+    List<Enrollment> findEnrollmentsByStudentIdAndSemesterId(
+            @Param("studentId") String studentId,
+            @Param("semesterId") Integer semesterId
+    );
 
     Page<Enrollment> findByEnrolledClassEntity_Id(Integer classId, Pageable pageable);
 
     // 학생 + 학기의 조건에 맞는 수강 정보 리스트를 조회 (2025.04.16 추가)
     List<Enrollment> findByStudentAndEnrolledClassEntity_Semester(User student, Semester current);
+
+
+
 }

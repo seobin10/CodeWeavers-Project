@@ -1,6 +1,6 @@
 package com.cw.cwu.dto;
 
-import com.cw.cwu.domain.Grade;
+import com.cw.cwu.domain.Enrollment;
 import com.cw.cwu.domain.StudentGrade;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,12 +12,16 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GradeDTO {
-    private String studentId;
     private String courseName;
     private Integer credit;
     private String grade;
 
-    // DB 저장용 변환
+    // 추가된 필드
+    private Double gradePoint;   // 평점 점수 (4.5, 4.0 등)
+    private String courseType;   // 전공/교양
+    private String semester;     // 2024-1 형태
+
+    // 기존 변환 메서드 유지
     public String ConvertToDb(StudentGrade grade) {
         return switch (grade) {
             case A_PLUS -> "A+";
@@ -32,7 +36,6 @@ public class GradeDTO {
         };
     }
 
-    // DB -> ENUM
     public StudentGrade convertToEnum(String db) {
         return switch (db) {
             case "A+" -> StudentGrade.A_PLUS;
@@ -46,4 +49,5 @@ public class GradeDTO {
             default -> StudentGrade.valueOf(db);
         };
     }
+
 }

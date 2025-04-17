@@ -1,5 +1,6 @@
 package com.cw.cwu.repository;
 
+import com.cw.cwu.domain.Department;
 import com.cw.cwu.domain.Semester;
 import com.cw.cwu.domain.StudentRecord;
 import com.cw.cwu.domain.User;
@@ -12,5 +13,7 @@ import java.util.Optional;
 public interface StudentRecordRepository extends JpaRepository<StudentRecord, Long> {
 
     Optional<StudentRecord> findByStudentAndSemester(User student, Semester semester);
+
+    boolean existsBySemesterAndStudent_Department(Semester semester, Department department);
 }
 

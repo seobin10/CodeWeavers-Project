@@ -13,7 +13,10 @@ const AdminGradeStatusPage = () => {
   const [currentSemester, setCurrentSemester] = useState(null);
   const [departments, setDepartments] = useState([]);
   const [selectedDepartmentId, setSelectedDepartmentId] = useState("");
-  const [gradeStatusList, setGradeStatusList] = useState([]);
+  const [gradeStatusResponse, setGradeStatusResponse] = useState({
+    hasStudentRecords: false,
+    gradeStatusList: [],
+  });
 
   useEffect(() => {
     const loadInitialData = async () => {
@@ -38,13 +41,13 @@ const AdminGradeStatusPage = () => {
     const deptId = e.target.value;
     setSelectedDepartmentId(deptId);
     if (!deptId) {
-      setGradeStatusList([]);
+      setGradeStatusResponse({ hasStudentRecords: false, gradeStatusList: [] });
       return;
     }
 
     try {
       const res = await getGradeStatusSummary(deptId);
-      setGradeStatusList(res.data);
+      setGradeStatusResponse(res.data);
     } catch (e) {
       dispatch(showModal({ message: "조회에 실패했습니다.", type: "error" }));
     }
@@ -61,7 +64,7 @@ const AdminGradeStatusPage = () => {
       await finalizeGradesByDepartment(selectedDepartmentId);
       dispatch(showModal({ message: "성적 집계가 완료되었습니다." }));
       const res = await getGradeStatusSummary(selectedDepartmentId);
-      setGradeStatusList(res.data);
+      setGradeStatusResponse(res.data);
     } catch (e) {
       const errorMsg =
         typeof e.response?.data === "string"
@@ -76,6 +79,18 @@ const AdminGradeStatusPage = () => {
       );
     }
   };
+
+  // 버튼 비활성화 조건
+  const hasMissingData = gradeStatusResponse.gradeStatusList.some(
+    (s) => s.status === "미입력"
+  );
+  
+  const hasFixableData = gradeStatusResponse.gradeStatusList.some(
+    (s) => s.status === "수정됨"
+  );
+  
+  const isFinalizeDisabled =
+    !selectedDepartmentId || hasMissingData || (!hasFixableData && gradeStatusResponse.hasStudentRecords);
 
   return (
     <div className="max-w-7xl mx-auto p-8 bg-white shadow-md rounded-md mt-10 space-y-12">
@@ -94,7 +109,7 @@ const AdminGradeStatusPage = () => {
             value={selectedDepartmentId}
             onChange={handleDepartmentChange}
             className="px-3 py-2 w-64 border border-gray-300 rounded-md shadow-sm text-sm text-gray-700 
-        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
           >
             <option value="">학과 선택</option>
             {departments.map((d) => (
@@ -106,7 +121,13 @@ const AdminGradeStatusPage = () => {
 
           <button
             onClick={handleFinalize}
-            className="px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800 transition"
+            disabled={isFinalizeDisabled}
+            className={`px-4 py-2 rounded transition
+              ${
+                isFinalizeDisabled
+                  ? "bg-gray-300 cursor-not-allowed"
+                  : "bg-blue-700 hover:bg-blue-800 text-white"
+              }`}
           >
             집계 실행
           </button>
@@ -132,14 +153,14 @@ const AdminGradeStatusPage = () => {
                 학과를 선택해주세요.
               </td>
             </tr>
-          ) : gradeStatusList.length === 0 ? (
+          ) : gradeStatusResponse.gradeStatusList.length === 0 ? (
             <tr>
               <td colSpan={7} className="py-4 text-gray-400">
                 미입력 혹은 수정된 성적데이터가 없습니다.
               </td>
             </tr>
           ) : (
-            gradeStatusList.map((s) => (
+            gradeStatusResponse.gradeStatusList.map((s) => (
               <tr key={s.studentId} className="border-t hover:bg-gray-50">
                 <td className="py-2 px-4">{s.studentId}</td>
                 <td className="py-2 px-4">{s.studentName}</td>
@@ -150,14 +171,6 @@ const AdminGradeStatusPage = () => {
                   ) : (
                     <span className="text-yellow-600">수정됨</span>
                   )}
-
-                  {/* {s.status === "미입력" ? (
-                    <span className="text-red-600">미입력</span>
-                  ) : s.status === "수정됨" ? (
-                    <span className="text-yellow-600">수정됨</span>
-                  ) : s.status === "입력완료" ? (
-                    <span className="text-green-600">입력완료</span>
-                  ) : null} */}
                 </td>
                 <td className="py-2 px-4">{s.recordedGpa ?? "-"}</td>
                 <td className="py-2 px-4">{s.calculatedGpa ?? "-"}</td>

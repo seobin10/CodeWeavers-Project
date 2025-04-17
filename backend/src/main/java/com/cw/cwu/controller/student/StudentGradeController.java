@@ -1,5 +1,6 @@
 package com.cw.cwu.controller.student;
 
+import com.cw.cwu.domain.StudentRecord;
 import com.cw.cwu.dto.GradeDTO;
 import com.cw.cwu.service.student.StudentGradeService;
 import com.cw.cwu.util.UserRequestUtil;
@@ -22,9 +23,16 @@ public class StudentGradeController {   // 학생 성적 관리 컨트롤러
 
 
     // 학생의 성적 조회
-    @GetMapping("/grade")
+    @GetMapping("")
     public ResponseEntity<List<GradeDTO>> getStudentGrade(HttpServletRequest request) {
         String studentId = userRequestUtil.extractUserId(request);
         return ResponseEntity.ok(studentGradeService.getStudentGrade(studentId));
+    }
+
+    // 학생의 현재 학기 총합 성적(신청학점, 이수학점, GPA) 조회
+    @GetMapping("/record")
+    public ResponseEntity<StudentRecord> getStudentRecord(HttpServletRequest request) {
+        String studentId = userRequestUtil.extractUserId(request);
+        return ResponseEntity.ok(studentGradeService.getStudentRecord(studentId));
     }
 }
