@@ -7,6 +7,7 @@ const UserInfo = () => {
   const { userId, userRole } = useSelector((state) => state.auth);
   const [userInfo, setUserInfo] = useState(null);
   const [statusInfo, setStatusInfo] = useState(null);
+  const [isLoading, setIsLoading] = useState(true); // 🔥 추가
 
   useEffect(() => {
     const idToUse = userId || localStorage.getItem("id");
@@ -26,6 +27,8 @@ const UserInfo = () => {
       }
     } catch (error) {
       console.error("Error fetching user info or status:", error);
+    } finally {
+      setIsLoading(false); // 🔥 둘 다 끝났을 때 로딩 false
     }
   };
 
@@ -38,8 +41,12 @@ const UserInfo = () => {
     };
   }, [userInfo]);
 
-  return processedUserInfo ? (
-    
+  // 🔥 여기: 둘 다 준비 안 됐으면 아예 렌더 안 해
+  if (isLoading || !processedUserInfo) {
+    return <div className="text-gray-400 text-sm">불러오는 중...</div>;
+  }
+
+  return (
     <div className="text-sm text-gray-600 flex flex-wrap items-center">
       <img
         src={`http://localhost:8080${userInfo.userImgUrl}`}
@@ -74,8 +81,6 @@ const UserInfo = () => {
         </>
       )}
     </div>
-  ) : (
-    "로그인 필요"
   );
 };
 

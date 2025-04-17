@@ -163,10 +163,10 @@ const BasicLayout = () => {
                           📑 현재학기 성적 조회
                         </Link>
                         <Link
-                          to="/main/currentgrades"
+                          to="/main/allgrades"
                           className="hover:underline block pt-6"
                         >
-                          📄 전체성적 조회
+                          📄 전체 성적 조회
                         </Link>
                         <Link
                         to="/main/evaluationlist"

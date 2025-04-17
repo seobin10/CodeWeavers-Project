@@ -12,11 +12,11 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GradeDTO {
+    private Integer courseId;
     private String courseName;
     private Integer credit;
     private String grade;
 
-    // 추가된 필드
     private Double gradePoint;   // 평점 점수 (4.5, 4.0 등)
     private String courseType;   // 전공/교양
     private String semester;     // 2024-1 형태

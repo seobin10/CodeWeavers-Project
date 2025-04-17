@@ -11,6 +11,7 @@ import java.util.List;
 public interface GradeRepository extends JpaRepository<Grade, Integer> {
 
 
+    // 현재 학기 성적 조회 (studentId + semesterId)
     @Query("""
     SELECT g
     FROM Grade g
@@ -22,26 +23,16 @@ public interface GradeRepository extends JpaRepository<Grade, Integer> {
 """)
     List<Grade> findGrade(@Param("studentId") String studentId, @Param("semesterId") Integer semesterId);
 
-//    // 학생 성적 조회 기능 추가
-//    @Query("""
-//    SELECT g
-//    FROM Grade g
-//    JOIN FETCH g.enrollment e
-//    JOIN FETCH e.enrolledClassEntity c
-//    JOIN FETCH c.course co
-//    WHERE e.student.userId = :studentId
-//""")
-//    List<Grade> findGrade(@Param("studentId") String studentId);
-
-    // 학생의 총 취득 학점(SUM(earned)) 조회 (F학점 제외)
+    // 특정 학기 성적 조회 (semesterId 추가)
     @Query("""
-    SELECT SUM(c.credit)
+    SELECT g
     FROM Grade g
-    JOIN g.enrollment e
-    JOIN e.enrolledClassEntity ce
-    JOIN ce.course c
+    JOIN FETCH g.enrollment e
+    JOIN FETCH e.enrolledClassEntity c
+    JOIN FETCH c.course co
     WHERE e.student.userId = :studentId
-      AND g.grade <> 'F'
+      AND c.semester.id = :semesterId
 """)
-    Integer findTotalEarnedCreditsByStudent(@Param("studentId") String studentId);
+    List<Grade> findGradesByStudentAndSemester(@Param("studentId") String studentId, @Param("semesterId") Integer semesterId);
+
 }
