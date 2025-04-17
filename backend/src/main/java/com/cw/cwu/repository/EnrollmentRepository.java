@@ -1,6 +1,7 @@
 package com.cw.cwu.repository;
 
 import com.cw.cwu.domain.Enrollment;
+import com.cw.cwu.domain.Semester;
 import com.cw.cwu.domain.User;
 import com.cw.cwu.domain.ClassEntity;
 import org.springframework.data.domain.Page;
@@ -71,4 +72,6 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
 
     Page<Enrollment> findByEnrolledClassEntity_Id(Integer classId, Pageable pageable);
 
+    // 학생 + 학기의 조건에 맞는 수강 정보 리스트를 조회 (2025.04.16 추가)
+    List<Enrollment> findByStudentAndEnrolledClassEntity_Semester(User student, Semester current);
 }

@@ -20,7 +20,7 @@ export const getFilters = () => {
 export const searchCourses = (userId, params) => {
   return axios.get(`${prefix}/${userId}/enrollment`, {
     params,
-    ...getAuthHeader(), // ✅ headers 포함
+    ...getAuthHeader(), // headers 포함
   });
 };
 

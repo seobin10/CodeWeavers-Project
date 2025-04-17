@@ -134,7 +134,7 @@ const QnaListPage = () => {
                             page: currentPage,
                           };
 
-                          if (userId == writerId) {
+                          if (String(userId) === String(writerId)) {
                             setAlertData(
                               "success",
                               "본인 확인 완료! 글을 조회합니다.",
@@ -179,7 +179,7 @@ const QnaListPage = () => {
                   </td>
                   <td
                     className={
-                      qna.status == "미답변"
+                      qna.status === "미답변"
                         ? "text-red-500 border border-gray-400 px-4 py-2 border-x-0"
                         : "border border-gray-400 px-4 py-2 border-x-0"
                     }
