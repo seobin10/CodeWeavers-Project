@@ -5,7 +5,7 @@ import { getData, updateNotice } from "../../api/noticeApi";
 import AlertModal from "../../components/AlertModal";
 
 
-const NoticeEditPage = () => {
+const AdminNoticeEditPage = () => {
   const location = useLocation();
   const noticeId = location.state?.noticeId;
   const navigate = useNavigate();
@@ -24,29 +24,29 @@ const NoticeEditPage = () => {
   const [goTarget, setGoTarget] = useState(null);
 
   useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const res = await getData(noticeId);
+        console.log("getData 응답:", res);
+        const notice = res.data;
+        setContentData({
+          noticeId: notice.noticeId,
+          title: notice.title,
+          content: notice.content,
+          pin: notice.pin,
+          viewCount: notice.viewCount,
+          noticeDate: notice.noticeDate,
+        });
+        console.log(contentData);
+      } catch (err) {
+        setMessage("공지를 불러올 수 없습니다.");
+      }
+    };
+
     if (userId) {
       fetchContent();
     }
-  }, [userId]);
-
-  const fetchContent = async () => {
-    try {
-      const res = await getData(noticeId);
-      console.log("getData 응답:", res);
-      const notice = res.data;
-      setContentData({
-        noticeId: notice.noticeId,
-        title: notice.title,
-        content: notice.content,
-        pin: notice.pin,
-        viewCount: notice.viewCount,
-        noticeDate: notice.noticeDate,
-      });
-      console.log(contentData);
-    } catch (err) {
-      setMessage("공지를 불러올 수 없습니다.");
-    }
-  };
+  }, [userId, contentData, noticeId]);
 
   // 공지 상단 고정 여부를 결정하는 함수 (체크하면 위에 고정되게 함)
   const handlePinned = () => {
@@ -166,4 +166,4 @@ const NoticeEditPage = () => {
   );
 };
 
-export default NoticeEditPage;
+export default AdminNoticeEditPage;

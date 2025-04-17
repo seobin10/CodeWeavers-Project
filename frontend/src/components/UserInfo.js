@@ -39,9 +39,16 @@ const UserInfo = () => {
   }, [userInfo]);
 
   return processedUserInfo ? (
+    
     <div className="text-sm text-gray-600 flex flex-wrap items-center">
+      <img
+        src={`http://localhost:8080${userInfo.userImgUrl}`}
+        alt="프로필 이미지"
+        className="w-[50px] h-[50px] object-cover rounded-full"
+      />
+
       <span>
-        <span className="font-semibold">성명:</span>{" "}
+        <span className="font-semibold">성명:</span>
         {processedUserInfo.userName} ({processedUserInfo.userId})
       </span>
 
