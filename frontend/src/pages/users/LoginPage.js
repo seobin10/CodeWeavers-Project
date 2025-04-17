@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { loginPostAsync } from "../../slices/authSlice";
+import { findUserId, findUserPw } from "../../api/memberApi";
 
 const images = [
   "/images/u1.jpg",
@@ -24,6 +25,21 @@ function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [showFindIdModal, setShowFindIdModal] = useState(false);
+  const [showFindPwModal, setShowFindPwModal] = useState(false);
+  const [showResultModal, setShowResultModal] = useState(false);
+  const [resultMessage, setResultMessage] = useState("");
+
+  const [findIdForm, setFindIdForm] = useState({
+    userName: "",
+    userEmail: "",
+    userPhone: "",
+  });
+
+  const [findPwForm, setFindPwForm] = useState({
+    userId: "",
+    userEmail: "",
+  });
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -42,16 +58,13 @@ function LoginPage() {
 
   const handleLogin = async () => {
     setMessage("");
-
     try {
-      const loginParam = {
-        userId: user.userId,
-        userPassword: user.userPassword,
-      };
-
-      // ✅ 에러 나면 catch로 바로 넘어감
-      const result = await dispatch(loginPostAsync(loginParam)).unwrap();
-      console.log("login 성공:", result);
+      const result = await dispatch(
+        loginPostAsync({
+          userId: user.userId,
+          userPassword: user.userPassword,
+        })
+      ).unwrap();
 
       if (user.remember) {
         localStorage.setItem("savedUserId", user.userId);
@@ -60,7 +73,7 @@ function LoginPage() {
       }
       navigate("/main");
     } catch (error) {
-      console.error("❌ 로그인 실패:", error.message);
+      console.error("로그인 실패:", error.message);
       setMessage("로그인에 실패했습니다.");
     }
   };
@@ -69,9 +82,39 @@ function LoginPage() {
     if (e.key === "Enter") handleLogin();
   };
 
+  const handleFindIdSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const data = await findUserId(findIdForm);
+      setResultMessage(data.message || "학번: " + data);
+      setShowResultModal(true);
+      setShowFindIdModal(false);
+    } catch {
+      setResultMessage("학번 찾기에 실패했습니다.");
+      setShowResultModal(true);
+    }
+  };
+
+  const handleFindPwSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const data = await findUserPw(findPwForm);
+
+      setResultMessage(
+        data.password
+          ? "비밀번호: " + data.password
+          : data.message || "비밀번호 찾기에 실패했습니다."
+      );
+
+      setShowResultModal(true);
+      setShowFindPwModal(false);
+    } catch (error) {
+      setResultMessage(error.message);
+      setShowResultModal(true);
+    }
+  };
   return (
     <div className="relative w-full h-screen overflow-hidden">
-      {/* 배경 이미지 */}
       <div className="absolute top-0 left-0 w-full h-full">
         {images.map((src, index) => (
           <img
@@ -84,7 +127,6 @@ function LoginPage() {
         ))}
       </div>
 
-      {/* 로그인 폼 */}
       <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-40">
         <div className="w-full max-w-md bg-white bg-opacity-90 p-6 rounded-lg shadow-md">
           <img
@@ -97,7 +139,6 @@ function LoginPage() {
             <p className="text-red-500 text-center mb-2">{message}</p>
           )}
 
-          {/* 학번 입력 */}
           <div className="bg-white border border-gray-300 rounded px-3 py-2 mb-3 flex items-center">
             <img
               src="/images/id.jpg"
@@ -113,7 +154,7 @@ function LoginPage() {
               onKeyDown={handleKeyPress}
               className="w-3/4 outline-none bg-white"
             />
-            <label className="flex items-center gap-2">
+            <label className="flex items-center gap-2 whitespace-nowrap">
               <input
                 type="checkbox"
                 name="remember"
@@ -125,7 +166,6 @@ function LoginPage() {
             </label>
           </div>
 
-          {/* 비밀번호 입력 */}
           <div className="bg-white border border-gray-300 rounded px-3 py-2 mb-3 flex items-center relative">
             <img
               src="/images/pw.jpg"
@@ -157,7 +197,7 @@ function LoginPage() {
           <ul className="flex justify-end text-sm mb-4">
             <li className="px-3">
               <button
-                onClick={() => navigate("/member/findId")}
+                onClick={() => setShowFindIdModal(true)}
                 className="text-gray-400 hover:text-gray-800"
               >
                 학번 찾기
@@ -165,7 +205,7 @@ function LoginPage() {
             </li>
             <li className="px-3">
               <button
-                onClick={() => navigate("/member/findPw")}
+                onClick={() => setShowFindPwModal(true)}
                 className="text-gray-400 hover:text-gray-800"
               >
                 비밀번호 찾기
@@ -195,6 +235,117 @@ function LoginPage() {
           </div>
         </div>
       </div>
+
+      {showFindIdModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white bg-opacity-90 p-8 rounded-lg w-full max-w-md relative">
+            <button
+              className="absolute top-2 right-2 text-gray-500"
+              onClick={() => setShowFindIdModal(false)}
+            >
+              ✕
+            </button>
+            <form onSubmit={handleFindIdSubmit} className="space-y-5">
+              <h2 className="text-2xl font-bold text-center mb-2">학번 찾기</h2>
+              <input
+                name="userName"
+                placeholder="이름"
+                className="w-full p-2 border rounded focus:outline-none focus:ring-0"
+                required
+                onChange={(e) =>
+                  setFindIdForm({ ...findIdForm, userName: e.target.value })
+                }
+              />
+              <input
+                name="userPhone"
+                placeholder="010-0000-0000"
+                className="w-full p-2 border rounded focus:outline-none focus:ring-0"
+                required
+                onChange={(e) =>
+                  setFindIdForm({ ...findIdForm, userPhone: e.target.value })
+                }
+              />
+              <input
+                name="userEmail"
+                placeholder="이메일"
+                className="w-full p-2 border rounded focus:outline-none focus:ring-0"
+                required
+                onChange={(e) =>
+                  setFindIdForm({ ...findIdForm, userEmail: e.target.value })
+                }
+              />
+              <button
+                type="submit"
+                className="w-full bg-blue-400 text-white py-2 rounded hover:bg-blue-800"
+              >
+                학번 찾기
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showFindPwModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white bg-opacity-90 p-6 rounded-lg w-full max-w-md relative">
+            <button
+              className=" absolute top-2 right-2 text-gray-500"
+              onClick={() => setShowFindPwModal(false)}
+            >
+              ✕
+            </button>
+            <form onSubmit={handleFindPwSubmit} className="space-y-5">
+              <h2 className="text-2xl font-bold text-center mb-2">
+                비밀번호 찾기
+              </h2>
+              <input
+                name="userId"
+                placeholder="학번"
+                className="w-full p-2 border rounded focus:outline-none focus:ring-0"
+                required
+                onChange={(e) =>
+                  setFindPwForm({ ...findPwForm, userId: e.target.value })
+                }
+              />
+              <input
+                name="userEmail"
+                placeholder="이메일"
+                className="w-full p-2 border rounded focus:outline-none focus:ring-0"
+                required
+                onChange={(e) =>
+                  setFindPwForm({ ...findPwForm, userEmail: e.target.value })
+                }
+              />
+              <button
+                type="submit"
+                className="w-full bg-blue-400 text-white py-2 rounded hover:bg-blue-800"
+              >
+                비밀번호 찾기
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {showResultModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded-lg w-full max-w-sm shadow-md relative">
+            <button
+              className="absolute top-2 right-2 text-gray-500"
+              onClick={() => setShowResultModal(false)}
+            >
+              ✕
+            </button>
+            <p className="text-center text-gray-800">{resultMessage}</p>
+            <button
+              className="mt-4 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-700"
+              onClick={() => setShowResultModal(false)}
+            >
+              확인
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

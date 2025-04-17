@@ -5,8 +5,8 @@ import RoleGuard from "../components/RoleGuard";
 
 const NoticeListPage = lazy(() => import("../pages/NoticeListPage"));
 const NoticeDataPage = lazy(() => import("../pages/NoticeDataPage"));
-const NoticeWritePage = lazy(() => import("../pages/Admin/NoticeWritePage"))
-const NoticeEditPage = lazy(() => import("../pages/Admin/NoticeEditPage"))
+const NoticeWritePage = lazy(() => import("../pages/Admin/AdminNoticeWritePage"))
+const NoticeEditPage = lazy(() => import("../pages/Admin/AdminNoticeEditPage"))
 const noticeRouter = [
   {
     path: "noticelist",
