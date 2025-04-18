@@ -29,4 +29,15 @@ public class EvaluationAnswerDTO {
         };
     }
 
+    public String changeString(AnswerChoice choice) {
+        return switch (choice) {
+            case VERY_GOOD -> "5";
+            case GOOD -> "4";
+            case AVERAGE -> "3";
+            case BAD -> "2";
+            case VERY_BAD -> "1";
+            default -> "";
+        };
+    }
+
 }

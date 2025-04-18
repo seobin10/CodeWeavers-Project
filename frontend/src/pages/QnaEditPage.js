@@ -27,7 +27,8 @@ const QnaEditPage = () => {
     const fetchContent = async () => {
       try {
         const res = await getQnaDetail(questionId);
-        const qna = res.data[0];
+        console.log(res);
+        const qna = res[0];
         setContentData({
           questionId: qna.questionId,
           title: qna.title,
@@ -36,16 +37,17 @@ const QnaEditPage = () => {
           viewCount: qna.viewCount,
           userName: qna.userName,
         });
-      } catch (err) {
+      } catch (error) {
+        console.log(error);
         setMessage("질문을 불러올 수 없습니다.");
       }
     };
   
     const fetchWriter = async () => {
       try {
-        const res = await getQnaWriterId(questionId);
-        setWriterId(String(res.data));
-      } catch (err) {
+      const data = await getQnaWriterId(questionId);
+      setWriterId(data);
+      } catch (error) {
         setMessage("작성자 정보를 불러올 수 없습니다.");
       }
     };
@@ -89,7 +91,7 @@ const QnaEditPage = () => {
       return;
     }
 
-    if (userId !== writerId) {
+    if (String(userId) !== String(writerId)) {
       setAlertData("error", "작성자만 수정할 수 있습니다.", "/main/qnalist");
       return;
     }
@@ -98,7 +100,7 @@ const QnaEditPage = () => {
       const updatedTitle = handleSecret(contentData.title);
       await updateQna(questionId, { ...contentData, title: updatedTitle });
       setAlertData("success", "성공적으로 수정되었습니다.", "/main/qnadata");
-    } catch (err) {
+    } catch (error) {
       setAlertData("error", "수정에 실패했습니다.");
     }
   };

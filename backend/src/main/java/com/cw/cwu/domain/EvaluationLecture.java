@@ -11,10 +11,7 @@ import java.sql.Timestamp;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(
-        name = "lecture_evaluations",
-        uniqueConstraints = @UniqueConstraint(name = "uc_student_class", columnNames = {"student_id", "classId"})
-)
+@Table(name = "lecture_evaluations", uniqueConstraints = @UniqueConstraint(name = "uc_student_class", columnNames = {"student_id", "classId"}))
 public class EvaluationLecture {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

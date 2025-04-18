@@ -43,7 +43,8 @@ public class StudentEvaluationServiceImpl implements StudentEvaluationService {
     // 학기에 해당하는 과목 가져오기
     @Override
     public List<EvaluationCourseDTO> getCurrentSemesterCourses(String studentId) {
-        User student = userRepository.findByUserId(studentId).orElseThrow(() -> new IllegalArgumentException("학생 정보를 찾을 수 없습니다."));
+        User student = userRepository.findByUserId(studentId)
+                .orElseThrow(() -> new IllegalArgumentException("학생 정보를 찾을 수 없습니다."));
 
         Semester current = semesterRepository.findCurrentSemester(LocalDate.now()).orElseThrow(() -> new IllegalStateException("현재 학기를 찾을 수 없습니다."));
 
@@ -101,7 +102,7 @@ public class StudentEvaluationServiceImpl implements StudentEvaluationService {
     public List<EvaluationLectureDTO> findEvaluationStatus(String studentId) {
         EvaluationLectureDTO dto = new EvaluationLectureDTO();
         List<EvaluationLecture> filteredList = lectureRepository.findAll().stream()
-                .filter(e -> e.getStudentId().getUserId().equals(studentId))
+                .filter(e -> e.getStudentId() != null && e.getStudentId().getUserId().equals(studentId))
                 .toList();
         List<EvaluationLectureDTO> lectList = new ArrayList<>();
         for (EvaluationLecture l : filteredList) {

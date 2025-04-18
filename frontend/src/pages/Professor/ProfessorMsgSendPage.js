@@ -1,16 +1,16 @@
 import React, { useState } from "react";
-import axios from "axios";
-import { getAuthHeader } from "../../util/authHeader";
 import AlertModal from "../../components/AlertModal";
+import { sendMessage } from "../../api/msgAPi";
 
 function ProfessorMsgSendPage() {
+  const [msgLength, setMsgLength] = useState(0);
   const [phoneNumber, setPhoneNumber] = useState("");
   const [error, setError] = useState("");
-  const [alertModalOpen, setAlertModalOpen] = useState(false);
   const [type, setType] = useState("");
   const [alertMsg, setAlertMsg] = useState("");
   const [message, setMessage] = useState("");
-  const [msgLength, setMsgLength] = useState(0);
+  const [alertModalOpen, setAlertModalOpen] = useState(false);
+
   const handleSendMessage = async () => {
     if (!phoneNumber.trim() || !message.trim()) {
       setError("전화번호와 메시지를 모두 입력해주세요.");
@@ -18,22 +18,14 @@ function ProfessorMsgSendPage() {
     }
 
     try {
-      const config = getAuthHeader();
-      await axios.post(
-        "http://localhost:8080/api/professor/msg/send",
-        null,
-        {
-          ...config,
-          params: {
-            to: phoneNumber,
-            text: message,
-          },
-        }
-      );
-      setError("")
+      await sendMessage(phoneNumber, message);
+      setError("");
       setAlertData("success", "메시지 전송에 성공했습니다.");
     } catch (error) {
-      setAlertData("error", "메시지 전송에 실패했습니다.\n 번호와 메시지를 올바르게\n 입력했는지 확인하세요!");
+      setAlertData(
+        "error",
+        "메시지 전송에 실패했습니다.\n 번호와 메시지를 올바르게\n 입력했는지 확인하세요!"
+      );
     }
   };
 
@@ -50,12 +42,12 @@ function ProfessorMsgSendPage() {
     setAlertModalOpen(false);
   };
 
-    // 모달을 일괄 설정하기 위한 메서드, 곧 사용할 예정
-    const setAlertData = (modalType, modalMsg) => {
-      setType(modalType);
-      setAlertMsg(modalMsg);
-      setAlertModalOpen(true);
-    };
+  // 모달을 일괄 설정하기 위한 메서드(함수)
+  const setAlertData = (modalType, modalMsg) => {
+    setType(modalType);
+    setAlertMsg(modalMsg);
+    setAlertModalOpen(true);
+  };
 
   return (
     <div className="max-w-xl mx-auto p-6 bg-white shadow-md rounded-md mt-10 space-y-6">

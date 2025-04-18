@@ -10,8 +10,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class EvaluationCourseDTO {
-    private Integer classId;        // 수강한 강의 ID
-    private String courseName;     // 과목명
-    private String professorName;  // 교수명
-    private int credit;            // 학점
+    private Integer classId;
+    private String courseName;
+    private String professorName;
+    private int credit;
 }

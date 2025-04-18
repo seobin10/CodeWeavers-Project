@@ -238,6 +238,12 @@ const BasicLayout = () => {
                   강의 관리 ▶
                 </Link>
                 <Link
+                  to="/main/professor/list"
+                  className="hover:bg-blue-500 px-6 py-3 mt-6"
+                >
+                  평가 조회 ▶
+                </Link>
+                <Link
                   to="/main/professor/grades"
                   className="hover:bg-blue-500 px-6 py-3"
                 >

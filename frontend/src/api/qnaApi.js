@@ -27,43 +27,52 @@ export const writeAns = async (data) => {
     ...getAuthHeader(),
   };
 
-  const res = await axios.post(
-    `${prefix}/admin/ans/write`,
-    data,
-    headers
-  );
+  const res = await axios.post(`${prefix}/admin/ans/write`, data, headers);
 
   return res.data;
-}
+};
 
 // Q&A 답변 삭제
 export const deleteAns = async (qno) => {
-  return axios.delete(`${prefix}/admin/ans/delete/${qno}`);
-}
+  return axios.delete(`${prefix}/admin/ans/delete/${qno}`, getAuthHeader());
+};
 
 // Q&A 전체 목록 가져오기
-export const getQnaList = () => {
-  return axios.get(`${prefix}/user/qna/list`, getAuthHeader());
+export const getQnaList = async () => {
+  const res = await axios.get(`${prefix}/user/qna/list`, getAuthHeader());
+  return res.data;
 };
 
 // Q&A 작성자 확인
-export const getWriterId = (questionId) => {
-  return axios.get(`${prefix}/user/qna/find/${questionId}`, getAuthHeader());
+export const getWriterId = async (questionId) => {
+  const res = await axios.get(
+    `${prefix}/user/qna/find/${questionId}`,
+    getAuthHeader()
+  );
+  return res.data;
 };
 
 // Q&A 게시글 상세조회
-export const getQnaDetail = (questionId) => {
-  return axios.get(`${prefix}/user/qna/${questionId}`, getAuthHeader());
+export const getQnaDetail = async (questionId) => {
+  const res = await axios.get(
+    `${prefix}/user/qna/${questionId}`,
+    getAuthHeader()
+  );
+  return res.data;
 };
 
 // Q&A 작성자 Id 가져오기
-export const getQnaWriterId = (questionId) => {
-  return axios.get(`${prefix}/user/qna/find/${questionId}`, getAuthHeader());
+export const getQnaWriterId = async (questionId) => {
+  const res = await axios.get(
+    `${prefix}/user/qna/find/${questionId}`,
+    getAuthHeader()
+  );
+  return res.data;
 };
 
 // Q&A 조회수 증가
-export const increaseViewCount = (questionId) => {
-  return axios.put(
+export const increaseViewCount = async (questionId) => {
+  return await axios.put(
     `${prefix}/user/qna/${questionId}/update`,
     null,
     getAuthHeader()
@@ -71,8 +80,11 @@ export const increaseViewCount = (questionId) => {
 };
 
 // Q&A 데이터 삭제
-export const deleteQna = (questionId) => {
-  return axios.delete(`${prefix}/user/delete/${questionId}`, getAuthHeader());
+export const deleteQna = async (questionId) => {
+  return await axios.delete(
+    `${prefix}/user/qna/delete/${questionId}`,
+    getAuthHeader()
+  );
 };
 
 // Q&A 게시글 수정

@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
-import "../../src/EvaluationPage.css";
+import "../../src/evaluationPage.css";
 import { getAuthHeader } from "../util/authHeader";
-import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import AlertModal from "../components/AlertModal";
+import {
+  getQuestions,
+  getStatus,
+  submitEvaluation,
+} from "../api/evaluationAPI";
 
 const EvaluationPage = () => {
   const userId = useSelector((state) => state.auth?.userId);
@@ -31,44 +35,24 @@ const EvaluationPage = () => {
   const courseName = state.name;
 
   useEffect(() => {
-    const fetchQuestionInfo = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:8080/api/students/evaluation/quelist`,
-          getAuthHeader()
-        );
-        setQuestions(response.data);
-      } catch (error) {
-        console.log("데이터를 불러올 수 없습니다.");
-      }
+    const fetchData = async () => {
+      const questionData = await getQuestions();
+      setQuestions(questionData);
+      const statusData = await getStatus(userId);
+      setEvaluationStatus(statusData);
     };
-  
-    const fetchStatus = async () => {
-      try {
-        const res = await axios.get(
-          `http://localhost:8080/api/students/evaluation/lecturelist?studentId=${userId}`,
-          getAuthHeader()
-        );
-        setEvaluationStatus(res.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-  
-    fetchQuestionInfo();
-    fetchStatus();
+    fetchData();
   }, [userId]);
-  
 
   useEffect(() => {
-    if (!evaluationStatus || evaluationStatus.length === 0) return;
-  
-    const isAlreadyEvaluated = evaluationStatus.some((stat) => stat.classId === classId);
+    if (!Array.isArray(evaluationStatus) || evaluationStatus.length === 0) return;
+    const isAlreadyEvaluated = evaluationStatus.some(
+      (stat) => stat.classId === classId
+    );
     if (isAlreadyEvaluated) {
       setAlertData("error", "이미 평가한 강의입니다.", "/main/evaluationlist");
     }
   }, [evaluationStatus, classId]);
-  
 
   useEffect(() => {
     setScores(questions.map(() => 3));
@@ -102,9 +86,8 @@ const EvaluationPage = () => {
 
   const handleSubmit = async () => {
     try {
-      setIsLoading(true); // 로딩 시작
+      setIsLoading(true);
       const createdAt = new Date().toISOString();
-      const headers = getAuthHeader();
 
       for (let i = 0; i < questions.length; i++) {
         const q = questions[i];
@@ -115,17 +98,14 @@ const EvaluationPage = () => {
           ? comments[String(questionId)]?.trim() || " "
           : null;
 
-        const data = {
-          lectDto: { evaluationId: null, createdAt },
-          dto: {
-            answerId: null,
-            answerChoice: choice,
-            subjectiveText: text,
-          },
-        };
-
-        const url = `http://localhost:8080/api/students/evaluation/savedata?userId=${userId}&questionId=${questionId}&classId=${classId}`;
-        await axios.post(url, data, headers);
+        await submitEvaluation(
+          userId,
+          questionId,
+          classId,
+          createdAt,
+          choice,
+          text
+        );
       }
 
       setAlertData(
@@ -138,7 +118,7 @@ const EvaluationPage = () => {
       console.error("제출 실패", error);
       setAlertData("error", "강의 평가 제출에\n 실패했습니다.", "");
     } finally {
-      setIsLoading(false); // 로딩 종료
+      setIsLoading(false);
     }
   };
 

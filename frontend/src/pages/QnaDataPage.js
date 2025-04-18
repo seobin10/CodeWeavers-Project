@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
 import QnaAnswerWritePage from "../pages/Admin/AdminQnaAnswerWritePage";
 import AlertModal from "../components/AlertModal";
 import BaseModal from "../components/BaseModal";
 import ConfirmModal from "../components/ConfirmModal";
 import { useSelector } from "react-redux";
-import { getAuthHeader } from "../util/authHeader";
 import Navbar from "../components/Navbar";
+import { deleteAns, deleteQna, getQnaDetail, getWriterId, increaseViewCount } from "../api/qnaApi";
 
 const QnaDataPage = () => {
   const [alertModalOpen, setAlertModalOpen] = useState(false);
@@ -41,11 +40,7 @@ const QnaDataPage = () => {
 
   const handleView = useCallback(async () => {
     try {
-      await axios.put(
-        `http://localhost:8080/api/user/qna/${questionId}/update`,
-        null,
-        getAuthHeader()
-      );
+      increaseViewCount(questionId);
     } catch (error) {
       console.log("조회수 증가 실패");
     }
@@ -66,35 +61,25 @@ const QnaDataPage = () => {
 
   const fetchContentInfo = async (id) => {
     try {
-      const response = await axios.get(
-        `http://localhost:8080/api/user/qna/${id}`,
-        getAuthHeader()
-      );
-      setContentInfo(response.data);
+      const data = await getQnaDetail(id);
+      setContentInfo(data);
     } catch (error) {
       setMessage("게시물 정보를 불러올 수 없습니다.");
     }
   };
 
-  const fetchWriterId = async (questionId) => {
+  const fetchWriterId = async (id) => {
     try {
-      const response = await axios.get(
-        `http://localhost:8080/api/user/qna/find/${questionId}`,
-        getAuthHeader()
-      );
-      setWriterId(String(response.data));
-      return response.data;
+      const data = await getWriterId(id);
+      setWriterId(data);
     } catch (error) {
       setMessage("작성자 정보를 불러올 수 없습니다.");
     }
   };
 
-  const handleDelete = async (questionId) => {
+  const handleDelete = async (id) => {
     try {
-      await axios.delete(
-        `http://localhost:8080/api/user/qna/delete/${questionId}`,
-        getAuthHeader()
-      );
+      await deleteQna(id);
       setMsg("삭제되었습니다.");
       setType("success");
     } catch (error) {
@@ -111,12 +96,9 @@ const QnaDataPage = () => {
     }
   };
 
-  const handleClickDelete = async (questionId) => {
+  const handleClickDelete = async (id) => {
     try {
-      await axios.delete(
-        `http://localhost:8080/api/admin/ans/delete/${questionId}`,
-        getAuthHeader()
-      );
+      await deleteAns(id);
       setMsg("답변이 삭제되었습니다.");
       setType("success");
       setAlertModalOpen(true);
@@ -136,7 +118,7 @@ const QnaDataPage = () => {
             navigate("/main/qnalist", { state: { page: currentPage } })
           }
           onEditClick={() => {
-            if (userId !== writerId) {
+            if (String(userId) !== String(writerId)) {
               setMsg("작성자만 수정할 수 있습니다!");
               setType("error");
               setGoTarget(null);
@@ -148,7 +130,7 @@ const QnaDataPage = () => {
             }
           }}
           onDelClick={() => {
-            if (userId !== writerId && userRole !== "ADMIN"){
+            if (String(userId) !== String(writerId) && userRole !== "ADMIN") {
               setMsg("작성자 혹은 관리자만\n 삭제할 수 있습니다!");
               setType("error");
               setGoTarget(null);

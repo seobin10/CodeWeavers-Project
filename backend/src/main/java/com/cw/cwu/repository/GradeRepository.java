@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface GradeRepository extends JpaRepository<Grade, Integer> {
+public interface                                                                                                                   GradeRepository extends JpaRepository<Grade, Integer> {
 
     // 학생 성적 조회 기능 추가
     @Query(value = """
