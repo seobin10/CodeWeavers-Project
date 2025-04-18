@@ -7,9 +7,7 @@ const prefix = `${API_SERVER_HOST}/api/students/enrollment`;
 // 필터 정보 불러오기
 export const getFilters = () => {
   return Promise.all([
-    axios.get(`${prefix}/departments`, getAuthHeader()),
     axios.get(`${prefix}/courseTypes`, getAuthHeader()),
-    axios.get(`${prefix}/courseYears`, getAuthHeader()),
     axios.get(`${prefix}/classDays`, getAuthHeader()),
     axios.get(`${prefix}/classTimes`, getAuthHeader()),
     axios.get(`${prefix}/credits`, getAuthHeader()),
@@ -47,5 +45,16 @@ export const checkEnrollPeriod = async () => {
   } catch (error) {
     console.error("수강신청 기간 확인 실패:", error);
     return false;
+  }
+};
+
+// 수강신청용 학기 정보 조회
+export const getEnrollmentSemesterInfo = async () => {
+  try {
+    const response = await axios.get(`${prefix}/enrollment-semester-info`, getAuthHeader());
+    return response.data;  // { year: xxxx, term: "FIRST" 또는 "SECOND" }
+  } catch (error) {
+    console.error("수강신청 학기 정보 조회 실패:", error);
+    return null;
   }
 };

@@ -44,40 +44,33 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
     public PageResponseDTO<Map<String, Object>> getAvailableCoursesPaged(
             String studentId,
             String courseType,
-            String departmentName,
-            Integer courseYear,
             String classDay,
             Integer classStart,
             Integer credit,
             String courseName,
             PageRequestDTO pageRequestDTO
     ) {
-        // 수강신청 기간 확인
         if (!adminScheduleService.isScheduleOpen(ScheduleType.ENROLL)) {
             throw new IllegalStateException("현재는 수강신청 기간이 아닙니다!");
         }
 
-        // 현재 학기ID 가져오기
-        Integer semesterId = adminScheduleService.getCurrentSemesterId();
-
+        Integer semesterId = adminScheduleService.getEnrollSemesterId();
         Pageable pageable = PageRequest.of(pageRequestDTO.getPage() - 1, pageRequestDTO.getSize());
 
+        // 🔥 학생 정보 가져오기
+        User student = userRepository.findByUserId(studentId)
+                .orElseThrow(() -> new IllegalArgumentException("학생 정보를 찾을 수 없습니다."));
+        String departmentName = student.getDepartment().getDepartmentName();
+        int studentYear = studentInfoService.calculateStudentYear(studentId);
+
         Page<Map<String, Object>> result = classEntityRepository.findAvailableCoursesPaged(
-                studentId, courseType, departmentName, courseYear,
+                courseType, departmentName, studentYear,
                 classDay, classStart, credit, courseName, semesterId, pageable
         );
 
         return PageUtil.toDTO(result, pageRequestDTO.getPage());
     }
 
-
-    // 학과 목록 필터링
-    @Override
-    public List<Map<String, Object>> getDepartments() {
-        return classEntityRepository.findDistinctDepartments().stream()
-                .map(d -> Map.<String, Object>of("departmentName", d))
-                .collect(Collectors.toList());
-    }
 
     // 강의 구분 필터링
     @Override
@@ -88,13 +81,6 @@ public class StudentEnrollmentServiceImpl implements StudentEnrollmentService {
                 .collect(Collectors.toList());
     }
 
-    // 강의 학년 필터링
-    @Override
-    public List<Map<String, Object>> getCourseYears() {
-        return classEntityRepository.findDistinctCourseYears().stream()
-                .map(y -> Map.<String, Object>of("courseYear", y))
-                .collect(Collectors.toList());
-    }
 
     // 강의 요일 필터링
     @Override

@@ -5,6 +5,7 @@ import {
   searchCourses,
   enrollCourse,
   getEnrolledCourses,
+  getEnrollmentSemesterInfo,
 } from "../api/enrollmentApi";
 
 import { useDispatch, useSelector } from "react-redux";
@@ -41,13 +42,23 @@ const EnrollmentPage = () => {
     checkPeriod();
   }, [navigate]);
 
+  const [semesterInfo, setSemesterInfo] = useState(null);
+  useEffect(() => {
+    const fetchSemesterInfo = async () => {
+      try {
+        const data = await getEnrollmentSemesterInfo(); 
+        setSemesterInfo(data);
+      } catch (error) {
+        console.error("수강신청 학기 정보 조회 실패:", error);
+      }
+    };
+    fetchSemesterInfo();
+  }, []);
   const [timetable, setTimetable] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
 
   const [filters, setFilters] = useState({
-    departments: [],
     courseTypes: [],
-    courseYears: [],
     classDays: [],
     classTimes: [],
     credits: [],
@@ -55,8 +66,6 @@ const EnrollmentPage = () => {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("전체");
-  const [filterDepartment, setFilterDepartment] = useState("전체");
-  const [filterYear, setFilterYear] = useState("전체");
   const [filterDay, setFilterDay] = useState("전체");
   const [filterTime, setFilterTime] = useState("전체");
   const [filterCredit, setFilterCredit] = useState("전체");
@@ -73,19 +82,11 @@ const EnrollmentPage = () => {
   useEffect(() => {
     const fetchFilters = async () => {
       try {
-        const [
-          departmentsRes,
-          courseTypesRes,
-          courseYearsRes,
-          classDaysRes,
-          classTimesRes,
-          creditsRes,
-        ] = await getFilters();
+        const [courseTypesRes, classDaysRes, classTimesRes, creditsRes] =
+          await getFilters();
 
         setFilters({
-          departments: departmentsRes.data,
           courseTypes: courseTypesRes.data,
-          courseYears: courseYearsRes.data,
           classDays: classDaysRes.data,
           classTimes: classTimesRes.data,
           credits: creditsRes.data,
@@ -100,7 +101,7 @@ const EnrollmentPage = () => {
 
   // 3. 강의 검색
   useEffect(() => {
-    if (userId && filters.departments.length > 0) {
+    if (userId && filters.courseTypes.length > 0) {
       handleSearch(1);
     }
   }, [userId, filters]);
@@ -126,8 +127,6 @@ const EnrollmentPage = () => {
       const response = await searchCourses(userId, {
         courseName: searchQuery || null,
         courseType: filterCategory !== "전체" ? filterCategory : null,
-        departmentName: filterDepartment !== "전체" ? filterDepartment : null,
-        courseYear: filterYear !== "전체" ? parseInt(filterYear) : null,
         classDay: filterDay !== "전체" ? filterDay : null,
         classStart: filterTime !== "전체" ? parseInt(filterTime) : null,
         credit: filterCredit !== "전체" ? parseInt(filterCredit) : null,
@@ -198,12 +197,16 @@ const EnrollmentPage = () => {
   return (
     <div className="max-w-7xl mx-auto p-2 bg-slate-50 bg-opacity-40 shadow-md mt-3 rounded-md">
       <h2 className="text-3xl font-bold text-center mb-6 mt-3">
-        수강 신청 목록
+        {semesterInfo
+          ? `${semesterInfo.year}년 ${
+              semesterInfo.term === "FIRST" ? "1학기" : "2학기"
+            } 수강 신청`
+          : "수강 신청"}
       </h2>
 
       {/* 필터 영역 */}
       <div className="space-y-4">
-        <div className="grid grid-cols-3 gap-4 mb-4">
+        <div className="grid grid-cols-2 gap-4 mb-4">
           <select
             className="bg-blue-50 border p-2 rounded w-full"
             value={filterCategory}
@@ -213,30 +216,6 @@ const EnrollmentPage = () => {
             {filters.courseTypes.map((type) => (
               <option key={type.courseType} value={type.courseType}>
                 {type.courseType}
-              </option>
-            ))}
-          </select>
-          <select
-            className="bg-blue-50 border p-2 rounded w-full"
-            value={filterDepartment}
-            onChange={(e) => setFilterDepartment(e.target.value)}
-          >
-            <option value="전체">전체 학과</option>
-            {filters.departments.map((dept) => (
-              <option key={dept.departmentName} value={dept.departmentName}>
-                {dept.departmentName}
-              </option>
-            ))}
-          </select>
-          <select
-            className="bg-blue-50 border p-2 rounded w-full"
-            value={filterYear}
-            onChange={(e) => setFilterYear(e.target.value)}
-          >
-            <option value="전체">전체 학년</option>
-            {filters.courseYears.map((year) => (
-              <option key={year.courseYear} value={year.courseYear}>
-                {year.courseYear}학년
               </option>
             ))}
           </select>

@@ -131,15 +131,10 @@ public class AdminScheduleServiceImpl implements AdminScheduleService {
         LocalDateTime now = LocalDateTime.now();
 
         ScheduleSetting setting = scheduleSettingRepository
-                .findBySemesterIdAndScheduleType(getCurrentSemesterId(), scheduleType)
+                .findByScheduleTypeAndStartDateBeforeAndEndDateAfter(scheduleType, now, now)
                 .orElse(null);
 
-        if (setting == null) {
-            return false;
-        }
-
-        return (now.isEqual(setting.getStartDate()) || now.isAfter(setting.getStartDate())) &&
-                (now.isEqual(setting.getEndDate()) || now.isBefore(setting.getEndDate()));
+        return setting != null; // 설정이 존재하면 열린 것
     }
 
     @Override
@@ -151,6 +146,20 @@ public class AdminScheduleServiceImpl implements AdminScheduleService {
                 .orElseThrow(() -> new IllegalStateException("현재 학기가 존재하지 않습니다."));
 
         return currentSemester.getId();
+    }
+
+
+    // 수강신청 학기 찾기
+    @Override
+    public Integer getEnrollSemesterId() {
+        LocalDateTime now = LocalDateTime.now();
+
+        ScheduleSetting setting = scheduleSettingRepository
+                .findByScheduleTypeAndStartDateBeforeAndEndDateAfter(
+                        ScheduleType.ENROLL, now, now)
+                .orElseThrow(() -> new IllegalStateException("현재 수강신청 기간이 아닙니다."));
+
+        return setting.getSemester().getId();
     }
 
 
