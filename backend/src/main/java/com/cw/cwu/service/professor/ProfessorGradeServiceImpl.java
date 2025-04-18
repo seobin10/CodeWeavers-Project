@@ -31,7 +31,6 @@ public class ProfessorGradeServiceImpl implements ProfessorGradeService {
     private final GradeRepository gradeRepository;
     private final ClassEntityRepository classEntityRepository;
     private final AdminScheduleService adminScheduleService;
-    private final SemesterRepository semesterRepository;
     private final UserSemesterService userSemesterService;
 
 

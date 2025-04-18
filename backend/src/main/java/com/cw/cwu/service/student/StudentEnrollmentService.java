@@ -20,11 +20,11 @@ public interface StudentEnrollmentService {
      * @param pageRequestDTO 페이징 정보
      * @return 강의 목록 Map 페이징 응답
      */
+
+    // 학생이 수강 신청 가능한 강의 목록 조회
     PageResponseDTO<Map<String, Object>> getAvailableCoursesPaged(
             String studentId,
             String courseType,
-            String departmentName,
-            Integer courseYear,
             String classDay,
             Integer classStart,
             Integer credit,
@@ -33,22 +33,10 @@ public interface StudentEnrollmentService {
     );
 
     /**
-     * [수강 신청 가능한 학과 목록 조회]
-     * @return 학과 이름 리스트 (Map 형태)
-     */
-    List<Map<String, Object>> getDepartments();
-
-    /**
      * [수강 신청 가능한 강의 구분 목록 조회]
      * @return 전공/교양 리스트 (Map 형태)
      */
     List<Map<String, Object>> getCourseTypes();
-
-    /**
-     * [수강 신청 가능한 강의 학년 목록 조회]
-     * @return 학년 리스트 (Map 형태)
-     */
-    List<Map<String, Object>> getCourseYears();
 
     /**
      * [수강 신청 가능한 요일 목록 조회]

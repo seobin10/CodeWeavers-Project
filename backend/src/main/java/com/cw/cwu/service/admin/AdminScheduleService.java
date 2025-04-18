@@ -26,4 +26,7 @@ public interface AdminScheduleService {
     boolean isScheduleOpen(ScheduleType scheduleType);
 
     Integer getCurrentSemesterId();
+
+    // 수강신청 학기 찾기
+    Integer getEnrollSemesterId();
 }
