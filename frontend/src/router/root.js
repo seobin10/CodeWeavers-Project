@@ -1,5 +1,5 @@
-// 📁 src/routers/index.js
 import { Navigate, createBrowserRouter } from "react-router-dom";
+import { Suspense, lazy } from "react";
 import BasicLayout from "../layouts/BasicLayout";
 import memberRouter from "./memberRouter";
 import studentRouter from "./studentRouter";
@@ -7,13 +7,18 @@ import adminRouter from "./adminRouter";
 import professorRouter from "./professorRouter";
 import qnaRouter from "./qnaRouter";
 import noticeRouter from "./noticeRouter";
-import UnauthorizedPage from "../pages/UnauthorizedPage";
-import PeriodExpiredPage from "../pages/users/PeriodExpiredPage";
 import Loading from "../components/Loading";
-import MainPage from "../pages/MainPage";
-import CalenderPage from "../pages/CalenderPage";
-import { Suspense, lazy } from "react";
-import ResetPasswordPage from "../pages/users/ResetPasswordPage";
+
+const MainPage = lazy(() => import("../pages/MainPage"));
+const CalenderPage = lazy(() => import("../pages/CalenderPage"));
+const ProfilePage = lazy(() => import("../pages/users/ProfilePage"));
+const UnauthorizedPage = lazy(() => import("../pages/UnauthorizedPage"));
+const PeriodExpiredPage = lazy(() =>
+  import("../pages/users/PeriodExpiredPage")
+);
+const ResetPasswordPage = lazy(() =>
+  import("../pages/users/ResetPasswordPage")
+);
 
 const root = createBrowserRouter([
   { path: "/", element: <Navigate to="/member/login" /> },
@@ -34,6 +39,14 @@ const root = createBrowserRouter([
         element: (
           <Suspense fallback={<Loading />}>
             <CalenderPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "profile",
+        element: (
+          <Suspense fallback={<Loading />}>
+            <ProfilePage />
           </Suspense>
         ),
       },
@@ -66,7 +79,11 @@ const root = createBrowserRouter([
   },
   {
     path: "/reset-password",
-    element: <ResetPasswordPage />,
+    element: (
+      <Suspense fallback={<Loading />}>
+        <ResetPasswordPage />
+      </Suspense>
+    ),
   },
 ]);
 
