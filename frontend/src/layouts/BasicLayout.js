@@ -1,17 +1,16 @@
 import React, { useCallback, useState } from "react";
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../slices/authSlice";
 import UserInfo from "../components/UserInfo";
+import { motion } from "framer-motion";
 
 const BasicLayout = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
+  const location = useLocation();
   const { userId, userRole } = useSelector((state) => state.auth);
-  const [openEnrollmentMenu, setOpenEnrollmentMenu] = useState(false);
-  const [openGradeMenu, setOpenGradeMenu] = useState(false);
-  const [openInfoMenu, setOpenInfoMenu] = useState(false);
+  const [hoveredMenu, setHoveredMenu] = useState("");
 
   const handleLogout = useCallback(() => {
     dispatch(logout());
@@ -23,29 +22,29 @@ const BasicLayout = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
-      <header className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300 p-4 flex justify-between items-center bg-opacity-80">
+      <header className="bg-white/80 backdrop-blur-md shadow-md p-4 flex justify-between items-center">
         <Link to="/main" className="flex items-center space-x-3">
-          <img src="/images/eonLogo.jpg" alt="학교 로고" className="h-16" />
-          <span className="text-2xl font-extrabold text-blue-800">
-            <ul>
-              <li> 이온대학교 </li>
-              <li> EON UNIVERSITY </li>
-            </ul>
-          </span>
+          <img src="/images/eonLogo.jpg" alt="학교 로고" className="h-14" />
+          <div className="text-blue-800 font-extrabold text-xl leading-tight">
+            <div>이온대학교</div>
+            <div className="text-xs font-medium tracking-wider">
+              EON UNIVERSITY
+            </div>
+          </div>
         </Link>
         <div className="flex items-center space-x-4">
           <UserInfo />
           {userId ? (
             <button
               onClick={handleLogout}
-              className="bg-blue-500 hover:bg-blue-900 text-white text-sm font-semibold py-1 px-4 rounded transition"
+              className="bg-blue-600 hover:bg-blue-800 text-white text-sm font-semibold py-2 px-5 rounded-lg transition"
             >
               로그아웃
             </button>
           ) : (
             <Link
               to="/member/login"
-              className="bg-blue-500 hover:bg-blue-900 text-white text-sm font-semibold py-1 px-4 rounded transition"
+              className="bg-blue-600 hover:bg-blue-800 text-white text-sm font-semibold py-2 px-5 rounded-lg transition"
             >
               로그인
             </Link>
@@ -54,288 +53,199 @@ const BasicLayout = () => {
       </header>
 
       <div className="flex flex-1">
-        <nav className="bg-blue-800 text-white w-64 p-4 flex flex-col min-h-full">
-          <div className="flex flex-col space-y-8">
-            {userRole === "STUDENT" && (
-              <>
-                <Link
-                  to="/main/noticelist"
-                  className="hover:bg-blue-500 px-6 py-3 mt-10"
-                >
-                  공지사항 ▶
-                </Link>
+        <nav className="bg-gradient-to-b from-blue-900 to-blue-800 text-white w-64 p-6 flex flex-col space-y-8">
+          <SectionTitle title={userRole} />
 
-                {/* 정보조회 */}
-                <div className="flex flex-col mt-5 mb-5">
-                  <button
-                    className="hover:bg-blue-500 px-6 py-3 text-left w-full"
-                    onClick={() => setOpenInfoMenu((prev) => !prev)}
-                  >
-                    정보조회 {openInfoMenu ? "▼" : "▶"}
-                  </button>
-                  <div
-                    className={`pl-8 overflow-hidden transition-all duration-700 ease-in-out ${
-                      openInfoMenu
-                        ? "max-h-60 opacity-100 mt-5"
-                        : "max-h-0 opacity-0"
-                    } space-y-3 text-sm`}
-                  >
-                    {openInfoMenu && (
-                      <>
-                        <Link
-                          to="/main/profile"
-                          className="hover:underline block pt-3"
-                        >
-                          🙍‍♂️ 내 정보 조회
-                        </Link>
-                        <Link
-                          to="/main/password"
-                          className="hover:underline block pt-6"
-                        >
-                          🔐 비밀번호 변경
-                        </Link>
-                      </>
-                    )}
-                  </div>
-                </div>
+          <SimpleLink
+            to="/main/noticelist"
+            label="📢 공지사항"
+            currentPath={location.pathname}
+          />
 
-                {/* 수강 신청 */}
-                <div className="flex flex-col mt-2 mb-2">
-                  <button
-                    className="hover:bg-blue-500 px-6 py-3 text-left w-full"
-                    onClick={() => setOpenEnrollmentMenu((prev) => !prev)}
-                  >
-                    수강 신청 {openEnrollmentMenu ? "▼" : "▶"}
-                  </button>
-                  <div
-                    className={`pl-8 overflow-hidden transition-all duration-700 ease-in-out ${
-                      openEnrollmentMenu
-                        ? "max-h-60 opacity-100 mt-5"
-                        : "max-h-0 opacity-0"
-                    } space-y-3 text-sm`}
-                  >
-                    {openEnrollmentMenu && (
-                      <>
-                        <Link
-                          to="/main/enrollment"
-                          className="hover:underline block pt-3"
-                        >
-                          📋 수강신청 목록
-                        </Link>
-                        <Link
-                          to="/main/history"
-                          className="hover:underline block pt-6"
-                        >
-                          🗂 수강신청 내역
-                        </Link>
-                        <Link
-                          to="/main/schedule"
-                          className="hover:underline block pt-6"
-                        >
-                          ⏰ 시간표 조회
-                        </Link>
-                      </>
-                    )}
-                  </div>
-                </div>
+          <ToggleMenu
+            title="🙍‍♂️ 정보조회"
+            links={[
+              { to: "/main/profile", label: "내 정보 조회" },
+              { to: "/main/password", label: "비밀번호 변경" },
+            ]}
+            currentPath={location.pathname}
+            hoveredMenu={hoveredMenu}
+            setHoveredMenu={setHoveredMenu}
+          />
 
-                {/* 성적 조회 */}
-                <div className="flex flex-col mt-2 mb-2">
-                  <button
-                    className="hover:bg-blue-500 px-6 py-3 text-left w-full"
-                    onClick={() => setOpenGradeMenu((prev) => !prev)}
-                  >
-                    성적 조회 {openGradeMenu ? "▼" : "▶"}
-                  </button>
-                  <div
-                    className={`pl-8 overflow-hidden transition-all duration-700 ease-in-out ${
-                      openGradeMenu
-                        ? "max-h-40 opacity-100 mt-5"
-                        : "max-h-0 opacity-0"
-                    } space-y-3 text-sm`}
-                  >
-                    {openGradeMenu && (
-                      <>
-                        <Link
-                          to="/main/grades"
-                          className="hover:underline block pt-3"
-                        >
-                          📑 현재학기 성적 조회
-                        </Link>
-                        <Link
-                          to="/main/allgrades"
-                          className="hover:underline block pt-6"
-                        >
-                          📄 전체 성적 조회
-                        </Link>
-                        <Link
-                        to="/main/evaluationlist"
-                        className="hover:underline block pt-6"
-                      >
-                        📝 강의 평가
-                      </Link>
-                      </>
-                    )}
-                  </div>
-                </div>
+          {userRole === "STUDENT" && (
+            <>
+              <ToggleMenu
+                title="📋 수강 신청"
+                links={[
+                  { to: "/main/enrollment", label: "수강신청 목록" },
+                  { to: "/main/history", label: "수강신청 내역" },
+                  { to: "/main/schedule", label: "시간표 조회" },
+                ]}
+                currentPath={location.pathname}
+                hoveredMenu={hoveredMenu}
+                setHoveredMenu={setHoveredMenu}
+              />
+              <ToggleMenu
+                title="📑 성적 조회"
+                links={[
+                  { to: "/main/grades", label: "현재학기 성적 조회" },
+                  { to: "/main/allgrades", label: "전체 성적 조회" },
+                  { to: "/main/evaluationlist", label: "강의 평가" },
+                ]}
+                currentPath={location.pathname}
+                hoveredMenu={hoveredMenu}
+                setHoveredMenu={setHoveredMenu}
+              />
+            </>
+          )}
 
-                <Link
-                  to="/main/qnalist"
-                  className="hover:bg-blue-500 px-6 py-3"
-                >
-                  Q&A ▶
-                </Link>
-              </>
-            )}
+          {userRole === "ADMIN" && (
+            <>
+              <SimpleLink
+                to="/main/admin/user-list"
+                label="👥 사용자 관리"
+                currentPath={location.pathname}
+              />
+              <SimpleLink
+                to="/main/admin/users"
+                label="🗓 일정 관리"
+                currentPath={location.pathname}
+              />
+              <SimpleLink
+                to="/main/admin/grades"
+                label="📚 성적 집계"
+                currentPath={location.pathname}
+              />
+            </>
+          )}
 
-            {userRole === "ADMIN" && (
-              <>
-                <Link
-                  to="/main/noticelist"
-                  className="hover:bg-blue-500 px-6 py-3 mt-6"
-                >
-                  공지사항 ▶
-                </Link>
-                 {/* 정보조회 */}
-                 <div className="flex flex-col mt-5 mb-5">
-                  <button
-                    className="hover:bg-blue-500 px-6 py-3 text-left w-full"
-                    onClick={() => setOpenInfoMenu((prev) => !prev)}
-                  >
-                    정보조회 {openInfoMenu ? "▼" : "▶"}
-                  </button>
-                  <div
-                    className={`pl-8 overflow-hidden transition-all duration-700 ease-in-out ${
-                      openInfoMenu
-                        ? "max-h-60 opacity-100 mt-5"
-                        : "max-h-0 opacity-0"
-                    } space-y-3 text-sm`}
-                  >
-                    {openInfoMenu && (
-                      <>
-                        <Link
-                          to="/main/profile"
-                          className="hover:underline block pt-3"
-                        >
-                          🙍‍♂️ 내 정보 조회
-                        </Link>
-                        <Link
-                          to="/main/password"
-                          className="hover:underline block pt-6"
-                        >
-                          🔐 비밀번호 변경
-                        </Link>
-                      </>
-                    )}
-                  </div>
-                </div>
-                <Link
-                  to="/main/admin/user-list"
-                  className="hover:bg-blue-500 px-6 py-3 mt-6"
-                >
-                  사용자 관리 ▶
-                </Link>
-                <Link
-                  to="/main/admin/users"
-                  className="hover:bg-blue-500 px-6 py-3"
-                >
-                  일정 관리 ▶
-                </Link>
-                <Link
-                  to="/main/admin/grades"
-                  className="hover:bg-blue-500 px-6 py-3"
-                >
-                  성적 집계 ▶
-                </Link>
-                <Link
-                  to="/main/qnalist"
-                  className="hover:bg-blue-500 px-6 py-3"
-                >
-                  Q&A ▶
-                </Link>
-              </>
-            )}
+          {userRole === "PROFESSOR" && (
+            <>
+              <SimpleLink
+                to="/main/professor/classes"
+                label="📖 강의 관리"
+                currentPath={location.pathname}
+              />
+              <SimpleLink
+                to="/main/professor/grades"
+                label="📝 성적 관리"
+                currentPath={location.pathname}
+              />
+              <SimpleLink
+                to="/main/professor/msg"
+                label="✉️ 문자 발송"
+                currentPath={location.pathname}
+              />
+            </>
+          )}
 
-            {userRole === "PROFESSOR" && (
-              <>
-                <Link
-                  to="/main/noticelist"
-                  className="hover:bg-blue-500 px-6 py-3 mt-6"
-                >
-                  공지사항 ▶
-                </Link>
-                 {/* 정보조회 */}
-                 <div className="flex flex-col mt-5 mb-5">
-                  <button
-                    className="hover:bg-blue-500 px-6 py-3 text-left w-full"
-                    onClick={() => setOpenInfoMenu((prev) => !prev)}
-                  >
-                    정보조회 {openInfoMenu ? "▼" : "▶"}
-                  </button>
-                  <div
-                    className={`pl-8 overflow-hidden transition-all duration-700 ease-in-out ${
-                      openInfoMenu
-                        ? "max-h-60 opacity-100 mt-5"
-                        : "max-h-0 opacity-0"
-                    } space-y-3 text-sm`}
-                  >
-                    {openInfoMenu && (
-                      <>
-                        <Link
-                          to="/main/profile"
-                          className="hover:underline block pt-3"
-                        >
-                          🙍‍♂️ 내 정보 조회
-                        </Link>
-                        <Link
-                          to="/main/password"
-                          className="hover:underline block pt-6"
-                        >
-                          🔐 비밀번호 변경
-                        </Link>
-                      </>
-                    )}
-                  </div>
-                </div>
-                <Link
-                  to="/main/professor/classes"
-                  className="hover:bg-blue-500 px-6 py-3 mt-6"
-                >
-                  강의 관리 ▶
-                </Link>
-                <Link
-                  to="/main/professor/grades"
-                  className="hover:bg-blue-500 px-6 py-3"
-                >
-                  성적 관리 ▶
-                </Link>
-                <Link
-                  to="/main/professor/msg"
-                  className="hover:bg-blue-500 px-6 py-3"
-                >
-                  문자 발송 ▶
-                </Link>
-              </>
-            )}
-          </div>
+          {userRole !== "PROFESSOR" && (
+            <SimpleLink
+              to="/main/qnalist"
+              label="❓ Q&A"
+              currentPath={location.pathname}
+            />
+          )}
         </nav>
 
-        {/* Content */}
-        <main className="p-8 bg-gray-50 shadow-md w-full flex-1 pb-16">
-          <Outlet />
+        <main className="flex-1 p-10 bg-gray-50 flex flex-col">
+          <motion.div
+            className="bg-white rounded-3xl shadow-lg p-10 flex-1"
+            style={{ minHeight: "calc(100vh - 200px)" }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <Outlet />
+          </motion.div>
         </main>
       </div>
 
-      {/* Footer */}
-      <footer className="bg-blue-900 text-white text-center py-4 text-sm w-full mt-auto">
-        <div>
-          01212 서울특별시 한국구 한국산로 12(한국동) 이온대학교 02-123-1234
-          <br />
-          webmaster@eon.ac.kr
-          <br />
-          COPYRIGHT © EON UNIVERSITY. ALL RIGHTS RESERVED.
-        </div>
+      <footer className="bg-blue-950 text-gray-300 text-center text-xs py-6">
+        01212 서울특별시 한국구 한국산로 12(한국동) 이온대학교 02-123-1234
+        <br />
+        webmaster@eon.ac.kr
+        <br />
+        COPYRIGHT © EON UNIVERSITY. ALL RIGHTS RESERVED.
       </footer>
+    </div>
+  );
+};
+
+const SectionTitle = ({ title }) => (
+  <div className="text-gray-300 text-xs uppercase font-semibold tracking-wide mb-2">
+    {title}
+    <div className="border-t border-blue-700 my-2" />
+  </div>
+);
+
+const SimpleLink = ({ to, label, currentPath }) => {
+  const isActive = currentPath.startsWith(to);
+  return (
+    <Link
+      to={to}
+      className={`flex items-center px-4 py-2 rounded transition space-x-2 ${
+        isActive
+          ? "bg-blue-700 text-white"
+          : "hover:bg-blue-600 hover:text-white"
+      }`}
+    >
+      <span>{label}</span>
+    </Link>
+  );
+};
+
+const ToggleMenu = ({
+  title,
+  links,
+  currentPath,
+  hoveredMenu,
+  setHoveredMenu,
+}) => {
+  const shouldBeOpen = links.some((link) => currentPath.startsWith(link.to));
+  const isHovered = hoveredMenu === title;
+  const isOpen = shouldBeOpen || isHovered;
+
+  return (
+    <div
+      className="relative"
+      onMouseEnter={() => setHoveredMenu(title)}
+      onMouseLeave={() => setHoveredMenu("")}
+    >
+      <button
+        className={`w-full text-left flex justify-between items-center px-4 py-2 rounded transition ${
+          isOpen
+            ? "bg-blue-700 text-white"
+            : "hover:bg-blue-600 hover:text-white"
+        }`}
+      >
+        <span>{title}</span>
+        <span>{isOpen ? "▼" : "▶"}</span>
+      </button>
+
+      <div
+        className={`pl-6 overflow-hidden transition-all duration-500 ease-in-out ${
+          isOpen ? "max-h-80 opacity-100 mt-2" : "max-h-0 opacity-0"
+        } space-y-2 text-sm`}
+      >
+        {links.map((link, idx) => {
+          const active = currentPath.startsWith(link.to);
+          return (
+            <Link
+              key={idx}
+              to={link.to}
+              className={`block px-2 py-1 rounded transition ${
+                active
+                  ? "bg-blue-600 text-white"
+                  : "hover:bg-blue-700 hover:text-white"
+              }`}
+            >
+              {link.label}
+            </Link>
+          );
+        })}
+      </div>
     </div>
   );
 };
