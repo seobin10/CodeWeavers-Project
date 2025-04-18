@@ -3,7 +3,7 @@ import { lazy, Suspense } from "react";
 import RoleGuard from "../components/RoleGuard";
 import Loading from "../components/Loading";
 
-const StudentPage = lazy(() => import("../pages/StudentPage"));
+
 const GradePage = lazy(() => import("../pages/GradePage"));
 const AllGradePage = lazy(() => import("../pages/AllGradePage"));
 const CurrentPage = lazy(() => import("../pages/CurrentPage"));
@@ -14,14 +14,6 @@ const ChangepwPage = lazy(() => import("../components/ChangepwPage"));
 const EvaluationPage = lazy(() => import("../pages/EvaluationPage"));
 const EvaluationListPage = lazy(() => import("../pages/EvaluationListPage"));
 const studentRouter = [
-  {
-    path: "student",
-    element: (
-      <Suspense fallback={<Loading />}>
-        <StudentPage />
-      </Suspense>
-    ),
-  },
   {
     path: "grades",
     element: (

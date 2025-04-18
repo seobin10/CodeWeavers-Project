@@ -137,9 +137,9 @@ const AdminSchedulePage = () => {
     SCHEDULE_TYPES.find((t) => t.type === type)?.label || type;
 
   return (
-    <div className="max-w-7xl mx-auto p-8 bg-white shadow-md rounded-md mt-10 space-y-12">
-      {/* 학기 목록 */}
-      <div>
+    <div className="max-w-7xl mx-auto space-y-12 p-8">
+      {/* 학기 설정 영역 */}
+      <div className="bg-white shadow-md rounded-md p-8">
         <div className="flex justify-between items-center border-b pb-3 mb-4">
           <h2 className="text-2xl font-semibold text-gray-700">학기 설정</h2>
           <button
@@ -151,6 +151,7 @@ const AdminSchedulePage = () => {
         </div>
 
         <table className="min-w-full table-auto border border-gray-200 text-sm rounded">
+          {/* 학기 목록 테이블 내용 그대로 */}
           <thead className="bg-gray-50 text-gray-600 uppercase text-sm">
             <tr>
               <th className="py-3 px-4">년도</th>
@@ -161,6 +162,7 @@ const AdminSchedulePage = () => {
             </tr>
           </thead>
           <tbody className="text-gray-700 text-center">
+            {/* 학기 목록 rows 그대로 */}
             {semesters.length === 0 ? (
               <tr>
                 <td colSpan={5} className="py-4 text-gray-400">
@@ -176,20 +178,12 @@ const AdminSchedulePage = () => {
                   </td>
                   <td className="py-3 px-4">
                     {s.startDate
-                      ? new Date(s.startDate).toLocaleString("ko-KR", {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                        })
+                      ? new Date(s.startDate).toLocaleDateString("ko-KR")
                       : "-"}
                   </td>
                   <td className="py-3 px-4">
                     {s.endDate
-                      ? new Date(s.endDate).toLocaleString("ko-KR", {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                        })
+                      ? new Date(s.endDate).toLocaleDateString("ko-KR")
                       : "-"}
                   </td>
                   <td className="py-3 px-4 space-x-2">
@@ -216,8 +210,8 @@ const AdminSchedulePage = () => {
         </table>
       </div>
 
-      {/* 학사 일정 관리 */}
-      <div>
+      {/* 기간 설정 영역 */}
+      <div className="bg-white shadow-md rounded-md p-8">
         <h2 className="text-2xl font-semibold text-gray-700 mb-4">기간 설정</h2>
 
         <div className="mb-6">
@@ -237,6 +231,7 @@ const AdminSchedulePage = () => {
         </div>
 
         <table className="min-w-full table-auto border border-gray-200 text-sm rounded">
+          {/* 일정 테이블 */}
           <thead className="bg-gray-50 text-gray-600 uppercase text-sm">
             <tr>
               <th className="py-3 px-4">일정 종류</th>

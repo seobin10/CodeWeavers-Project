@@ -37,10 +37,9 @@ export const updateUserInfo = async (userData) => {
     return res.data;
   } catch (error) {
     console.error("유저 정보 업데이트 실패:", error);
-    return { error: "정보 업데이트 실패. 다시 시도해주세요." };
+    throw error; 
   }
 };
-
 // 학번 찾기 (인증 필요 없음)
 export const findUserId = async (formData) => {
   try {
