@@ -83,7 +83,7 @@ const BasicLayout = () => {
                     {openInfoMenu && (
                       <>
                         <Link
-                          to="/main/student"
+                          to="/main/profile"
                           className="hover:underline block pt-3"
                         >
                           🙍‍♂️ 내 정보 조회
@@ -196,6 +196,39 @@ const BasicLayout = () => {
                 >
                   공지사항 ▶
                 </Link>
+                 {/* 정보조회 */}
+                 <div className="flex flex-col mt-5 mb-5">
+                  <button
+                    className="hover:bg-blue-500 px-6 py-3 text-left w-full"
+                    onClick={() => setOpenInfoMenu((prev) => !prev)}
+                  >
+                    정보조회 {openInfoMenu ? "▼" : "▶"}
+                  </button>
+                  <div
+                    className={`pl-8 overflow-hidden transition-all duration-700 ease-in-out ${
+                      openInfoMenu
+                        ? "max-h-60 opacity-100 mt-5"
+                        : "max-h-0 opacity-0"
+                    } space-y-3 text-sm`}
+                  >
+                    {openInfoMenu && (
+                      <>
+                        <Link
+                          to="/main/profile"
+                          className="hover:underline block pt-3"
+                        >
+                          🙍‍♂️ 내 정보 조회
+                        </Link>
+                        <Link
+                          to="/main/password"
+                          className="hover:underline block pt-6"
+                        >
+                          🔐 비밀번호 변경
+                        </Link>
+                      </>
+                    )}
+                  </div>
+                </div>
                 <Link
                   to="/main/admin/user-list"
                   className="hover:bg-blue-500 px-6 py-3 mt-6"
@@ -231,6 +264,39 @@ const BasicLayout = () => {
                 >
                   공지사항 ▶
                 </Link>
+                 {/* 정보조회 */}
+                 <div className="flex flex-col mt-5 mb-5">
+                  <button
+                    className="hover:bg-blue-500 px-6 py-3 text-left w-full"
+                    onClick={() => setOpenInfoMenu((prev) => !prev)}
+                  >
+                    정보조회 {openInfoMenu ? "▼" : "▶"}
+                  </button>
+                  <div
+                    className={`pl-8 overflow-hidden transition-all duration-700 ease-in-out ${
+                      openInfoMenu
+                        ? "max-h-60 opacity-100 mt-5"
+                        : "max-h-0 opacity-0"
+                    } space-y-3 text-sm`}
+                  >
+                    {openInfoMenu && (
+                      <>
+                        <Link
+                          to="/main/profile"
+                          className="hover:underline block pt-3"
+                        >
+                          🙍‍♂️ 내 정보 조회
+                        </Link>
+                        <Link
+                          to="/main/password"
+                          className="hover:underline block pt-6"
+                        >
+                          🔐 비밀번호 변경
+                        </Link>
+                      </>
+                    )}
+                  </div>
+                </div>
                 <Link
                   to="/main/professor/classes"
                   className="hover:bg-blue-500 px-6 py-3 mt-6"

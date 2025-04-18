@@ -51,7 +51,7 @@ const UserInfo = () => {
       <img
         src={`http://localhost:8080${userInfo.userImgUrl}`}
         alt="프로필 이미지"
-        className="w-[50px] h-[50px] object-cover rounded-full"
+        className="w-[45px] h-[45px] object-cover rounded-full mr-4"
       />
 
       <span>
