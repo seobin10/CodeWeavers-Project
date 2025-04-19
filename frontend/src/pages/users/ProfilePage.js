@@ -155,7 +155,7 @@ const ProfilePage = () => {
           </div>
 
           {/* 입력 폼 */}
-          <div className="col-span-2 grid grid-cols-2 gap-x-8 gap-y-0">
+          <div className="col-span-2 grid grid-cols-2 gap-x-8 gap-y-0 ">
             {/* 1행: 학번, 학과 */}
             {[
               {

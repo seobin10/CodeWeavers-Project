@@ -25,7 +25,7 @@ const BasicLayout = () => {
       <header className="bg-white/80 backdrop-blur-md shadow-md p-4 flex justify-between items-center">
         <Link to="/main" className="flex items-center space-x-3">
           <img src="/images/eonLogo.jpg" alt="학교 로고" className="h-14" />
-          <div className="text-blue-800 font-extrabold text-xl leading-tight">
+          <div className="text-blue-800 font-extrabold text-2xl leading-tight">
             <div>이온대학교</div>
             <div className="text-xs font-medium tracking-wider">
               EON UNIVERSITY
@@ -37,14 +37,14 @@ const BasicLayout = () => {
           {userId ? (
             <button
               onClick={handleLogout}
-              className="bg-blue-600 hover:bg-blue-800 text-white text-sm font-semibold py-2 px-5 rounded-lg transition"
+              className="bg-blue-600 hover:bg-blue-800 text-white text-sm font-semibold py-2 px-5 rounded-lg transition duration-300"
             >
               로그아웃
             </button>
           ) : (
             <Link
               to="/member/login"
-              className="bg-blue-600 hover:bg-blue-800 text-white text-sm font-semibold py-2 px-5 rounded-lg transition"
+              className="bg-blue-600 hover:bg-blue-800 text-white text-sm font-semibold py-2 px-5 rounded-lg transition duration-300"
             >
               로그인
             </Link>
@@ -53,7 +53,8 @@ const BasicLayout = () => {
       </header>
 
       <div className="flex flex-1">
-        <nav className="bg-gradient-to-b from-blue-900 to-blue-800 text-white w-64 p-6 flex flex-col space-y-8">
+        {/* 왼쪽 사이드바 */}
+        <nav className="bg-gradient-to-b from-blue-900 to-blue-800 text-white w-64 p-6 flex flex-col space-y-8 shadow-xl rounded-tr-3xl rounded-br-3xl">
           <SectionTitle title={userRole} />
 
           <SimpleLink
@@ -149,6 +150,7 @@ const BasicLayout = () => {
           )}
         </nav>
 
+        {/* 오른쪽 본문 */}
         <main className="flex-1 p-10 bg-gray-50 flex flex-col">
           <motion.div
             className="bg-white rounded-3xl shadow-lg p-10 flex-1"
@@ -187,8 +189,8 @@ const SimpleLink = ({ to, label, currentPath }) => {
       to={to}
       className={`flex items-center px-4 py-2 rounded transition space-x-2 ${
         isActive
-          ? "bg-blue-700 text-white"
-          : "hover:bg-blue-600 hover:text-white"
+          ? "bg-blue-700 text-white shadow-inner border-l-4 border-white"
+          : "hover:bg-blue-600 hover:text-white transition-colors duration-300"
       }`}
     >
       <span>{label}</span>
@@ -216,8 +218,8 @@ const ToggleMenu = ({
       <button
         className={`w-full text-left flex justify-between items-center px-4 py-2 rounded transition ${
           isOpen
-            ? "bg-blue-700 text-white"
-            : "hover:bg-blue-600 hover:text-white"
+            ? "bg-blue-700 text-white shadow-inner"
+            : "hover:bg-blue-600 hover:text-white transition-colors duration-300"
         }`}
       >
         <span>{title}</span>
@@ -237,8 +239,8 @@ const ToggleMenu = ({
               to={link.to}
               className={`block px-2 py-1 rounded transition ${
                 active
-                  ? "bg-blue-600 text-white"
-                  : "hover:bg-blue-700 hover:text-white"
+                  ? "bg-blue-600 text-white shadow-inner border-l-4 border-white"
+                  : "hover:bg-blue-700 hover:text-white transition-colors duration-300"
               }`}
             >
               {link.label}
