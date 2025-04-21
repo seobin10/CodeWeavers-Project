@@ -40,32 +40,55 @@ public class AdminLectureRoomController {
         return ResponseEntity.ok(result);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<Void> createLectureRoom(
-            @RequestParam String roomName,
-            @RequestParam Integer buildingId
+    public ResponseEntity<?> createLectureRoom(
+            @RequestParam(required = false) String roomName,
+            @RequestParam(required = false) Integer buildingId
     ) {
-        adminLectureRoomService.createLectureRoom(roomName, buildingId);
-        return ResponseEntity.ok().build();
+        if (roomName == null || roomName.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("강의실 이름은 필수입니다.");
+        }
+        if (buildingId == null) {
+            return ResponseEntity.badRequest().body("건물을 선택해주세요.");
+        }
+
+        try {
+            adminLectureRoomService.createLectureRoom(roomName, buildingId);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{roomId}")
-    public ResponseEntity<Void> updateLectureRoom(
+    public ResponseEntity<?> updateLectureRoom(
             @PathVariable Integer roomId,
             @RequestParam(required = false) String newName,
             @RequestParam(required = false) String newStatus
     ) {
-        adminLectureRoomService.updateLectureRoom(roomId, newName,
-                newStatus != null ? RoomStatus.valueOf(newStatus) : null);
-        return ResponseEntity.ok().build();
+        try {
+            adminLectureRoomService.updateLectureRoom(
+                    roomId,
+                    newName,
+                    newStatus != null ? RoomStatus.valueOf(newStatus) : null
+            );
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(e.getMessage());
+        }
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{roomId}")
-    public ResponseEntity<Void> deleteLectureRoom(@PathVariable Integer roomId) {
-        adminLectureRoomService.deleteLectureRoom(roomId);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> deleteLectureRoom(@PathVariable Integer roomId) {
+        try {
+            adminLectureRoomService.deleteLectureRoom(roomId);
+            return ResponseEntity.ok().build();
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

@@ -3,11 +3,15 @@ import {
   getAllBuildings,
   getLectureRoomsByBuilding,
   getLectureRoomUsage,
+  deleteLectureRoom,
 } from "../../api/adminLectureRoomApi";
 import PageComponent from "../../components/PageComponent";
 import BaseModal from "../../components/BaseModal";
 import AdminLectureRoomCreatePage from "./AdminLectureRoomCreatePage";
-import AdminLectureRoomEditPage from "./AdminLectureRoomEditPage"; // 수정 페이지 추가
+import AdminLectureRoomEditPage from "./AdminLectureRoomEditPage";
+import useConfirmModal from "../../hooks/useConfirmModal";
+import { useDispatch } from "react-redux";
+import { showModal } from "../../slices/modalSlice";
 
 const AdminLectureRoomPage = () => {
   const [buildings, setBuildings] = useState([]);
@@ -19,7 +23,11 @@ const AdminLectureRoomPage = () => {
   const [selectedRoomName, setSelectedRoomName] = useState("");
   const [occupiedRoomIds, setOccupiedRoomIds] = useState([]);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false); // 수정 모달 상태
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedRoomId, setSelectedRoomId] = useState(null);
+
+  const { openConfirm, ConfirmModalComponent } = useConfirmModal();
+  const dispatch = useDispatch();
 
   const [currentPage, setCurrentPage] = useState(1);
   const roomsPerPage = 20;
@@ -38,13 +46,9 @@ const AdminLectureRoomPage = () => {
   ];
 
   const getPeriodRangeText = (start, end) => {
-    const startLabel = `${start}교시`;
-    const endLabel = `${end}교시`;
-
     const startTime = periodTimes[start - 1]?.time?.split(" ~ ")[0] || "";
     const endTime = periodTimes[end - 1]?.time?.split(" ~ ")[1] || "";
-
-    return `${startLabel} ~ ${endLabel} (${startTime} ~ ${endTime})`;
+    return `${start}교시 ~ ${end}교시 (${startTime} ~ ${endTime})`;
   };
 
   const paginatedRooms = rooms.slice(
@@ -57,10 +61,10 @@ const AdminLectureRoomPage = () => {
       .then((res) => {
         const buildingList = res.data;
         setBuildings(buildingList);
-
         if (buildingList.length > 0) {
-          const defaultBuildingId = buildingList[0].buildingId;
-          handleBuildingChange({ target: { value: defaultBuildingId } });
+          handleBuildingChange({
+            target: { value: buildingList[0].buildingId },
+          });
         }
       })
       .catch(() => setBuildings([]));
@@ -89,7 +93,6 @@ const AdminLectureRoomPage = () => {
       const occupied = usageResults
         .filter((res) => res.isOccupied)
         .map((res) => res.roomId);
-
       setOccupiedRoomIds(occupied);
     } catch {
       setRooms([]);
@@ -108,6 +111,7 @@ const AdminLectureRoomPage = () => {
       });
       setSelectedRoomUsage(sorted);
       setSelectedRoomName(roomName);
+      setSelectedRoomId(roomId);
       setSelectedBuildingName(buildingName);
       setIsModalOpen(true);
     } catch {
@@ -117,7 +121,31 @@ const AdminLectureRoomPage = () => {
   };
 
   const handleEditClick = () => {
-    setIsEditModalOpen(true); // 수정 모달 열기
+    setIsEditModalOpen(true);
+  };
+
+  const handleDeleteRoom = () => {
+    openConfirm(
+      `${selectedBuildingName} ${selectedRoomName}\n\n이 강의실을 삭제하시겠습니까?`,
+      async () => {
+        try {
+          await deleteLectureRoom(selectedRoomId);
+          dispatch(showModal("강의실이 성공적으로 삭제되었습니다."));
+          setIsModalOpen(false);
+          setSelectedRoomName("");
+          setSelectedRoomId(null);
+          handleBuildingChange({ target: { value: selectedBuildingId } });
+        } catch (err) {
+          dispatch(
+            showModal({
+              message:
+                err?.response?.data || "강의실 삭제 중 오류가 발생했습니다.",
+              type: "error",
+            })
+          );
+        }
+      }
+    );
   };
 
   return (
@@ -126,9 +154,8 @@ const AdminLectureRoomPage = () => {
         <h2 className="text-2xl font-semibold text-gray-700">
           강의실 사용 현황
         </h2>
-        {/* 강의실 등록 버튼 추가 */}
         <button
-          onClick={() => setIsCreateModalOpen(true)} // 생성 모달 열기
+          onClick={() => setIsCreateModalOpen(true)}
           className="px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800 transition"
         >
           강의실 등록
@@ -138,8 +165,7 @@ const AdminLectureRoomPage = () => {
       <div className="mb-4">
         <select
           onChange={handleBuildingChange}
-          className="px-3 py-2 w-64 border border-gray-300 rounded-md shadow-sm text-sm text-gray-700 
-    focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+          className="px-3 py-2 w-64 border border-gray-300 rounded-md shadow-sm text-sm"
         >
           {buildings.map((b) => (
             <option key={b.buildingId} value={b.buildingId}>
@@ -149,25 +175,21 @@ const AdminLectureRoomPage = () => {
         </select>
       </div>
 
-      {/* 강의실 Grid */}
-      <div className="grid grid-cols-5 gap-6 justify-items-center">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 justify-items-center mt-10 mb-10">
         {paginatedRooms.map((room) => {
           const isOccupied = occupiedRoomIds.includes(room.roomId);
-          const isDisabled = room.status !== "AVAILABLE";
-
-          const cardStyle = isDisabled
-            ? "bg-gray-400 text-white border-gray-500 cursor-not-allowed"
-            : isOccupied
-            ? "bg-blue-200 text-blue-900 border-blue-300 hover:bg-blue-300"
-            : "bg-white text-gray-900 border-gray-300 hover:bg-blue-100";
+          const cardStyle =
+            room.status !== "AVAILABLE"
+              ? "bg-gray-400 text-white border-gray-300 hover:bg-gray-500"
+              : isOccupied
+              ? "bg-blue-200 text-blue-900 border-blue-300 hover:bg-blue-300"
+              : "bg-white text-gray-900 border-gray-300 hover:bg-gray-100";
 
           return (
             <div
               key={room.roomId}
-              onClick={() =>
-                !isDisabled && handleRoomClick(room.roomId, room.roomName)
-              }
-              className={`w-24 h-24 flex items-center justify-center rounded-md transition duration-200 shadow-sm border font-medium text-sm ${cardStyle}`}
+              onClick={() => handleRoomClick(room.roomId, room.roomName)}
+              className={`w-full max-w-[96px] h-24 flex items-center justify-center rounded-md transition duration-200 shadow-sm border font-medium text-sm ${cardStyle}`}
             >
               {room.roomName}
             </div>
@@ -180,12 +202,28 @@ const AdminLectureRoomPage = () => {
         totalPage={Math.ceil(rooms.length / roomsPerPage)}
         onPageChange={(page) => setCurrentPage(page)}
       />
-
-      {/* 사용 현황 모달 */}
       <BaseModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <h2 className="text-xl font-semibold mb-4">
-          {selectedBuildingName} {selectedRoomName} 강의실
-        </h2>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center">
+            <h2 className="text-xl font-semibold">
+              {selectedBuildingName} {selectedRoomName} 강의실
+            </h2>
+            <div className="flex gap-2 ml-4">
+              <button
+                onClick={handleEditClick}
+                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-base font-medium"
+              >
+                수정
+              </button>
+              <button
+                onClick={handleDeleteRoom}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-base font-medium"
+              >
+                삭제
+              </button>
+            </div>
+          </div>
+        </div>
 
         {selectedRoomUsage.length === 0 ? (
           <p className="text-gray-500 text-sm">현재 수업이 없습니다.</p>
@@ -197,52 +235,58 @@ const AdminLectureRoomPage = () => {
                 className="py-4 px-2 bg-gray-50 rounded-md shadow-sm space-y-1"
               >
                 <div>
-                  <span className="font-semibold text-gray-700">과목:</span>{" "}
-                  {cls.courseName}
+                  <span className="font-semibold">과목:</span> {cls.courseName}
                 </div>
                 <div>
-                  <span className="font-semibold text-gray-700">시간:</span>{" "}
+                  <span className="font-semibold">시간:</span>{" "}
                   {getPeriodRangeText(cls.startTime, cls.endTime)}
                 </div>
                 <div>
-                  <span className="font-semibold text-gray-700">요일:</span>{" "}
-                  {cls.day}요일
+                  <span className="font-semibold">요일:</span> {cls.day}요일
                 </div>
                 <div>
-                  <span className="font-semibold text-gray-700">담당:</span>{" "}
+                  <span className="font-semibold">담당:</span>{" "}
                   {cls.professorName} 교수
                 </div>
                 <div>
-                  <span className="font-semibold text-gray-700">소속:</span>{" "}
+                  <span className="font-semibold">소속:</span>{" "}
                   {cls.departmentName}
                 </div>
               </li>
             ))}
           </ul>
         )}
-        <button
-          onClick={handleEditClick} // 수정 페이지로 이동
-          className="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
-        >
-          수정
-        </button>
       </BaseModal>
 
-      {/* 강의실 수정 모달 */}
-      <BaseModal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)}>
+      <BaseModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+      >
         <AdminLectureRoomEditPage
-          roomId={selectedRoomName} // 현재 선택된 강의실 ID를 전달
-          onSuccess={() => {
-            setIsEditModalOpen(false); // 수정 완료 후 모달 닫기
-            handleBuildingChange({ target: { value: selectedBuildingId } }); // 건물 변경
+          roomId={selectedRoomId}
+          rooms={rooms}
+          onSuccess={(newName) => {
+            setIsEditModalOpen(false);
+            setIsModalOpen(false);
+            handleBuildingChange({ target: { value: selectedBuildingId } });
+            setSelectedRoomName(newName);
           }}
         />
       </BaseModal>
 
-      {/* 강의실 생성 모달 */}
-      <BaseModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)}>
-        <AdminLectureRoomCreatePage onSuccess={() => handleBuildingChange({ target: { value: selectedBuildingId } })} />
+      <BaseModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+      >
+        <AdminLectureRoomCreatePage
+          onSuccess={() => {
+            setIsCreateModalOpen(false);
+            handleBuildingChange({ target: { value: selectedBuildingId } });
+          }}
+        />
       </BaseModal>
+
+      {ConfirmModalComponent}
     </div>
   );
 };

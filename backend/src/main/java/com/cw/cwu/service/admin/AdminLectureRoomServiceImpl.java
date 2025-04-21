@@ -124,15 +124,23 @@ public class AdminLectureRoomServiceImpl implements AdminLectureRoomService {
         LectureRoom room = lectureRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 강의실을 찾을 수 없습니다."));
 
+        // 상태를 이용불가로 변경할 시
+        if (newStatus == RoomStatus.UNAVAILABLE) {
+            Integer usableSemesterId = resolveUsableSemesterId();
+            if (usableSemesterId != null) {
+                boolean isInUse = classEntityRepository.existsByLectureRoom_IdAndSemester_Id(roomId, usableSemesterId);
+                if (isInUse) {
+                    throw new IllegalStateException("사용 중인 강의실은 이용불가로 변경할 수 없습니다.");
+                }
+            }
+        }
+
         if (newName != null && !newName.trim().isEmpty()) {
-            // 동일 건물 내, 다른 roomId와 이름이 겹치는지 확인
             boolean nameExists = lectureRoomRepository.existsByBuilding_IdAndNameAndIdNot(
                     room.getBuilding().getId(), newName, roomId);
-
             if (nameExists) {
                 throw new IllegalArgumentException("동일한 건물에 동일한 이름의 강의실이 이미 존재합니다.");
             }
-
             room.setName(newName);
         }
 

@@ -71,6 +71,27 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
             }
         }
 
+        if (lectureRoomId != null) {
+            LectureRoom room = lectureRoomRepository.findById(lectureRoomId).orElse(null);
+            if (room == null) {
+                return "강의실 정보를 찾을 수 없습니다.";
+            }
+
+            if (room.getStatus() == RoomStatus.UNAVAILABLE) {
+                return "선택한 강의실은 현재 이용 불가 상태입니다.";
+            }
+
+            List<ClassEntity> roomClasses = classEntityRepository
+                    .findByLectureRoom_IdAndDayAndSemester(lectureRoomId, day, semester);
+
+            for (ClassEntity cls : roomClasses) {
+                if (!cls.getId().equals(classIdToExclude) &&
+                        isTimeOverlap(cls.getStartTime(), cls.getEndTime(), startTime, endTime)) {
+                    return "해당 강의실은 이미 사용 중입니다.";
+                }
+            }
+        }
+
         return null;
     }
 
@@ -254,6 +275,7 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
         List<LectureRoom> allRooms = lectureRoomRepository.findAll();
 
         return allRooms.stream()
+                .filter(room -> room.getStatus() == RoomStatus.AVAILABLE)
                 .filter(room -> {
                     List<ClassEntity> classes = classEntityRepository.findByLectureRoom_IdAndDayAndSemester(
                             room.getId(), day, semester
