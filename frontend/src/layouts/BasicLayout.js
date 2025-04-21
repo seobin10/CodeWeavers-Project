@@ -129,6 +129,11 @@ const BasicLayout = () => {
                 currentPath={location.pathname}
               />
               <SimpleLink
+                to="/main/professor/list"
+                label="🔎 평가 조회"
+                currentPath={location.pathname}
+              ></SimpleLink>
+              <SimpleLink
                 to="/main/professor/grades"
                 label="📝 성적 관리"
                 currentPath={location.pathname}
