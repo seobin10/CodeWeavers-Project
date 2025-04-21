@@ -7,6 +7,7 @@ import com.cw.cwu.dto.SemesterRequestDTO;
 import com.cw.cwu.dto.SemesterResponseDTO;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface AdminScheduleService {
 
@@ -29,4 +30,8 @@ public interface AdminScheduleService {
 
     // 수강신청 학기 찾기
     Integer getEnrollSemesterId();
+
+    Integer getSemesterIdByScheduleType(ScheduleType type);
+
+    Optional<Integer> getUpcomingSemesterId();
 }

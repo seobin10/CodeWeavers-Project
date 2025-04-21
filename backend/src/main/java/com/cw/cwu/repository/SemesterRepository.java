@@ -1,6 +1,7 @@
 package com.cw.cwu.repository;
 
 
+import aj.org.objectweb.asm.commons.Remapper;
 import com.cw.cwu.domain.Semester;
 import com.cw.cwu.domain.SemesterTerm;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,4 +24,6 @@ public interface SemesterRepository extends JpaRepository<Semester, Integer> {
 
     Optional<Semester> findByStartDateBeforeAndEndDateAfter(LocalDate startDate, LocalDate endDate);
 
+    // 오늘 이후 시작하는 학기 중 가장 빠른 학기 조회
+    Optional<Semester> findFirstByStartDateAfterOrderByStartDateAsc(LocalDate today);
 }

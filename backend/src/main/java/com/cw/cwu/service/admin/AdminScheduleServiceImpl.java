@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Transactional
 @Service
@@ -148,19 +149,31 @@ public class AdminScheduleServiceImpl implements AdminScheduleService {
         return currentSemester.getId();
     }
 
-
-    // 수강신청 학기 찾기
+    // 현재 날짜가 포함된 특정 일정의 학기에 해당하는 semesterId 반환
     @Override
-    public Integer getEnrollSemesterId() {
+    public Integer getSemesterIdByScheduleType(ScheduleType type) {
         LocalDateTime now = LocalDateTime.now();
 
         ScheduleSetting setting = scheduleSettingRepository
-                .findByScheduleTypeAndStartDateBeforeAndEndDateAfter(
-                        ScheduleType.ENROLL, now, now)
-                .orElseThrow(() -> new IllegalStateException("현재 수강신청 기간이 아닙니다."));
+                .findByScheduleTypeAndStartDateBeforeAndEndDateAfter(type, now, now)
+                .orElseThrow(() -> new IllegalStateException("현재 " + type.name() + " 일정이 아닙니다."));
 
         return setting.getSemester().getId();
     }
 
+    // 수강신청 학기 찾기
+    @Override
+    public Integer getEnrollSemesterId() {
+        return getSemesterIdByScheduleType(ScheduleType.ENROLL);
+    }
+
+
+    // 다음 학기(오늘 이후 시작) ID 조회
+    @Override
+    public Optional<Integer> getUpcomingSemesterId() {
+        LocalDate today = LocalDate.now();
+        return semesterRepository.findFirstByStartDateAfterOrderByStartDateAsc(today)
+                .map(Semester::getId);
+    }
 
 }
