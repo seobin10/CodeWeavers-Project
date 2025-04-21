@@ -63,14 +63,14 @@ const CalenderPage = () => {
 
   return (
     <div className="max-w-7xl mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-center items-center mb-6 gap-4">
         <span
           onClick={() => changeMonth(-1)}
           className="text-2xl font-bold cursor-pointer hover:text-blue-600"
         >
           &lt;
         </span>
-        <h1 className="text-4xl font-bold text-center">{selectedYear}</h1>
+        <h1 className="text-4xl font-bold">{selectedYear}</h1>
         <span
           onClick={() => changeMonth(1)}
           className="text-2xl font-bold cursor-pointer hover:text-blue-600"
@@ -84,27 +84,28 @@ const CalenderPage = () => {
           <div
             key={i}
             onClick={() => setSelectedMonth(i + 1)}
-            className={`px-3 py-1 cursor-pointer border-b-2 ${
-              selectedMonth === i + 1
-                ? "text-blue-700 border-blue-700"
-                : "text-gray-600 border-transparent"
-            }`}
+            className={`px-3 py-1 cursor-pointer border-b-2 transition-all duration-200
+           ${
+             selectedMonth === i + 1
+               ? "text-blue-700 border-blue-700 font-bold"
+               : "text-gray-600 border-gray-300"
+           }`}
           >
             {i + 1}월
           </div>
         ))}
       </div>
 
-      <div className="flex gap-6">
+      <div className="flex gap-6 mt-16">
         {/* 왼쪽 달력 */}
         <div className="w-1/2 border rounded p-4">
-          <div className="text-lg font-bold mb-2 text-center">
+          <div className="text-lg font-bold mb-1 text-center">
             {selectedYear}. {String(selectedMonth).padStart(2, "0")}.
           </div>
 
           {/* 요일 + 날짜 배경 한 덩어리 */}
           <div className=" p-1.5 rounded">
-            <div className="grid grid-cols-7 text-center text-sm font-semibold mb-4">
+            <div className="grid grid-cols-7 text-center text-sm font-semibold mb-1.5">
               {["일", "월", "화", "수", "목", "금", "토"].map((d) => (
                 <div key={d} className="bg-blue-800 text-white py-1">
                   {d}
@@ -121,7 +122,7 @@ const CalenderPage = () => {
                 return (
                   <div
                     key={idx}
-                    className={`h-24 flex flex-col items-center justify-center rounded ${
+                    className={`h-24 flex flex-col items-center justify-start pt-2 rounded ${
                       day === null ? "bg-gray-50" : "bg-white"
                     } ${hasEvent ? "relative" : ""}`}
                   >
@@ -129,7 +130,7 @@ const CalenderPage = () => {
                       <>
                         <div>{day}</div>
                         {hasEvent && (
-                          <span className="w-1.5 h-1.5 bg-yellow-900 rounded-full mt-1"></span>
+                          <span className="w-1.5 h-1.5 bg-blue-900 rounded-full mt-1"></span>
                         )}
                       </>
                     )}
@@ -141,15 +142,15 @@ const CalenderPage = () => {
         </div>
 
         {/* 오른쪽 일정 리스트 */}
-        <div className="w-1/2 border rounded p-5 text-base">
-          <h2 className="text-lg font-bold mb-3">📌 일정</h2>
+        <div className="w-1/2 border rounded p-5 text-[17px] leading-7">
+          <h2 className="text-xl font-bold mb-4">📌 일정</h2>
           {filteredEvents.length === 0 ? (
             <div className="text-gray-500">등록된 일정이 없습니다.</div>
           ) : (
-            <ul className="space-y-2">
+            <ul className="space-y-4">
               {filteredEvents.map((e, idx) => (
-                <li key={idx} className="flex gap-4">
-                  <span className="text-blue-800 font-semibold w-28">
+                <li key={idx} className="flex gap-6 items-start">
+                  <span className="text-blue-800 font-semibold min-w-[110px]">
                     {formatRange(e.start, e.end)}
                   </span>
                   <span>{e.event}</span>

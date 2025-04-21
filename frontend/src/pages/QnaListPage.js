@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import axios from "axios";
 import PageComponent from "../components/PageComponent";
-import { getAuthHeader } from "../util/authHeader";
 import AlertModal from "../components/AlertModal";
+import { getQnaList, getWriterId } from "../api/qnaApi";
 
 const QnaListPage = () => {
   const [alertModalOpen, setAlertModalOpen] = useState(false);
@@ -31,23 +30,17 @@ const QnaListPage = () => {
 
   const fetchQnaInfo = async () => {
     try {
-      const response = await axios.get(
-        "http://localhost:8080/api/user/qna/list",
-        getAuthHeader()
-      );
-      setQnaInfo(response.data);
+      const data = await getQnaList();
+      setQnaInfo(data);
     } catch (error) {
       setMessage("Q&A 정보를 불러올 수 없습니다.");
     }
   };
 
-  const fetchWriterId = async (questionId) => {
+  const fetchWriterId = async (id) => {
     try {
-      const response = await axios.get(
-        `http://localhost:8080/api/user/qna/find/${questionId}`,
-        getAuthHeader()
-      );
-      return response.data;
+      const data = await getWriterId(id);
+      return data;
     } catch (error) {
       setMessage("작성자 정보를 불러올 수 없습니다.");
     }
@@ -133,7 +126,6 @@ const QnaListPage = () => {
                             questionId: qna.questionId,
                             page: currentPage,
                           };
-
                           if (String(userId) === String(writerId)) {
                             setAlertData(
                               "success",

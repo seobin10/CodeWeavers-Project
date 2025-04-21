@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { useSelector } from "react-redux";
-import { getAuthHeader } from "../util/authHeader";
 import { useNavigate } from "react-router-dom";
+import { getList, getStatus } from "../api/evaluationAPI";
 import AlertModal from "../components/AlertModal";
 
 const EvaluationListPage = () => {
@@ -14,27 +13,13 @@ const EvaluationListPage = () => {
 
   useEffect(() => {
     const fetchCourseList = async () => {
-      try {
-        const res = await axios.get(
-          `http://localhost:8080/api/students/evaluation/courselist?studentId=${userId}`,
-          getAuthHeader()
-        );
-        setCourseList(res.data);
-      } catch (err) {
-        console.error("강의 목록 불러오기 실패:", err);
-      }
+      const data = await getList(userId);
+      setCourseList(data);
     };
 
     const fetchStatus = async () => {
-      try {
-        const res = await axios.get(
-          `http://localhost:8080/api/students/evaluation/lecturelist?studentId=${userId}`,
-          getAuthHeader()
-        );
-        setEvaluationStatus(res.data);
-      } catch (error) {
-        console.log(error);
-      }
+      const data = await getStatus(userId);
+      setEvaluationStatus(data);
     };
     fetchCourseList();
     fetchStatus();
@@ -99,14 +84,15 @@ const EvaluationListPage = () => {
                     }
                     onClick={() => {
                       const isAlreadyEvaluated = evaluationStatus?.some(
-                        (e) => e.classId === course.classId && e.studentId === userId
+                        (e) =>
+                          e.classId === course.classId && e.studentId === userId
                       );
-                    
+
                       if (isAlreadyEvaluated) {
-                        setAlertModalOpen(true)
+                        setAlertModalOpen(true);
                         return;
                       }
-                    
+
                       navigate("/main/evaluation", {
                         state: {
                           name: course.courseName,
@@ -114,17 +100,13 @@ const EvaluationListPage = () => {
                         },
                       });
                     }}
-                    
                   >
-                    {
-                      evaluationStatus?.some(
-                        (e) =>
-                          e.classId === course.classId && e.studentId === userId
-                      )
-                        ? "완료"
-                        : "평가"
-                    }
-                    
+                    {evaluationStatus?.some(
+                      (e) =>
+                        e.classId === course.classId && e.studentId === userId
+                    )
+                      ? "완료"
+                      : "평가"}
                   </button>
                 </td>
               </tr>

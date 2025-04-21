@@ -46,7 +46,7 @@ const AdminNoticeEditPage = () => {
     if (userId) {
       fetchContent();
     }
-  }, [userId, contentData, noticeId]);
+  }, [userId, noticeId]);
 
   // 공지 상단 고정 여부를 결정하는 함수 (체크하면 위에 고정되게 함)
   const handlePinned = () => {
