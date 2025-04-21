@@ -28,4 +28,8 @@ public class LectureRoom {
     @ManyToOne
     @JoinColumn(name = "building_id", nullable = false)
     private Building building;
+
+    @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private RoomStatus status;
 }

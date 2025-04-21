@@ -129,4 +129,6 @@ WHERE\s
     @Query("select c from ClassEntity c where c.id = :classId")
     Optional<ClassEntity> findByClassIdWithLock(@Param("classId") Integer classId);
 
+    List<ClassEntity> findByLectureRoom_IdAndSemester_Id(Integer roomId, Integer semesterId);
+
 }
