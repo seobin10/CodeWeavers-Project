@@ -12,7 +12,10 @@ public class LectureRoomUsageDTO {
     private Integer classId;
     private String courseName;
     private String professorName;
+    private String departmentName;
     private String day;
     private Integer startTime;
     private Integer endTime;
+    private String lectureRoomName;
+    private String buildingName;
 }

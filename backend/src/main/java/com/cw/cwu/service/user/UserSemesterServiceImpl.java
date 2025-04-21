@@ -13,6 +13,7 @@ public class UserSemesterServiceImpl implements UserSemesterService {
 
     private final SemesterRepository semesterRepository;
 
+    // 현재 학기중인지 확인
     @Override
     public Semester getCurrentSemester() {
         LocalDate now = LocalDate.now();

@@ -5,6 +5,7 @@ import Loading from "../components/Loading";
 const AdminUserListPage = lazy(() => import("../pages/Admin/AdminUserListPage"));
 const AdminSchedulePage = lazy(() => import("../pages/Admin/AdminSchedulePage"));
 const AdminGradePage = lazy(() => import("../pages/Admin/AdminGradePage")); 
+const AdminLectureRoomPage = lazy(() => import("../pages/Admin/AdminLectureRoomPage"));
 
 const adminRouter = [
   {
@@ -33,6 +34,16 @@ const adminRouter = [
       <RoleGuard allowedRoles={["ADMIN"]}>
         <Suspense fallback={<Loading />}>
           <AdminGradePage />
+        </Suspense>
+      </RoleGuard>
+    ),
+  },
+  {
+    path: "admin/lecture-rooms",
+    element: (
+      <RoleGuard allowedRoles={["ADMIN"]}>
+        <Suspense fallback={<Loading />}>
+          <AdminLectureRoomPage />
         </Suspense>
       </RoleGuard>
     ),
