@@ -13,6 +13,16 @@ const MsgSendPage = lazy(() =>
   import("../pages/Professor/ProfessorMsgSendPage")
 );
 
+const ProfessorListPage = lazy(() =>
+  import("../pages/Professor/ProfessorEvaluationClassListPage")
+);
+const ProfessorEvaluationListPage = lazy(() =>
+  import("../pages/Professor/ProfessorEvaluationListPage")
+);
+const ProfessorEvaluationDataPage = lazy(() =>
+  import("../pages/Professor/ProfessorEvaluationDataPage")
+);
+
 const professorRouter = [
   {
     path: "professor/classes",
@@ -40,6 +50,36 @@ const professorRouter = [
       <RoleGuard allowedRoles={["PROFESSOR"]}>
         <Suspense fallback={<Loading />}>
           <MsgSendPage />
+        </Suspense>
+      </RoleGuard>
+    ),
+  },
+  {
+    path: "professor/list",
+    element: (
+      <RoleGuard allowedRoles={["PROFESSOR"]}>
+        <Suspense fallback={<Loading />}>
+          <ProfessorListPage />
+        </Suspense>
+      </RoleGuard>
+    ),
+  },
+  {
+    path: "professor/evaluationlist",
+    element: (
+      <RoleGuard allowedRoles={["PROFESSOR"]}>
+        <Suspense fallback={<Loading />}>
+          <ProfessorEvaluationListPage />
+        </Suspense>
+      </RoleGuard>
+    ),
+  },
+  {
+    path: "professor/evaluationdata",
+    element: (
+      <RoleGuard allowedRoles={["PROFESSOR"]}>
+        <Suspense fallback={<Loading />}>
+          <ProfessorEvaluationDataPage />
         </Suspense>
       </RoleGuard>
     ),

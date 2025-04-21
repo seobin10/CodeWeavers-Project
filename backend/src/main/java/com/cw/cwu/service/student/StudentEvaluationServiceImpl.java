@@ -43,7 +43,8 @@ public class StudentEvaluationServiceImpl implements StudentEvaluationService {
     // 학기에 해당하는 과목 가져오기
     @Override
     public List<EvaluationCourseDTO> getCurrentSemesterCourses(String studentId) {
-        User student = userRepository.findByUserId(studentId).orElseThrow(() -> new IllegalArgumentException("학생 정보를 찾을 수 없습니다."));
+        User student = userRepository.findByUserId(studentId)
+                .orElseThrow(() -> new IllegalArgumentException("학생 정보를 찾을 수 없습니다."));
 
         Semester current = semesterRepository.findCurrentSemester(LocalDate.now()).orElseThrow(() -> new IllegalStateException("현재 학기를 찾을 수 없습니다."));
 
@@ -99,11 +100,10 @@ public class StudentEvaluationServiceImpl implements StudentEvaluationService {
     // 강의 평가 완료 여부 체크를 위해 관련 데이터 불러오기
     @Override
     public List<EvaluationLectureDTO> findEvaluationStatus(String studentId) {
+        EvaluationLectureDTO dto = new EvaluationLectureDTO();
         List<EvaluationLecture> filteredList = lectureRepository.findAll().stream()
-                // [수정] 이제 studentId가 null인 경우가 존재할 수 있어서, null 체크 추가
-                .filter(e -> e.getStudentId() != null && studentId.equals(e.getStudentId().getUserId()))
+                .filter(e -> e.getStudentId() != null && e.getStudentId().getUserId().equals(studentId))
                 .toList();
-
         List<EvaluationLectureDTO> lectList = new ArrayList<>();
         for (EvaluationLecture l : filteredList) {
             lectList.add(domainToDTO(l));
