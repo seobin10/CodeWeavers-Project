@@ -3,8 +3,7 @@ import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { writeQna } from "../api/qnaApi";
 import AlertModal from "../components/AlertModal";
-import { getAuthHeader } from "../util/authHeader";
-import axios from "axios";
+import { fetchUserInfo } from "../api/memberApi";
 
 // 날짜 데이터 포맷팅
 let date = new Date();
@@ -33,11 +32,8 @@ const QnaWritePage = () => {
 
   const fetchStudentInfo = async (userId) => {
     try {
-      const response = await axios.get(
-        `http://localhost:8080/api/user/${userId}`,
-        getAuthHeader()
-      );
-      setUserName(response.data.userName);
+      const res = await fetchUserInfo(userId);
+      setUserName(res.data.userName);
     } catch (error) {
       console.log("정보를 불러올 수 없습니다.");
     }

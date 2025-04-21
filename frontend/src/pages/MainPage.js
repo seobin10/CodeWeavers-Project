@@ -34,7 +34,7 @@ const MainPage = () => {
         const sorted = res.data.sort(
           (a, b) => new Date(b.noticeDate) - new Date(a.noticeDate)
         );
-        setNoticeList(sorted.slice(0, 6));
+        setNoticeList(sorted.slice(0, 5));
       } catch (err) {
         console.error("공지사항 불러오기 실패", err);
       }
@@ -49,7 +49,7 @@ const MainPage = () => {
           "http://localhost:8080/api/user/qna/list",
           getAuthHeader()
         );
-        setQnaList(res.data.slice(0, 3));
+        setQnaList(res.data.slice(0, 5));
       } catch (err) {
         console.error("Q&A 불러오기 실패", err);
       }
@@ -80,14 +80,14 @@ const MainPage = () => {
   };
 
   return (
-    <div className="max-w-screen-2xl mx-auto mt-5 px-0">
+    <div className="max-w-screen-2xl mx-auto mt-6 px-0">
       <div className="flex flex-col md:flex-row gap-20 items-stretch">
         <div className="flex flex-col space-y-10 w-full md:w-1/2">
-          <h1 className="text-5xl md:text-7xl font-semibold leading-tight pb-12 space-y-1">
+          <h1 className="text-5xl md:text-7xl font-semibold leading-tight pb-6 space-y-1">
             <div className="text-left">𝐈𝐧𝐧𝐨𝐯𝐚𝐭𝐞.</div>
             <div className="text-left">𝐈𝐭𝐞𝐫𝐚𝐭𝐞.</div>
             <div className="text-left">𝐈𝐥𝐥𝐮𝐦𝐢𝐧𝐚𝐭𝐞</div>
-            <div className="text-right mt-10 text-3xl">– 𝐀𝐭 𝐄.𝐎𝐍</div>
+            <div className="text-right mt-9 text-3xl">– 𝐀𝐭 𝐄.𝐎𝐍</div>
           </h1>
 
           <div>
@@ -121,7 +121,7 @@ const MainPage = () => {
           </div>
 
           <div className="flex-1 flex flex-col">
-            <div className="flex justify-between items-center mb-6 mt-7">
+            <div className="flex justify-between items-center mb-6 mt-5">
               <h2 className="text-2xl font-semibold"> 📢 공지사항 </h2>
               <Link
                 to="/main/noticelist"
@@ -147,7 +147,7 @@ const MainPage = () => {
           </div>
 
           <div className="flex-1 flex flex-col">
-            <div className="flex justify-between items-center mb-6 mt-5">
+            <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-semibold"> 💬 Q&A 게시판 </h2>
               <Link
                 to="/main/qnalist"
@@ -181,7 +181,7 @@ const MainPage = () => {
           </div>
         </div>
 
-        <div className="flex flex-col w-full md:w-1/2 flex-2 gap-10 mt-4">
+        <div className="flex flex-col w-full md:w-1/2 flex-2 gap-10 mt-3">
           <div className="relative w-full h-[450px] overflow-hidden rounded-lg shadow-lg">
             {images.map((img, idx) => (
               <img

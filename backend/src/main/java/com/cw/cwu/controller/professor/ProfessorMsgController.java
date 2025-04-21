@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
-//@PropertySource("classpath:apikey.properties")
+
 @RequestMapping("/api/professor/msg")
 @RestController
 public class ProfessorMsgController {
