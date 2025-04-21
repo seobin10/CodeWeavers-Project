@@ -132,4 +132,6 @@ WHERE\s
     List<ClassEntity> findByLectureRoom_IdAndSemester_Id(Integer roomId, Integer semesterId);
 
     boolean existsByLectureRoom_Id(Integer lectureRoomId);
+
+    boolean existsByLectureRoom_IdAndSemester_Id(Integer roomId, Integer semesterId);
 }

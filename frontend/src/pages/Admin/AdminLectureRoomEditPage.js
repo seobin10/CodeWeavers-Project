@@ -1,33 +1,24 @@
 import React, { useState, useEffect } from "react";
-import {
-  updateLectureRoom,
-  getAllBuildings,
-} from "../../api/adminLectureRoomApi";
+import { updateLectureRoom } from "../../api/adminLectureRoomApi";
 import { useDispatch } from "react-redux";
-import { showModal } from "../../slices/modalSlice"; // Redux 액션
+import { showModal } from "../../slices/modalSlice";
 
 const AdminLectureRoomEditPage = ({ roomId, rooms, onSuccess }) => {
   const [form, setForm] = useState({
     roomName: "",
-    newName: "", // 수정할 강의실 이름
-    newStatus: "", // 수정할 강의실 상태
+    newName: "",
+    newStatus: "",
   });
-  const [buildings, setBuildings] = useState([]);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    // 건물 목록 가져오기
-    getAllBuildings()
-      .then((res) => setBuildings(res.data))
-      .catch(() => setBuildings([]));
-
-    // 강의실 정보 가져오기
     if (roomId && rooms) {
-      const room = rooms.find((r) => r.roomId === roomId);
+      // roomId를 숫자로 변환해서 비교
+      const room = rooms.find((r) => Number(r.roomId) === Number(roomId));
       if (room) {
         setForm({
           roomName: room.roomName,
-          newName: room.roomName, // 초기값 설정
+          newName: room.roomName,
           newStatus: room.status,
         });
       } else {
@@ -45,18 +36,19 @@ const AdminLectureRoomEditPage = ({ roomId, rooms, onSuccess }) => {
 
   const handleSubmit = async () => {
     try {
-      await updateLectureRoom(roomId, form.newName, form.newStatus);
+      // roomId를 숫자로 변환해서 전달
+      await updateLectureRoom(Number(roomId), form.newName, form.newStatus);
       dispatch(
         showModal({
           message: "강의실이 성공적으로 수정되었습니다.",
           type: "success",
         })
       );
-      onSuccess(); // 부모에서 갱신
+      onSuccess(form.newName);
     } catch (err) {
       dispatch(
         showModal({
-          message: "강의실 수정 중 오류가 발생했습니다.",
+          message: err?.response?.data || "강의실 수정 중 오류가 발생했습니다.",
           type: "error",
         })
       );
@@ -93,8 +85,8 @@ const AdminLectureRoomEditPage = ({ roomId, rooms, onSuccess }) => {
             value={form.newStatus}
             onChange={handleChange}
           >
-            <option value="AVAILABLE">AVAILABLE</option>
-            <option value="UNAVAILABLE">UNAVAILABLE</option>
+            <option value="AVAILABLE">이용 가능</option>
+            <option value="UNAVAILABLE">이용 불가</option>
           </select>
         </div>
 
@@ -104,7 +96,7 @@ const AdminLectureRoomEditPage = ({ roomId, rooms, onSuccess }) => {
             onClick={handleSubmit}
             className="w-full mt-4 bg-green-600 hover:bg-green-800 text-white font-semibold py-3 rounded-lg transition"
           >
-            강의실 수정
+            수정
           </button>
         </div>
       </div>
