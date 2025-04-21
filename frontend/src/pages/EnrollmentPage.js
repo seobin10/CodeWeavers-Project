@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import {
   getFilters,
   searchCourses,
   enrollCourse,
   getEnrolledCourses,
+  getEnrollmentSemesterInfo,
+  checkEnrollPeriod,
 } from "../api/enrollmentApi";
-
-import { useDispatch, useSelector } from "react-redux";
 import { showModal } from "../slices/modalSlice";
 import { setUserId as setUserIdAction } from "../slices/authSlice";
-import { checkEnrollPeriod } from "../api/enrollmentApi";
 import FloatingPopup from "../components/FloatingPopup";
 import PageComponent from "../components/PageComponent";
 
@@ -19,35 +19,18 @@ const EnrollmentPage = () => {
   const navigate = useNavigate();
   const userId = useSelector((state) => state.auth.userId);
 
+  const [semesterInfo, setSemesterInfo] = useState(null);
   const [courses, setCourses] = useState({
     dtoList: [],
     totalPage: 0,
     current: 1,
     totalCount: 0,
   });
-
-  // 수강신청 가능 기간 확인
-  useEffect(() => {
-    const checkPeriod = async () => {
-      const isOpen = await checkEnrollPeriod();
-      if (!isOpen) {
-        // 수강신청 기간이 아니면 제한 페이지로 리다이렉트
-        navigate("/main/period-expired", {
-          state: { message: "현재는 수강신청 기간이 아닙니다!" },
-        });
-      }
-    };
-
-    checkPeriod();
-  }, [navigate]);
-
-  const [timetable, setTimetable] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [timetable, setTimetable] = useState([]);
 
   const [filters, setFilters] = useState({
-    departments: [],
     courseTypes: [],
-    courseYears: [],
     classDays: [],
     classTimes: [],
     credits: [],
@@ -55,13 +38,34 @@ const EnrollmentPage = () => {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filterCategory, setFilterCategory] = useState("전체");
-  const [filterDepartment, setFilterDepartment] = useState("전체");
-  const [filterYear, setFilterYear] = useState("전체");
   const [filterDay, setFilterDay] = useState("전체");
   const [filterTime, setFilterTime] = useState("전체");
   const [filterCredit, setFilterCredit] = useState("전체");
 
-  // 1. 사용자 정보 초기화
+  useEffect(() => {
+    const checkPeriod = async () => {
+      const isOpen = await checkEnrollPeriod();
+      if (!isOpen) {
+        navigate("/main/period-expired", {
+          state: { message: "현재는 수강신청 기간이 아닙니다!" },
+        });
+      }
+    };
+    checkPeriod();
+  }, [navigate]);
+
+  useEffect(() => {
+    const fetchSemesterInfo = async () => {
+      try {
+        const data = await getEnrollmentSemesterInfo();
+        setSemesterInfo(data);
+      } catch (error) {
+        console.error("수강신청 학기 정보 조회 실패:", error);
+      }
+    };
+    fetchSemesterInfo();
+  }, []);
+
   useEffect(() => {
     const localId = localStorage.getItem("id");
     if (!userId && localId) {
@@ -69,23 +73,13 @@ const EnrollmentPage = () => {
     }
   }, [userId, dispatch]);
 
-  // 2. 필터 정보 불러오기
   useEffect(() => {
     const fetchFilters = async () => {
       try {
-        const [
-          departmentsRes,
-          courseTypesRes,
-          courseYearsRes,
-          classDaysRes,
-          classTimesRes,
-          creditsRes,
-        ] = await getFilters();
-
+        const [courseTypesRes, classDaysRes, classTimesRes, creditsRes] =
+          await getFilters();
         setFilters({
-          departments: departmentsRes.data,
           courseTypes: courseTypesRes.data,
-          courseYears: courseYearsRes.data,
           classDays: classDaysRes.data,
           classTimes: classTimesRes.data,
           credits: creditsRes.data,
@@ -94,47 +88,38 @@ const EnrollmentPage = () => {
         console.error("필터 데이터 불러오기 실패:", error);
       }
     };
-
     fetchFilters();
   }, []);
 
-  // 3. 강의 검색
   useEffect(() => {
-    if (userId && filters.departments.length > 0) {
+    if (userId && filters.courseTypes.length > 0) {
       handleSearch(1);
     }
   }, [userId, filters]);
 
-  // 4. 수강 신청 내역
   useEffect(() => {
     const fetchEnrolled = async () => {
       try {
-        const response = await getEnrolledCourses(userId);
-        setTimetable(response.data);
+        const res = await getEnrolledCourses(userId);
+        setTimetable(res.data);
       } catch (error) {
         console.error("내 수강 목록 불러오기 실패:", error);
       }
     };
-
     if (userId) fetchEnrolled();
   }, [userId]);
 
   const handleSearch = async (page = 1, size = 15) => {
-    const safePage = isNaN(Number(page)) ? 1 : Number(page);
-    const safeSize = isNaN(Number(size)) ? 15 : Number(size);
     try {
       const response = await searchCourses(userId, {
         courseName: searchQuery || null,
         courseType: filterCategory !== "전체" ? filterCategory : null,
-        departmentName: filterDepartment !== "전체" ? filterDepartment : null,
-        courseYear: filterYear !== "전체" ? parseInt(filterYear) : null,
         classDay: filterDay !== "전체" ? filterDay : null,
         classStart: filterTime !== "전체" ? parseInt(filterTime) : null,
         credit: filterCredit !== "전체" ? parseInt(filterCredit) : null,
-        page: safePage,
-        size: safeSize,
+        page,
+        size,
       });
-
       setCourses(response.data);
       setCurrentPage(page);
     } catch (error) {
@@ -173,17 +158,11 @@ const EnrollmentPage = () => {
         const updated = await getEnrolledCourses(userId);
         setTimetable(updated.data);
       } else {
-        dispatch(
-          showModal({
-            message: msg,
-            type: "error",
-          })
-        );
+        dispatch(showModal({ message: msg, type: "error" }));
       }
     } catch (error) {
       const msg =
         error.response?.data?.message ?? error.response?.data ?? error.message;
-
       dispatch(
         showModal({
           message: msg || "수강 신청 중 오류가 발생했습니다.",
@@ -196,144 +175,143 @@ const EnrollmentPage = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-2 bg-slate-50 bg-opacity-40 shadow-md mt-3 rounded-md">
-      <h2 className="text-3xl font-bold text-center mb-6 mt-3">
-        수강 신청 목록
-      </h2>
+    <div className="max-w-7xl mx-auto p-8 bg-white shadow-md rounded-md mt-10">
+      {/* 헤더 */}
+      <div className="flex justify-between items-center border-b pb-3 mb-6">
+        <h2 className="text-2xl font-semibold text-gray-700">
+          {semesterInfo
+            ? `${semesterInfo.year}년 ${
+                semesterInfo.term === "FIRST" ? "1" : "2"
+              }학기 수강 신청`
+            : "수강 신청"}
+        </h2>
+      </div>
 
-      {/* 필터 영역 */}
-      <div className="space-y-4">
-        <div className="grid grid-cols-3 gap-4 mb-4">
-          <select
-            className="bg-blue-50 border p-2 rounded w-full"
-            value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value)}
-          >
-            <option value="전체">전체 구분</option>
-            {filters.courseTypes.map((type) => (
-              <option key={type.courseType} value={type.courseType}>
-                {type.courseType}
-              </option>
-            ))}
-          </select>
-          <select
-            className="bg-blue-50 border p-2 rounded w-full"
-            value={filterDepartment}
-            onChange={(e) => setFilterDepartment(e.target.value)}
-          >
-            <option value="전체">전체 학과</option>
-            {filters.departments.map((dept) => (
-              <option key={dept.departmentName} value={dept.departmentName}>
-                {dept.departmentName}
-              </option>
-            ))}
-          </select>
-          <select
-            className="bg-blue-50 border p-2 rounded w-full"
-            value={filterYear}
-            onChange={(e) => setFilterYear(e.target.value)}
-          >
-            <option value="전체">전체 학년</option>
-            {filters.courseYears.map((year) => (
-              <option key={year.courseYear} value={year.courseYear}>
-                {year.courseYear}학년
-              </option>
-            ))}
-          </select>
+      {/* 안내 문구 */}
+      <div className="text-center text-gray-600 text-sm mb-6">
+        ※ 필터를 선택한 후{" "}
+        <span className="text-blue-600 font-semibold">검색 버튼</span>을
+        눌러주세요.
+      </div>
 
-          <select
-            className="bg-blue-50 border p-2 rounded w-full"
-            value={filterDay}
-            onChange={(e) => setFilterDay(e.target.value)}
-          >
-            <option value="전체">전체 요일</option>
-            {filters.classDays.map((day) => (
-              <option key={day.classDay} value={day.classDay}>
-                {day.classDay}
-              </option>
+      {/* 필터 + 검색창 통합 박스 */}
+      <div className="flex flex-wrap gap-4 items-center justify-center mb-10">
+        <select
+          value={filterCategory}
+          onChange={(e) => setFilterCategory(e.target.value)}
+          className="px-3 py-2 w-48 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="전체">전체 구분</option>
+          {filters.courseTypes.map((t) => (
+            <option key={t.courseType} value={t.courseType}>
+              {t.courseType}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={filterDay}
+          onChange={(e) => setFilterDay(e.target.value)}
+          className="px-3 py-2 w-48 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="전체">전체 요일</option>
+          {filters.classDays.map((d) => (
+            <option key={d.classDay} value={d.classDay}>
+              {d.classDay}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={filterTime}
+          onChange={(e) => setFilterTime(e.target.value)}
+          className="px-3 py-2 w-48 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="전체">전체 시작교시</option>
+          {filters.classTimes.map((t) => (
+            <option key={t.classTime} value={t.classTime}>
+              {t.classTime}교시
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={filterCredit}
+          onChange={(e) => setFilterCredit(e.target.value)}
+          className="px-3 py-2 w-48 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="전체">전체 학점</option>
+          {filters.credits.map((c) => (
+            <option key={c.credit} value={c.credit}>
+              {c.credit}학점
+            </option>
+          ))}
+        </select>
+
+        {/* 과목명 검색창 */}
+        <input
+          type="text"
+          placeholder="과목명 검색"
+          className="px-3 py-2 w-64 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+
+        {/* 검색 버튼 */}
+        <button
+          onClick={() => handleSearch(1)}
+          className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-semibold"
+        >
+          검색 🔍
+        </button>
+      </div>
+
+      {/* 검색 결과 테이블 */}
+      <table className="min-w-full table-auto shadow-sm border border-gray-200 rounded-md text-sm">
+        <thead className="bg-gray-50 text-gray-600 uppercase text-sm leading-normal">
+          <tr className="text-center">
+            {[
+              "강의번호",
+              "구분",
+              "개설학과",
+              "강의학년",
+              "과목명",
+              "강의요일",
+              "강의실",
+              "강의시간",
+              "학점",
+              "담당교수",
+              "신청인원/정원",
+              "담기",
+            ].map((header) => (
+              <th key={header} className="py-3 px-2">
+                {header}
+              </th>
             ))}
-          </select>
-
-          <select
-            className="bg-blue-50 border p-2 rounded w-full"
-            value={filterTime}
-            onChange={(e) => setFilterTime(e.target.value)}
-          >
-            <option value="전체">전체 강의시간</option>
-            {filters.classTimes.map((time) => (
-              <option key={time.classTime} value={time.classTime}>
-                {time.classTime}교시
-              </option>
-            ))}
-          </select>
-
-          <select
-            className="bg-blue-50 border p-2 rounded w-full"
-            value={filterCredit}
-            onChange={(e) => setFilterCredit(e.target.value)}
-          >
-            <option value="전체">전체 학점</option>
-            {filters.credits.map((credit) => (
-              <option key={credit.credit} value={credit.credit}>
-                {credit.credit}학점
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* 검색창 */}
-        <div className="grid grid-cols-4 gap-4 items-center">
-          <div className="col-span-4 relative w-full">
-            <input
-              type="text"
-              className="bg-blue-50 border p-2 rounded w-full"
-              placeholder="과목명 검색"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <button
-              onClick={handleSearch}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white py-2 px-4 rounded text-sm hover:bg-blue-800"
-            >
-              검색 🔍
-            </button>
-          </div>
-        </div>
-
-        {/* 검색 결과 */}
-        <table className="w-full border-collapse border border-gray-300">
-          <thead>
-            <tr className="bg-gray-100 text-center">
-              <th className="border p-2">강의번호</th>
-              <th className="border p-2">구분</th>
-              <th className="border p-2">개설학과</th>
-              <th className="border p-2">강의학년</th>
-              <th className="border p-2">과목명</th>
-              <th className="border p-2">강의요일</th>
-              <th className="border p-2">강의실</th>
-              <th className="border p-2">강의시간</th>
-              <th className="border p-2">학점</th>
-              <th className="border p-2">담당교수</th>
-              <th className="border p-2">신청인원/정원</th>
-              <th className="border p-2">담기</th>
+          </tr>
+        </thead>
+        <tbody className="text-center text-gray-900">
+          {courses.dtoList.length === 0 ? (
+            <tr>
+              <td colSpan="12" className="py-4 text-gray-400">
+                검색 결과가 없습니다.
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {courses.dtoList.map((course) => (
-              <tr key={course.강의번호} className="text-center">
-                <td className="border p-2">{course.강의번호}</td>
-                <td className="border p-2">{course.구분}</td>
-                <td className="border p-2">{course.개설학과}</td>
-                <td className="border p-2">{course.강의학년}</td>
-                <td className="border p-2">{course.강의명}</td>
-                <td className="border p-2">{course.강의요일}</td>
-                <td className="border p-2">{course.강의실}</td>
-                <td className="border p-2">{course.강의시간}</td>
-                <td className="border p-2">{course.강의학점}</td>
-                <td className="border p-2">{course.담당교수}</td>
-                <td className="border p-2">{course.수강인원}</td>
-
-                <td className="border p-2">
+          ) : (
+            courses.dtoList.map((course) => (
+              <tr key={course.강의번호} className="hover:bg-gray-50 border-t">
+                <td className="py-2 px-2">{course.강의번호}</td>
+                <td className="py-2 px-2">{course.구분}</td>
+                <td className="py-2 px-2">{course.개설학과}</td>
+                <td className="py-2 px-2">{course.강의학년}</td>
+                <td className="py-2 px-2">{course.강의명}</td>
+                <td className="py-2 px-2">{course.강의요일}</td>
+                <td className="py-2 px-2">{course.강의실}</td>
+                <td className="py-2 px-2">{course.강의시간}</td>
+                <td className="py-2 px-2">{course.강의학점}</td>
+                <td className="py-2 px-2">{course.담당교수}</td>
+                <td className="py-2 px-2">{course.수강인원}</td>
+                <td className="py-2 px-2">
                   <button
                     onClick={() => handleEnroll(course)}
                     className="bg-blue-400 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
@@ -342,16 +320,18 @@ const EnrollmentPage = () => {
                   </button>
                 </td>
               </tr>
-            ))}
-          </tbody>
-        </table>
-        <PageComponent
-          currentPage={currentPage}
-          totalPage={courses.totalPage}
-          onPageChange={(page) => handleSearch(Number(page))}
-        />
-        <FloatingPopup subjects={timetable} />
-      </div>
+            ))
+          )}
+        </tbody>
+      </table>
+
+      <PageComponent
+        currentPage={currentPage}
+        totalPage={courses.totalPage}
+        onPageChange={(page) => handleSearch(page)}
+      />
+
+      <FloatingPopup subjects={timetable} />
     </div>
   );
 };
