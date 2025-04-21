@@ -155,7 +155,7 @@ const ProfilePage = () => {
           </div>
 
           {/* 입력 폼 */}
-          <div className="col-span-2 grid grid-cols-2 gap-x-8 gap-y-6">
+          <div className="col-span-2 grid grid-cols-2 gap-x-8 gap-y-0 ">
             {/* 1행: 학번, 학과 */}
             {[
               {
@@ -198,7 +198,7 @@ const ProfilePage = () => {
                 {["part1", "part2", "part3"].map((part, idx) => (
                   <div
                     key={part}
-                    className="flex items-center gap-1 flex-1 min-w-[6rem]"
+                    className="flex items-center gap-1 flex-1 min-w-[6rem]" 
                   >
                     <input
                       name={part}
@@ -214,42 +214,42 @@ const ProfilePage = () => {
               </div>
             </div>
 
-            {/* 3행: 이메일 (col-span-2로 넓게) */}
-            <div className="col-span-2">
-              <label className="block mb-1 text-sm font-semibold text-gray-700">
-                이메일
-              </label>
-              <div className="flex flex-wrap items-center gap-2">
-                <input
-                  className="flex-1 min-w-[6rem] max-w-[10rem] p-2 border rounded text-sm 
+{/* 3행: 이메일 (col-span-2로 넓게) */}
+<div className="col-span-2">
+  <label className="block mb-1 text-sm font-semibold text-gray-700">
+    이메일
+  </label>
+  <div className="flex flex-wrap items-center gap-2">
+    <input
+      className="flex-1 min-w-[6rem] max-w-[10rem] p-2 border rounded text-sm 
       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                  value={emailId}
-                  onChange={handleEmailIdChange}
-                />
-                <span className="text-gray-600">@</span>
-                <input
-                  className="flex-1 min-w-[6rem] max-w-[10rem] p-2 border rounded text-sm 
+      value={emailId}
+      onChange={handleEmailIdChange}
+    />
+    <span className="text-gray-600">@</span>
+    <input
+      className="flex-1 min-w-[6rem] max-w-[10rem] p-2 border rounded text-sm 
       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                  value={customEmailDomain}
-                  onChange={handleCustomDomainChange}
-                  placeholder="도메인"
-                />
-                <select
-                  className="flex-1 min-w-[6rem] max-w-[10rem] p-2 border rounded text-sm 
+      value={customEmailDomain}
+      onChange={handleCustomDomainChange}
+      placeholder="도메인"
+    />
+    <select
+      className="flex-1 min-w-[6rem] max-w-[10rem] p-2 border rounded text-sm 
       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                  value={emailDomain}
-                  onChange={handleEmailDomainChange}
-                >
-                  <option value="change">선택</option>
-                  {emailDomainList.map((domain) => (
-                    <option key={domain} value={domain}>
-                      {domain}
-                    </option>
-                  ))}
-                  <option value="custom">직접 입력</option>
-                </select>
-              </div>
-            </div>
+      value={emailDomain}
+      onChange={handleEmailDomainChange}
+    >
+      <option value="change">선택</option>
+      {emailDomainList.map((domain) => (
+        <option key={domain} value={domain}>
+          {domain}
+        </option>
+      ))}
+      <option value="custom">직접 입력</option>
+    </select>
+  </div>
+</div>
           </div>
 
           {/* 수정 버튼 */}

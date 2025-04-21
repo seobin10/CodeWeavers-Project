@@ -1,12 +1,15 @@
 package com.cw.cwu.controller.student;
 
 import com.cw.cwu.domain.ScheduleType;
+import com.cw.cwu.domain.Semester;
 import com.cw.cwu.dto.EnrollmentRequestDTO;
 import com.cw.cwu.dto.PageRequestDTO;
 import com.cw.cwu.dto.PageResponseDTO;
+import com.cw.cwu.repository.SemesterRepository;
 import com.cw.cwu.service.admin.AdminScheduleService;
 import com.cw.cwu.service.student.StudentEnrollmentService;
 
+import com.cw.cwu.service.user.UserSemesterService;
 import com.cw.cwu.util.UserRequestUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +30,8 @@ public class StudentEnrollmentController {  // 학생 수강 신청 관리 컨�
     private final StudentEnrollmentService studentEnrollmentService;
     private final AdminScheduleService adminScheduleService;
     private final UserRequestUtil userRequestUtil;
+    private final UserSemesterService userSemesterService;
+    private final SemesterRepository semesterRepository;
 
     // 학생이 수강 신청 가능한 강의 목록 조회
     @GetMapping("/{studentId}/enrollment")
@@ -33,8 +39,6 @@ public class StudentEnrollmentController {  // 학생 수강 신청 관리 컨�
             @PathVariable("studentId") String studentId,
             @ModelAttribute PageRequestDTO pageRequest,
             @RequestParam(required = false) String courseType,
-            @RequestParam(required = false) String departmentName,
-            @RequestParam(required = false) Integer courseYear,
             @RequestParam(required = false) String classDay,
             @RequestParam(required = false) Integer classStart,
             @RequestParam(required = false) Integer credit,
@@ -42,28 +46,19 @@ public class StudentEnrollmentController {  // 학생 수강 신청 관리 컨�
     ) {
         return ResponseEntity.ok(
                 studentEnrollmentService.getAvailableCoursesPaged(
-                        studentId, courseType, departmentName, courseYear,
+                        studentId, courseType,
                         classDay, classStart, credit, courseName,
                         pageRequest
                 )
         );
     }
 
-    // 필터 옵션 조회
-    @GetMapping("/departments")
-    public ResponseEntity<List<Map<String, Object>>> getDepartments() {
-        return ResponseEntity.ok(studentEnrollmentService.getDepartments());
-    }
 
     @GetMapping("/courseTypes")
     public ResponseEntity<List<Map<String, Object>>> getCourseTypes() {
         return ResponseEntity.ok(studentEnrollmentService.getCourseTypes());
     }
 
-    @GetMapping("/courseYears")
-    public ResponseEntity<List<Map<String, Object>>> getCourseYears() {
-        return ResponseEntity.ok(studentEnrollmentService.getCourseYears());
-    }
 
     @GetMapping("/classDays")
     public ResponseEntity<List<Map<String, Object>>> getClassDays() {
@@ -126,5 +121,19 @@ public class StudentEnrollmentController {  // 학생 수강 신청 관리 컨�
     public ResponseEntity<Boolean> isEnrollOpen() {
         boolean result = adminScheduleService.isScheduleOpen(ScheduleType.ENROLL);
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/enrollment-semester-info")
+    public ResponseEntity<Map<String, Object>> getEnrollmentSemesterInfo() {
+        Integer semesterId = adminScheduleService.getEnrollSemesterId();
+
+        Semester semester = semesterRepository.findById(semesterId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 학기를 찾을 수 없습니다."));
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("year", semester.getYear());
+        response.put("term", semester.getTerm().name());
+
+        return ResponseEntity.ok(response);
     }
 }
