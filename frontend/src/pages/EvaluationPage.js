@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "../../src/evaluationPage.css";
+import "../../src/EvaluationPage.css";
 import { getAuthHeader } from "../util/authHeader";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
