@@ -21,7 +21,6 @@ public class StudentEvaluationController { // 학생 강의 평가 컨트롤러 
     private final StudentEvaluationService service;
 
     // 질문 리스트 불러오기
-    @PreAuthorize("hasRole('STUDENT')")
     @GetMapping("/quelist")
     public ResponseEntity<List<EvaluationQuestionDTO>> readQuestionList() {
         List<EvaluationQuestionDTO> questionList = service.findAllList();
@@ -52,12 +51,12 @@ public class StudentEvaluationController { // 학생 강의 평가 컨트롤러 
             @RequestParam Integer classId,
             @RequestBody EvaluationWrapper wrapper
     ) {
-        EvaluationLectureDTO logDto = wrapper.getLectDto();
+        EvaluationLectureDTO lectureDto = wrapper.getLectDto();
         EvaluationAnswerDTO answerDto = wrapper.getDto();
 
-        service.saveEvaluationLog(logDto, userId, classId);
+        service.saveEvaluationLog(lectureDto, userId, classId);
 
-        Integer savedId = service.saveEvaluationAnswer(userId, questionId, classId, logDto, answerDto);
+        Integer savedId = service.saveEvaluationAnswer(userId, questionId, classId, lectureDto, answerDto);
         return ResponseEntity.ok(savedId);
     }
 
