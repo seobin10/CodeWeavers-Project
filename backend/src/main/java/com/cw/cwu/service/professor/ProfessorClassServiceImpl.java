@@ -78,7 +78,7 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
             }
 
             if (room.getStatus() == RoomStatus.UNAVAILABLE) {
-                return "선택한 강의실은 현재 이용 불가 상태입니다.";
+                return "선택한 강의실은 현재 사용 중지 상태입니다.";
             }
 
             List<ClassEntity> roomClasses = classEntityRepository

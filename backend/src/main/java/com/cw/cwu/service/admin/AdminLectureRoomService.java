@@ -8,6 +8,8 @@ import com.cw.cwu.dto.LectureRoomUsageDTO;
 import java.util.List;
 
 public interface AdminLectureRoomService {
+    Integer resolveUsableSemesterId();
+
     List<LectureRoomUsageDTO> getCurrentClassesByLectureRoom(Integer roomId);
 
     List<LectureRoomStatusDTO> getRoomsByBuilding(Integer buildingId);
