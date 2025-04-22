@@ -126,6 +126,12 @@ public class AdminLectureRoomServiceImpl implements AdminLectureRoomService {
         LectureRoom room = lectureRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 강의실을 찾을 수 없습니다."));
 
+        // 건물이 사용 불가 상태인데 강의실을 사용 가능으로 바꾸려는 경우 막기
+        if (newStatus == RoomStatus.AVAILABLE &&
+                room.getBuilding().getStatus() == BuildingStatus.UNAVAILABLE) {
+            throw new IllegalStateException("해당 건물이 사용 불가 상태이므로 강의실을 사용 가능으로 변경할 수 없습니다.");
+        }
+
         // 상태를 이용불가로 변경할 시
         if (newStatus == RoomStatus.UNAVAILABLE) {
             Integer usableSemesterId = resolveUsableSemesterId();
