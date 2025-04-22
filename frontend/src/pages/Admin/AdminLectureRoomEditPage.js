@@ -85,8 +85,8 @@ const AdminLectureRoomEditPage = ({ roomId, rooms, onSuccess }) => {
             value={form.newStatus}
             onChange={handleChange}
           >
-            <option value="AVAILABLE">이용 가능</option>
-            <option value="UNAVAILABLE">이용 불가</option>
+            <option value="AVAILABLE">사용 가능</option>
+            <option value="UNAVAILABLE">사용 불가</option>
           </select>
         </div>
 

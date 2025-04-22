@@ -118,10 +118,16 @@ const BasicLayout = () => {
                 label="📚 성적 집계"
                 currentPath={location.pathname}
               />
-              <SimpleLink
-                to="/main/admin/lecture-rooms"
-                label="🏢 시설 관리"
+
+              <ToggleMenu
+                title="🏢 시설 관리"
+                links={[
+                  { to: "/main/admin/buildings", label: "건물 관리" },
+                  { to: "/main/admin/lecture-rooms", label: "강의실 관리" },
+                ]}
                 currentPath={location.pathname}
+                hoveredMenu={hoveredMenu}
+                setHoveredMenu={setHoveredMenu}
               />
             </>
           )}

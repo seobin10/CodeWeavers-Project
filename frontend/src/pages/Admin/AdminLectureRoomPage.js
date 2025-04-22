@@ -12,6 +12,7 @@ import AdminLectureRoomEditPage from "./AdminLectureRoomEditPage";
 import useConfirmModal from "../../hooks/useConfirmModal";
 import { useDispatch } from "react-redux";
 import { showModal } from "../../slices/modalSlice";
+import AdminBuildingPage from "./AdminBuildingPage";
 
 const AdminLectureRoomPage = () => {
   const [buildings, setBuildings] = useState([]);
@@ -126,7 +127,7 @@ const AdminLectureRoomPage = () => {
 
   const handleDeleteRoom = () => {
     openConfirm(
-      `${selectedBuildingName} ${selectedRoomName}\n\n이 강의실을 삭제하시겠습니까?`,
+      `${selectedBuildingName} ${selectedRoomName}\n\n이 강의실을 삭제하시겠습니까?\n\n※ 수업 이력이 있는 강의실은 삭제할 수 없습니다.`,
       async () => {
         try {
           await deleteLectureRoom(selectedRoomId);
@@ -165,7 +166,8 @@ const AdminLectureRoomPage = () => {
       <div className="mb-4">
         <select
           onChange={handleBuildingChange}
-          className="px-3 py-2 w-64 border border-gray-300 rounded-md shadow-sm text-sm"
+          className="px-3 py-2 w-44 border border-gray-300 rounded-md shadow-sm text-sm
+           text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
         >
           {buildings.map((b) => (
             <option key={b.buildingId} value={b.buildingId}>
@@ -176,25 +178,31 @@ const AdminLectureRoomPage = () => {
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 justify-items-center mt-10 mb-10">
-        {paginatedRooms.map((room) => {
-          const isOccupied = occupiedRoomIds.includes(room.roomId);
-          const cardStyle =
-            room.status !== "AVAILABLE"
-              ? "bg-gray-400 text-white border-gray-300 hover:bg-gray-500"
-              : isOccupied
-              ? "bg-blue-200 text-blue-900 border-blue-300 hover:bg-blue-300"
-              : "bg-white text-gray-900 border-gray-300 hover:bg-gray-100";
+        {paginatedRooms.length === 0 ? (
+          <p className="text-gray-400 text-sm text-center col-span-full mt-4">
+            등록된 강의실이 없습니다.
+          </p>
+        ) : (
+          paginatedRooms.map((room) => {
+            const isOccupied = occupiedRoomIds.includes(room.roomId);
+            const cardStyle =
+              room.status !== "AVAILABLE"
+                ? "bg-gray-400 text-white border-gray-300 hover:bg-gray-500"
+                : isOccupied
+                ? "bg-blue-200 text-blue-900 border-blue-300 hover:bg-blue-300"
+                : "bg-white text-gray-900 border-gray-300 hover:bg-gray-100";
 
-          return (
-            <div
-              key={room.roomId}
-              onClick={() => handleRoomClick(room.roomId, room.roomName)}
-              className={`w-full max-w-[96px] h-24 flex items-center justify-center rounded-md transition duration-200 shadow-sm border font-medium text-sm ${cardStyle}`}
-            >
-              {room.roomName}
-            </div>
-          );
-        })}
+            return (
+              <div
+                key={room.roomId}
+                onClick={() => handleRoomClick(room.roomId, room.roomName)}
+                className={`w-full max-w-[96px] h-24 flex items-center justify-center rounded-md transition duration-200 shadow-sm border font-medium text-sm ${cardStyle}`}
+              >
+                {room.roomName}
+              </div>
+            );
+          })
+        )}
       </div>
 
       <PageComponent
@@ -247,6 +255,10 @@ const AdminLectureRoomPage = () => {
                 <div>
                   <span className="font-semibold">담당:</span>{" "}
                   {cls.professorName} 교수
+                </div>
+                <div>
+                  <span className="font-semibold">전화번호:</span>{" "}
+                  {cls.professorPhone || "비공개"}
                 </div>
                 <div>
                   <span className="font-semibold">소속:</span>{" "}

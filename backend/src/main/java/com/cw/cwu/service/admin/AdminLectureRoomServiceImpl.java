@@ -33,7 +33,8 @@ public class AdminLectureRoomServiceImpl implements AdminLectureRoomService {
      * - 아직 시작되지 않은 "다음 학기"가 존재한다면 그 학기 사용
      * - 다 없을 경우 null 반환, 강의실 사용 없음으로 처리
      */
-    private Integer resolveUsableSemesterId() {
+    @Override
+    public Integer resolveUsableSemesterId() {
         try {
             return userSemesterService.getCurrentSemester().getId();
         } catch (Exception e1) {
@@ -58,6 +59,7 @@ public class AdminLectureRoomServiceImpl implements AdminLectureRoomService {
                         .classId(c.getId())
                         .courseName(c.getCourse().getName())
                         .professorName(c.getProfessor() != null ? c.getProfessor().getUserName() : "(미정)")
+                        .professorPhone(c.getProfessor() != null ? c.getProfessor().getUserPhone() : null)
                         .departmentName(
                                 c.getProfessor() != null && c.getProfessor().getDepartment() != null
                                         ? c.getProfessor().getDepartment().getDepartmentName()
@@ -156,7 +158,7 @@ public class AdminLectureRoomServiceImpl implements AdminLectureRoomService {
     public void deleteLectureRoom(Integer roomId) {
         boolean isReferenced = classEntityRepository.existsByLectureRoom_Id(roomId);
         if (isReferenced) {
-            throw new IllegalStateException("해당 강의실은 강의 기록이 존재하여 삭제할 수 없습니다.");
+            throw new IllegalStateException("해당 강의실은 수업 이력이 존재하여 삭제할 수 없습니다.");
         }
         lectureRoomRepository.deleteById(roomId);
     }

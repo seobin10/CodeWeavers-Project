@@ -174,6 +174,17 @@ const EnrollmentPage = () => {
     }
   };
 
+  const formatPeriodRange = (periodStr) => {
+    const parts = periodStr
+      .split(",")
+      .map(Number)
+      .sort((a, b) => a - b);
+
+    if (parts.length === 0) return "-";
+    if (parts.length === 1) return `${parts[0]}교시`;
+    return `${parts[0]} ~ ${parts[parts.length - 1]}교시`;
+  };
+
   return (
     <div className="max-w-7xl mx-auto p-8 bg-white shadow-md rounded-md mt-10">
       {/* 헤더 */}
@@ -186,14 +197,12 @@ const EnrollmentPage = () => {
             : "수강 신청"}
         </h2>
       </div>
-
       {/* 안내 문구 */}
       <div className="text-center text-gray-600 text-sm mb-6">
         ※ 필터를 선택한 후{" "}
         <span className="text-blue-600 font-semibold">검색 버튼</span>을
         눌러주세요.
       </div>
-
       {/* 필터 + 검색창 통합 박스 */}
       <div className="flex flex-wrap gap-4 items-center justify-center mb-10">
         <select
@@ -265,24 +274,23 @@ const EnrollmentPage = () => {
           검색 🔍
         </button>
       </div>
-
       {/* 검색 결과 테이블 */}
       <table className="min-w-full table-auto shadow-sm border border-gray-200 rounded-md text-sm">
         <thead className="bg-gray-50 text-gray-600 uppercase text-sm leading-normal">
           <tr className="text-center">
             {[
               "강의번호",
+              "과목명",
               "구분",
               "개설학과",
               "강의학년",
-              "과목명",
-              "강의요일",
-              "강의실",
-              "강의시간",
               "학점",
+              "강의요일",
+              "강의시간",
+              "강의실",
               "담당교수",
               "신청인원/정원",
-              "담기",
+              "신청",
             ].map((header) => (
               <th key={header} className="py-3 px-2">
                 {header}
@@ -301,14 +309,16 @@ const EnrollmentPage = () => {
             courses.dtoList.map((course) => (
               <tr key={course.강의번호} className="hover:bg-gray-50 border-t">
                 <td className="py-2 px-2">{course.강의번호}</td>
+                <td className="py-2 px-2">{course.강의명}</td>
                 <td className="py-2 px-2">{course.구분}</td>
                 <td className="py-2 px-2">{course.개설학과}</td>
-                <td className="py-2 px-2">{course.강의학년}</td>
-                <td className="py-2 px-2">{course.강의명}</td>
-                <td className="py-2 px-2">{course.강의요일}</td>
+                <td className="py-2 px-2">{course.강의학년}학년</td>
+                <td className="py-2 px-2">{course.강의학점}학점</td>
+                <td className="py-2 px-2">{course.강의요일}요일</td>
+                <td className="py-2 px-2">
+                  {formatPeriodRange(course.강의시간)}
+                </td>
                 <td className="py-2 px-2">{course.강의실}</td>
-                <td className="py-2 px-2">{course.강의시간}</td>
-                <td className="py-2 px-2">{course.강의학점}</td>
                 <td className="py-2 px-2">{course.담당교수}</td>
                 <td className="py-2 px-2">{course.수강인원}</td>
                 <td className="py-2 px-2">
@@ -316,7 +326,7 @@ const EnrollmentPage = () => {
                     onClick={() => handleEnroll(course)}
                     className="bg-blue-400 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm"
                   >
-                    담기 🛒
+                    신청 🛒
                   </button>
                 </td>
               </tr>
@@ -330,7 +340,6 @@ const EnrollmentPage = () => {
         totalPage={courses.totalPage}
         onPageChange={(page) => handleSearch(page)}
       />
-
       <FloatingPopup subjects={timetable} />
     </div>
   );
