@@ -9,6 +9,7 @@ import { useDispatch } from "react-redux";
 import { showModal } from "../../slices/modalSlice";
 import useConfirmModal from "../../hooks/useConfirmModal";
 import BaseModal from "../../components/BaseModal";
+import PageComponent from "../../components/PageComponent";
 
 const AdminBuildingPage = () => {
   const dispatch = useDispatch();
@@ -19,6 +20,13 @@ const AdminBuildingPage = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  const paginatedBuildings = buildings.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const fetchBuildings = async () => {
     try {
@@ -62,21 +70,24 @@ const AdminBuildingPage = () => {
     }
   };
 
-  const handleDelete = (id) => {
-    openConfirm("정말 이 건물을 삭제하시겠습니까?", async () => {
-      try {
-        await deleteBuilding(id);
-        dispatch(showModal("건물 삭제 완료"));
-        fetchBuildings();
-      } catch (err) {
-        dispatch(
-          showModal({
-            message: err?.response?.data || "삭제 중 오류 발생",
-            type: "error",
-          })
-        );
+  const handleDelete = (building) => {
+    openConfirm(
+      `${building.buildingName} \n\n이 건물을 삭제하시겠습니까?\n\n※ 수업 이력이 있는 강의실이 포함된 건물은 삭제할 수 없습니다.`,
+      async () => {
+        try {
+          await deleteBuilding(building.buildingId);
+          dispatch(showModal("건물 삭제 완료"));
+          fetchBuildings();
+        } catch (err) {
+          dispatch(
+            showModal({
+              message: err?.response?.data || "삭제 중 오류 발생",
+              type: "error",
+            })
+          );
+        }
       }
-    });
+    );
   };
 
   const openEditModal = (building) => {
@@ -87,9 +98,9 @@ const AdminBuildingPage = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-8 bg-white shadow-md rounded-md mt-10">
+    <div className="w-full p-4 md:p-6 lg:p-8 mt-6">
       <div className="flex justify-between items-center border-b pb-3 mb-6">
-        <h2 className="text-2xl font-semibold text-gray-700">건물 관리</h2>
+        <h2 className="text-2xl font-semibold text-gray-700">건물 사용 현황</h2>
         <button
           onClick={() => {
             setIsModalOpen(true);
@@ -119,12 +130,12 @@ const AdminBuildingPage = () => {
               </td>
             </tr>
           ) : (
-            buildings.map((b) => (
+            paginatedBuildings.map((b) => (
               <tr key={b.buildingId} className="border-t hover:bg-gray-50">
                 <td className="py-2 px-4">{b.buildingId}</td>
                 <td className="py-2 px-4">{b.buildingName}</td>
                 <td className="py-2 px-4">
-                  {b.status === "AVAILABLE" ? "사용 가능" : "사용 불가"}
+                  {b.status === "AVAILABLE" ? "✅ 사용 가능" : "❌ 사용 불가"}
                 </td>
                 <td className="py-2 px-4 space-x-2">
                   <button
@@ -134,7 +145,7 @@ const AdminBuildingPage = () => {
                     수정
                   </button>
                   <button
-                    onClick={() => handleDelete(b.buildingId)}
+                    onClick={() => handleDelete(b)}
                     className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
                   >
                     삭제
@@ -145,6 +156,12 @@ const AdminBuildingPage = () => {
           )}
         </tbody>
       </table>
+
+      <PageComponent
+          currentPage={currentPage}
+          totalPage={Math.ceil(buildings.length / itemsPerPage)}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
 
       <BaseModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
         <h2 className="text-xl font-semibold mb-6 text-center">

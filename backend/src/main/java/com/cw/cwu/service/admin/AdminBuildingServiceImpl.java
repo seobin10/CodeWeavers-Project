@@ -76,6 +76,16 @@ public class AdminBuildingServiceImpl implements AdminBuildingService {
 
         if (newStatus != null) {
             building.setStatus(newStatus);
+
+            List<LectureRoom> rooms = lectureRoomRepository.findByBuilding_Id(buildingId);
+
+            if (newStatus == BuildingStatus.UNAVAILABLE) {
+                rooms.forEach(room -> room.setStatus(RoomStatus.UNAVAILABLE));
+            } else if (newStatus == BuildingStatus.AVAILABLE) {
+                rooms.forEach(room -> room.setStatus(RoomStatus.AVAILABLE));
+            }
+
+            lectureRoomRepository.saveAll(rooms);
         }
 
         buildingRepository.save(building);
