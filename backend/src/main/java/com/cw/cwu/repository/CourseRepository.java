@@ -15,4 +15,5 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
     List<Course> findCoursesByDepartmentOrLiberal(@Param("deptId") Integer deptId,
                                                   @Param("liberal") CourseType liberal);
 
+    int countByDepartment_DepartmentId(Integer departmentId);
 }

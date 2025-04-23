@@ -1,5 +1,5 @@
 package com.cw.cwu.domain;
 
-public enum RoomStatus {
+public enum DepartmentStatus {
     AVAILABLE, UNAVAILABLE
 }

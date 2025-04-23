@@ -34,6 +34,8 @@ public interface UserRepository extends JpaRepository<User, String> {
         );
 
         List<User> findByUserRoleAndDepartment(UserRole role, Department department);
+
+        int countByDepartment_DepartmentIdAndUserRole(Integer departmentId, UserRole role);
 }
 
 

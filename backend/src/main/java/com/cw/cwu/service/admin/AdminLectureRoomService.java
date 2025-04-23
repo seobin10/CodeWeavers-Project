@@ -1,6 +1,6 @@
 package com.cw.cwu.service.admin;
 
-import com.cw.cwu.domain.RoomStatus;
+import com.cw.cwu.domain.LectureRoomStatus;
 import com.cw.cwu.dto.BuildingDTO;
 import com.cw.cwu.dto.LectureRoomStatusDTO;
 import com.cw.cwu.dto.LectureRoomUsageDTO;
@@ -20,7 +20,7 @@ public interface AdminLectureRoomService {
     void createLectureRoom(String roomName, Integer buildingId);
 
     // 강의실 정보 수정 (이름 + 상태)
-    void updateLectureRoom(Integer roomId, String newName, RoomStatus newStatus);
+    void updateLectureRoom(Integer roomId, String newName, LectureRoomStatus newStatus);
 
     // 강의실 삭제 - 참조된 이력이 있으면 삭제 불가
     void deleteLectureRoom(Integer roomId);

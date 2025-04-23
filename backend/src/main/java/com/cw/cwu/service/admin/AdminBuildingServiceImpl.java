@@ -38,6 +38,11 @@ public class AdminBuildingServiceImpl implements AdminBuildingService {
     @Override
     public List<BuildingDTO> getAllBuildings() {
         return buildingRepository.findAll().stream()
+                .sorted((b1, b2) -> {
+                    int s1 = b1.getStatus() == BuildingStatus.UNAVAILABLE ? 1 : 0;
+                    int s2 = b2.getStatus() == BuildingStatus.UNAVAILABLE ? 1 : 0;
+                    return Integer.compare(s1, s2);
+                })
                 .map(b -> BuildingDTO.builder()
                         .buildingId(b.getId())
                         .buildingName(b.getName())
@@ -80,9 +85,9 @@ public class AdminBuildingServiceImpl implements AdminBuildingService {
             List<LectureRoom> rooms = lectureRoomRepository.findByBuilding_Id(buildingId);
 
             if (newStatus == BuildingStatus.UNAVAILABLE) {
-                rooms.forEach(room -> room.setStatus(RoomStatus.UNAVAILABLE));
+                rooms.forEach(room -> room.setStatus(LectureRoomStatus.UNAVAILABLE));
             } else if (newStatus == BuildingStatus.AVAILABLE) {
-                rooms.forEach(room -> room.setStatus(RoomStatus.AVAILABLE));
+                rooms.forEach(room -> room.setStatus(LectureRoomStatus.AVAILABLE));
             }
 
             lectureRoomRepository.saveAll(rooms);

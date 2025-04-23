@@ -10,6 +10,7 @@ import com.cw.cwu.repository.LectureRoomRepository;
 import com.cw.cwu.service.user.UserSemesterService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -113,7 +114,7 @@ public class AdminLectureRoomServiceImpl implements AdminLectureRoomService {
 
         LectureRoom room = LectureRoom.builder()
                 .name(roomName)
-                .status(RoomStatus.AVAILABLE)
+                .status(LectureRoomStatus.AVAILABLE)
                 .building(building)
                 .build();
 
@@ -122,23 +123,23 @@ public class AdminLectureRoomServiceImpl implements AdminLectureRoomService {
 
     // 강의실 정보 수정 (이름 + 상태)
     @Override
-    public void updateLectureRoom(Integer roomId, String newName, RoomStatus newStatus) {
+    public void updateLectureRoom(Integer roomId, String newName, LectureRoomStatus newStatus) {
         LectureRoom room = lectureRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 강의실을 찾을 수 없습니다."));
 
         // 건물이 사용 불가 상태인데 강의실을 사용 가능으로 바꾸려는 경우 막기
-        if (newStatus == RoomStatus.AVAILABLE &&
+        if (newStatus == LectureRoomStatus.AVAILABLE &&
                 room.getBuilding().getStatus() == BuildingStatus.UNAVAILABLE) {
             throw new IllegalStateException("해당 건물이 사용 불가 상태이므로 강의실을 사용 가능으로 변경할 수 없습니다.");
         }
 
-        // 상태를 이용불가로 변경할 시
-        if (newStatus == RoomStatus.UNAVAILABLE) {
+        // 상태를 사용 불가로 변경할 시
+        if (newStatus == LectureRoomStatus.UNAVAILABLE) {
             Integer usableSemesterId = resolveUsableSemesterId();
             if (usableSemesterId != null) {
                 boolean isInUse = classEntityRepository.existsByLectureRoom_IdAndSemester_Id(roomId, usableSemesterId);
                 if (isInUse) {
-                    throw new IllegalStateException("사용 중인 강의실은 이용불가로 변경할 수 없습니다.");
+                    throw new IllegalStateException("사용 중인 강의실은 사용 불가로 변경할 수 없습니다.");
                 }
             }
         }
@@ -162,10 +163,11 @@ public class AdminLectureRoomServiceImpl implements AdminLectureRoomService {
     // 강의실 삭제 - 참조된 이력이 있으면 삭제 불가
     @Override
     public void deleteLectureRoom(Integer roomId) {
-        boolean isReferenced = classEntityRepository.existsByLectureRoom_Id(roomId);
-        if (isReferenced) {
+        try {
+            lectureRoomRepository.deleteById(roomId);
+        } catch (DataIntegrityViolationException e) {
+            // DB의 RESTRICT 조건 위반 (참조된 수업 이력 존재)
             throw new IllegalStateException("해당 강의실은 수업 이력이 존재하여 삭제할 수 없습니다.");
         }
-        lectureRoomRepository.deleteById(roomId);
     }
 }

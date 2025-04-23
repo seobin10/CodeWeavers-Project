@@ -134,4 +134,8 @@ WHERE\s
     boolean existsByLectureRoom_Id(Integer lectureRoomId);
 
     boolean existsByLectureRoom_IdAndSemester_Id(Integer roomId, Integer semesterId);
+
+    @Query("SELECT COUNT(c) FROM ClassEntity c WHERE c.course.department.departmentId = :departmentId")
+    int countClassesByDepartmentId(@Param("departmentId") Integer departmentId);
+
 }

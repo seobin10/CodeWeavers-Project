@@ -4,7 +4,7 @@ import {
   getAllBuildings,
 } from "../../api/adminLectureRoomApi";
 import { useDispatch } from "react-redux";
-import { showModal } from "../../slices/modalSlice"; // Redux 액션
+import { showModal } from "../../slices/modalSlice"; 
 
 const initialForm = {
   roomName: "",
