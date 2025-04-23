@@ -25,7 +25,7 @@ const BasicLayout = () => {
       <header className="bg-white/80 backdrop-blur-md shadow-md p-4 flex justify-between items-center">
         <Link to="/main" className="flex items-center space-x-3">
           <img src="/images/eonLogo.jpg" alt="학교 로고" className="h-14" />
-          <div className="text-blue-800 font-extrabold text-2xl leading-tight">
+          <div className="text-blue-800 font-extrabold text-3xl leading-tight">
             <div>이온대학교</div>
             <div className="text-xs font-medium tracking-wider">
               EON UNIVERSITY

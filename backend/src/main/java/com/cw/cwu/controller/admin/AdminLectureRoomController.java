@@ -1,6 +1,6 @@
 package com.cw.cwu.controller.admin;
 
-import com.cw.cwu.domain.RoomStatus;
+import com.cw.cwu.domain.LectureRoomStatus;
 import com.cw.cwu.dto.BuildingDTO;
 import com.cw.cwu.dto.LectureRoomStatusDTO;
 import com.cw.cwu.dto.LectureRoomUsageDTO;
@@ -71,7 +71,7 @@ public class AdminLectureRoomController {
             adminLectureRoomService.updateLectureRoom(
                     roomId,
                     newName,
-                    newStatus != null ? RoomStatus.valueOf(newStatus) : null
+                    newStatus != null ? LectureRoomStatus.valueOf(newStatus) : null
             );
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException | IllegalStateException e) {

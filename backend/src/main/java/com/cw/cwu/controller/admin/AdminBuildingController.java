@@ -40,8 +40,6 @@ public class AdminBuildingController {
 
     }
 
-    int []arr2 = {1,2,3,4};
-
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping

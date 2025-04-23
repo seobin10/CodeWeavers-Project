@@ -14,7 +14,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -77,7 +76,7 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
                 return "강의실 정보를 찾을 수 없습니다.";
             }
 
-            if (room.getStatus() == RoomStatus.UNAVAILABLE) {
+            if (room.getStatus() == LectureRoomStatus.UNAVAILABLE) {
                 return "선택한 강의실은 현재 사용 중지 상태입니다.";
             }
 
@@ -275,7 +274,7 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
         List<LectureRoom> allRooms = lectureRoomRepository.findAll();
 
         return allRooms.stream()
-                .filter(room -> room.getStatus() == RoomStatus.AVAILABLE)
+                .filter(room -> room.getStatus() == LectureRoomStatus.AVAILABLE)
                 .filter(room -> {
                     List<ClassEntity> classes = classEntityRepository.findByLectureRoom_IdAndDayAndSemester(
                             room.getId(), day, semester

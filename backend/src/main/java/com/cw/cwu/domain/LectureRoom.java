@@ -31,5 +31,5 @@ public class LectureRoom {
 
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
-    private RoomStatus status;
+    private LectureRoomStatus status;
 }
