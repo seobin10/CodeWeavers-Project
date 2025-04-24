@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.findUserIdByUserName(username).get();
     }
 
-    // ✅ 비밀번호 재설정 토큰 저장
+    // 비밀번호 재설정 토큰 저장
     @Override
     public void savePasswordResetToken(User user, String token) {
         PasswordResetToken resetToken = PasswordResetToken.builder()
@@ -87,7 +87,7 @@ public class UserServiceImpl implements UserService {
         passwordResetTokenRepository.save(resetToken);
     }
 
-    // ✅ 재설정 이메일 전송
+    // 재설정 이메일 전송
     @Override
     public void sendResetEmail(String toEmail, String resetLink) {
         MimeMessage mimeMessage = mailSender.createMimeMessage();

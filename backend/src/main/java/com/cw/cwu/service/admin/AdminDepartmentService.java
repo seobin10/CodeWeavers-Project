@@ -4,9 +4,10 @@ import com.cw.cwu.dto.DepartmentCreateRequestDTO;
 import com.cw.cwu.dto.DepartmentDetailDTO;
 import com.cw.cwu.dto.DepartmentUpdateRequestDTO;
 
-public interface AdminDepartmentService {
-    DepartmentDetailDTO getDepartmentDetail(Integer id);
+import java.util.List;
 
+public interface AdminDepartmentService {
+    List<DepartmentDetailDTO> getAllDepartments();
 
     void createDepartment(DepartmentCreateRequestDTO dto);
 

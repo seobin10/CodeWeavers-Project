@@ -108,17 +108,16 @@ const BasicLayout = () => {
                 label="👥 사용자 관리"
                 currentPath={location.pathname}
               />
-              <SimpleLink
-                to="/main/admin/users"
-                label="🗓 일정 관리"
+              <ToggleMenu
+                title="🏫 학과/과목 관리"
+                links={[
+                  { to: "/main/admin/departments", label: "학과 관리" },
+                  { to: "/main/admin/courses", label: "과목 관리" },
+                ]}
                 currentPath={location.pathname}
+                hoveredMenu={hoveredMenu}
+                setHoveredMenu={setHoveredMenu}
               />
-              <SimpleLink
-                to="/main/admin/grades"
-                label="📚 성적 집계"
-                currentPath={location.pathname}
-              />
-
               <ToggleMenu
                 title="🏢 시설 관리"
                 links={[
@@ -128,6 +127,16 @@ const BasicLayout = () => {
                 currentPath={location.pathname}
                 hoveredMenu={hoveredMenu}
                 setHoveredMenu={setHoveredMenu}
+              />
+              <SimpleLink
+                to="/main/admin/users"
+                label="🗓 일정 관리"
+                currentPath={location.pathname}
+              />
+              <SimpleLink
+                to="/main/admin/grades"
+                label="📚 성적 집계"
+                currentPath={location.pathname}
               />
             </>
           )}
