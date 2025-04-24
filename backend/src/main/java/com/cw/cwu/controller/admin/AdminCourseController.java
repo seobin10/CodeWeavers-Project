@@ -29,25 +29,37 @@ public class AdminCourseController {
     // 과목 생성
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<String> createCourse(@RequestBody CourseCreateRequestDTO dto) {
-        adminCourseService.createCourse(dto);
-        return ResponseEntity.ok("과목이 등록되었습니다.");
+    public ResponseEntity<?> createCourse(@RequestBody CourseCreateRequestDTO dto) {
+        try {
+            adminCourseService.createCourse(dto);
+            return ResponseEntity.ok("과목이 등록되었습니다.");
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     // 과목 수정
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{courseId}")
-    public ResponseEntity<String> updateCourse(@PathVariable Integer courseId,
-                                               @RequestBody CourseUpdateRequestDTO dto) {
-        adminCourseService.updateCourse(courseId, dto);
-        return ResponseEntity.ok("과목이 수정되었습니다.");
+    public ResponseEntity<?> updateCourse(@PathVariable Integer courseId,
+                                          @RequestBody CourseUpdateRequestDTO dto) {
+        try {
+            adminCourseService.updateCourse(courseId, dto);
+            return ResponseEntity.ok("과목이 수정되었습니다.");
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     // 과목 삭제
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{courseId}")
-    public ResponseEntity<String> deleteCourse(@PathVariable Integer courseId) {
-        adminCourseService.deleteCourse(courseId);
-        return ResponseEntity.ok("과목이 삭제되었습니다.");
+    public ResponseEntity<?> deleteCourse(@PathVariable Integer courseId) {
+        try {
+            adminCourseService.deleteCourse(courseId);
+            return ResponseEntity.ok("과목이 삭제되었습니다.");
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }
