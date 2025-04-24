@@ -17,5 +17,6 @@ public class CourseInfoDTO {
     private Integer credit;
     private Integer courseYear;
     private String status;
+    private Integer departmentId;
 
 }
