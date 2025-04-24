@@ -1,6 +1,7 @@
 package com.cw.cwu.service.admin;
 
 import com.cw.cwu.domain.Department;
+import com.cw.cwu.domain.DepartmentStatus;
 import com.cw.cwu.domain.User;
 import com.cw.cwu.domain.UserRole;
 import com.cw.cwu.dto.*;
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -68,6 +71,9 @@ public class AdminUserServiceImpl implements AdminUserService {
                 .orElse(null);
         if (department == null) {
             return "존재하지 않는 학과입니다.";
+        }
+        if (department.getStatus() == DepartmentStatus.UNAVAILABLE) {
+            return "운영이 중지된 학과에는 사용자를 생성할 수 없습니다.";
         }
 
         User user = User.builder()
@@ -195,5 +201,13 @@ public class AdminUserServiceImpl implements AdminUserService {
         userRepository.save(user);
 
         return "비밀번호가 초기화되었습니다.";
+    }
+
+    @Override
+    public List<DepartmentSimpleDTO> getAvailableDepartments() {
+        return departmentRepository.findByStatus(DepartmentStatus.AVAILABLE)
+                .stream()
+                .map(d -> new DepartmentSimpleDTO(d.getDepartmentId(), d.getDepartmentName()))
+                .collect(Collectors.toList());
     }
 }

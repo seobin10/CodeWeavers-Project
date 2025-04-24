@@ -1,6 +1,7 @@
 package com.cw.cwu.repository;
 
 import com.cw.cwu.domain.Course;
+import com.cw.cwu.domain.CourseStatus;
 import com.cw.cwu.domain.CourseType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,4 +17,14 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
                                                   @Param("liberal") CourseType liberal);
 
     int countByDepartment_DepartmentId(Integer departmentId);
+
+    // 특정 학과의 모든 과목 조회
+    List<Course> findByDepartment_DepartmentId(Integer departmentId);
+
+    // 공통 과목 (학과 미지정)
+    List<Course> findByDepartmentIsNull();
+
+    // 과목명 중복 체크
+    boolean existsByName(String name);
+
 }

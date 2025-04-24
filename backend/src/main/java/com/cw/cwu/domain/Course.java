@@ -33,5 +33,9 @@ public class Course {
 
     @Column(name = "course_year", nullable = false)
     private Integer year;
+
+    @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private CourseStatus status;
 }
 

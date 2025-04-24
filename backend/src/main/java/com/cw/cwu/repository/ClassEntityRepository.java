@@ -135,7 +135,10 @@ WHERE\s
 
     boolean existsByLectureRoom_IdAndSemester_Id(Integer roomId, Integer semesterId);
 
-    @Query("SELECT COUNT(c) FROM ClassEntity c WHERE c.course.department.departmentId = :departmentId")
-    int countClassesByDepartmentId(@Param("departmentId") Integer departmentId);
+
+    int countByCourse_Department_DepartmentIdAndSemester_IdIn(Integer departmentId, List<Integer> semesterIds);
+
+    @Query("SELECT COUNT(c) > 0 FROM ClassEntity c WHERE c.course.department.departmentId = :departmentId AND c.semester.id IN :semesterIds")
+    boolean existsByCourse_Department_DepartmentIdAndSemester_IdIn(@Param("departmentId") Integer departmentId, @Param("semesterIds") List<Integer> semesterIds);
 
 }
