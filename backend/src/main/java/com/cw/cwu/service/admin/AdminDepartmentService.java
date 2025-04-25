@@ -7,6 +7,8 @@ import com.cw.cwu.dto.DepartmentUpdateRequestDTO;
 import java.util.List;
 
 public interface AdminDepartmentService {
+    List<Integer> resolveRelevantSemesterIds();
+
     List<DepartmentDetailDTO> getAllDepartments();
 
     void createDepartment(DepartmentCreateRequestDTO dto);

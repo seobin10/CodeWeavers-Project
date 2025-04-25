@@ -1,9 +1,6 @@
 package com.cw.cwu.service.admin;
 
-import com.cw.cwu.domain.Department;
-import com.cw.cwu.domain.DepartmentStatus;
-import com.cw.cwu.domain.ScheduleType;
-import com.cw.cwu.domain.UserRole;
+import com.cw.cwu.domain.*;
 import com.cw.cwu.dto.DepartmentCreateRequestDTO;
 import com.cw.cwu.dto.DepartmentDetailDTO;
 import com.cw.cwu.dto.DepartmentUpdateRequestDTO;
@@ -30,6 +27,7 @@ public class AdminDepartmentServiceImpl implements AdminDepartmentService {
     private final UserSemesterService userSemesterService;
     private final AdminScheduleService adminScheduleService;
 
+    @Override
     public List<Integer> resolveRelevantSemesterIds() {
         List<Integer> result = new ArrayList<>();
         try {
@@ -51,7 +49,13 @@ public class AdminDepartmentServiceImpl implements AdminDepartmentService {
 
     @Override
     public List<DepartmentDetailDTO> getAllDepartments() {
-        List<Department> departments = departmentRepository.findAll();
+        List<Department> departments = departmentRepository.findAll().stream()
+                .sorted((d1, d2) -> {
+                    int s1 = d1.getStatus() == DepartmentStatus.UNAVAILABLE ? 1 : 0;
+                    int s2 = d2.getStatus() == DepartmentStatus.UNAVAILABLE ? 1 : 0;
+                    return Integer.compare(s1, s2);
+                })
+                .toList();
 
         return departments.parallelStream().map(dept -> {
             Integer id = dept.getDepartmentId();
@@ -117,7 +121,17 @@ public class AdminDepartmentServiceImpl implements AdminDepartmentService {
 
         if (dto.getNewStatus() != null) {
             dept.setStatus(dto.getNewStatus());
+
+            // 연동된 과목 상태 동기화
+            List<Course> courses = courseRepository.findByDepartment_DepartmentId(dept.getDepartmentId());
+            for (Course course : courses) {
+                course.setStatus(dto.getNewStatus() == DepartmentStatus.AVAILABLE
+                        ? CourseStatus.AVAILABLE
+                        : CourseStatus.UNAVAILABLE);
+            }
+            courseRepository.saveAll(courses);
         }
+
 
         departmentRepository.save(dept);
     }
