@@ -6,7 +6,6 @@ import AlertModal from "../components/AlertModal";
 import ConfirmModal from "../components/ConfirmModal";
 import { getAuthHeader } from "../util/authHeader";
 import Navbar from "../components/Navbar";
-
 const QnaDataPage = () => {
   const navigate = useNavigate();
   const [alertModalOpen, setAlertModalOpen] = useState(false);
@@ -142,6 +141,8 @@ const QnaDataPage = () => {
 
               <div className="whitespace-pre-line leading-relaxed text-base sm:text-lg md:text-lg transition-all duration-300">
                 {contentInfo.content?.replace(/\n/g, "\n")}
+                <img src="/images/u1.jpg" style={{ opacity: 0.8 }} className = "mt-10" alt="notice" />
+
               </div>
             </>
           ) : (

@@ -30,7 +30,7 @@ export const getList = async (id) => {
   }
 };
 
-// 강의 평가 저장 API
+// 강의 평가 제출
 export const submitEvaluation = async (
   userId,
   questionId,
@@ -54,6 +54,7 @@ export const submitEvaluation = async (
   return await axios.post(url, data, config);
 };
 
+
 // 강의 평가 참여 상태 불러오기
 export const getStatus = async (id) => {
   try {
@@ -67,11 +68,6 @@ export const getStatus = async (id) => {
   }
 };
 
-// 강의 평가 제출
-export const submitAnswer = (userId, questionId, classId, data) => {
-  const url = `${prefix}/savedata?userId=${userId}&questionId=${questionId}&classId=${classId}`;
-  return axios.post(url, data, getAuthHeader());
-};
 
 /* 교수 */
 
