@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import "../../src/App.css"
+import { useEffect, useRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { setUserId as setUserIdAction } from "../slices/authSlice";
 import {
@@ -7,8 +8,12 @@ import {
   fetchTotalRecord,
 } from "../api/studentGradeApi";
 import { convertGradeLabel } from "../util/gradeUtil";
+import { useReactToPrint } from "react-to-print";
 
 const AllGradePage = () => {
+  const contentRef = useRef(null);
+  const reactToPrintFn = useReactToPrint({ contentRef });
+
   const dispatch = useDispatch();
   const userId = useSelector((state) => state.auth.userId);
 
@@ -55,13 +60,17 @@ const AllGradePage = () => {
   return (
     <div className="max-w-7xl mx-auto p-8 space-y-10">
       {/* 전체 성적 테이블 */}
+      <button onClick={() => reactToPrintFn()} className="float-right bg-gray-500 py-1 px-3 text-white rounded-md">🖨인쇄</button>
+      <div ref={contentRef}>
       <div className="bg-white shadow-md rounded-md p-6">
         <h2 className="text-2xl font-semibold text-gray-700 mb-4">전체 성적</h2>
-  
+
         {message && (
-          <div className="text-red-500 text-center font-medium mb-6">{message}</div>
+          <div className="text-red-500 text-center font-medium mb-6">
+            {message}
+          </div>
         )}
-  
+
         <table className="min-w-full table-auto border border-gray-200 rounded-md text-sm">
           <thead className="bg-gray-50 text-gray-600 uppercase text-sm leading-normal">
             <tr className="text-center">
@@ -94,12 +103,14 @@ const AllGradePage = () => {
                   </td>
                   <td className="py-2 px-4 w-1/5">{r.enrolled ?? "-"}</td>
                   <td className="py-2 px-4 w-1/5">{r.earned ?? "-"}</td>
-                  <td className="py-2 px-4 w-1/5">{r.gpa?.toFixed(2) ?? "-"}</td>
+                  <td className="py-2 px-4 w-1/5">
+                    {r.gpa?.toFixed(2) ?? "-"}
+                  </td>
                 </tr>
               ))
             )}
           </tbody>
-  
+
           {/* 총합 표시 (tfoot) */}
           {totalRecord && (
             <tfoot className="bg-gray-50 text-gray-700 text-sm">
@@ -113,31 +124,39 @@ const AllGradePage = () => {
                 </td>
                 <td className="py-2 px-4 w-1/5">
                   전체 평균평점:{" "}
-                  <span className="font-bold">{totalRecord.totalGpa?.toFixed(2)}</span>
+                  <span className="font-bold">
+                    {totalRecord.totalGpa?.toFixed(2)}
+                  </span>
                 </td>
               </tr>
             </tfoot>
           )}
         </table>
       </div>
-  
+
       {/* 과목별 성적 테이블 */}
       <div className="bg-white shadow-md rounded-md p-6">
-        <h2 className="text-2xl font-semibold text-gray-700 mb-4">과목별 성적</h2>
-  
+        <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+          과목별 성적
+        </h2>
+
         {selectedSemesterId !== null && (
           <div className="flex items-center gap-2 text-gray-600 text-base mb-6">
             <span className="text-gray-500">📅</span>
             <span className="font-semibold">
-              {records.find((r) => r.semester.id === selectedSemesterId)?.semester.year}년{" "}
-              {records.find((r) => r.semester.id === selectedSemesterId)?.semester.term ===
-              "FIRST"
+              {
+                records.find((r) => r.semester.id === selectedSemesterId)
+                  ?.semester.year
+              }
+              년{" "}
+              {records.find((r) => r.semester.id === selectedSemesterId)
+                ?.semester.term === "FIRST"
                 ? "1학기"
                 : "2학기"}
             </span>
           </div>
         )}
-  
+
         {selectedSemesterId === null ? (
           <div className="text-gray-400 text-center font-medium">
             위 성적 테이블에서 학기를 클릭하여 조회할 수 있습니다.
@@ -174,6 +193,7 @@ const AllGradePage = () => {
             </tbody>
           </table>
         )}
+        </div>
       </div>
     </div>
   );

@@ -48,4 +48,9 @@ public class LeaveRequest {
 
     @Column(name = "denial_reason")
     private String denialReason;
+
+    // 변경된 값을 반영하는 메서드
+    public void changeStatus(String status){this.status = RequestStatus.valueOf(status);}
+    public void changeDenialReason(String denialReason){this.denialReason=denialReason;}
+    public void changeApprovedDate() {this.approvedDate = LocalDate.now();}
 }

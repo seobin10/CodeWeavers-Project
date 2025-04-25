@@ -37,8 +37,8 @@ public class AdminGradeController {
                 adminGradeService.getGradeStatusSummary(semesterId, departmentId)
         );
     }
-
-    @PreAuthorize("hasRole('ADMIN')")
+    // userInfo 학적상태 처리 위해 권한 제거
+    // @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/current-semester")
     public ResponseEntity<?> getCurrentSemester() {
         return ResponseEntity.ok(adminGradeService.getCurrentSemesterDTO());

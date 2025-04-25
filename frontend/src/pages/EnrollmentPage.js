@@ -55,6 +55,15 @@ const EnrollmentPage = () => {
   }, [navigate]);
 
   useEffect(() => {
+    const status = sessionStorage.getItem("studentStatus");
+    if (status === "LEAVE") {
+      navigate("/main/period-expired", {
+        state: { message: "휴학 상태에서는 수강신청할 수 없습니다." },
+      });
+    }
+  }, []);
+  
+  useEffect(() => {
     const fetchSemesterInfo = async () => {
       try {
         const data = await getEnrollmentSemesterInfo();

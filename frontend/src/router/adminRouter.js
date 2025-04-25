@@ -9,6 +9,8 @@ const AdminLectureRoomPage = lazy(() => import("../pages/Admin/AdminLectureRoomP
 const AdminBuildingPage = lazy(() => import("../pages/Admin/AdminBuildingPage"));
 const AdminDeparmentPage = lazy(() => import("../pages/Admin/AdminDepartmentPage"));
 const AdminCoursePage = lazy(() => import("../pages/Admin/AdminCoursePage"));
+const AdminLeavePage = lazy(() => import("../pages/Admin/AdminLeavePage"));
+const AdminReturnPage = lazy(() => import("../pages/Admin/AdminReturnPage"));
 
 const adminRouter = [
   {
@@ -81,7 +83,26 @@ const adminRouter = [
       </RoleGuard>
     ),
   },
-
+  {
+    path: "admin/leave",
+    element: (
+      <RoleGuard allowedRoles={["ADMIN"]}>
+        <Suspense fallback={<Loading />}>
+          <AdminLeavePage />
+        </Suspense>
+      </RoleGuard>
+    ),
+  },
+  {
+    path: "admin/return",
+    element: (
+      <RoleGuard allowedRoles={["ADMIN"]}>
+        <Suspense fallback={<Loading />}>
+          <AdminReturnPage />
+        </Suspense>
+      </RoleGuard>
+    ),
+  },
 
 ];
 
