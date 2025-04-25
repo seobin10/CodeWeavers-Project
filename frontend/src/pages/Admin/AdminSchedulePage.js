@@ -107,14 +107,18 @@ const AdminSchedulePage = () => {
 
   const handleUpdateSemester = async () => {
     try {
-      await updateSemester(editSemester.semesterId, editSemester);
-      dispatch(showModal("학기 수정 완료"));
-      setIsEditModalOpen(false);
-      fetchSemesters();
-    } catch {
-      dispatch(showModal({ message: "학기 수정 실패", type: "error" }));
+      const res = await updateSemester(editSemester.semesterId, editSemester);
+      if (res.status === 200) {
+        dispatch(showModal("학기 수정 완료"));
+        setIsEditModalOpen(false);
+        fetchSemesters();
+      }
+    } catch (err) {
+      const message = err.response?.data || "학기 수정 실패";
+      dispatch(showModal({ message, type: "error" }));
     }
   };
+
 
   const handleDeleteSemester = async (semester) => {
     openConfirm(
@@ -126,12 +130,18 @@ const AdminSchedulePage = () => {
           await deleteSemester(semester.semesterId);
           dispatch(showModal("학기가 삭제되었습니다."));
           fetchSemesters();
-        } catch {
-          dispatch(showModal({ message: "학기 삭제 실패", type: "error" }));
+        } catch (err) {
+          dispatch(
+            showModal({
+              message: err.response?.data || "학기 삭제 실패",
+              type: "error",
+            })
+          );
         }
       }
     );
   };
+
 
   const getLabel = (type) =>
     SCHEDULE_TYPES.find((t) => t.type === type)?.label || type;

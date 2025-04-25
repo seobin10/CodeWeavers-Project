@@ -2,6 +2,8 @@ package com.cw.cwu.service.admin;
 
 import com.cw.cwu.dto.*;
 
+import java.util.List;
+
 public interface AdminUserService {
 
    /**
@@ -41,4 +43,6 @@ public interface AdminUserService {
     * @return 성공 또는 실패 메시지
     */
    String resetPassword(String userId);
+
+    List<DepartmentSimpleDTO> getAvailableDepartments();
 }

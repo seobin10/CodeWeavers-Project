@@ -25,7 +25,7 @@ const BasicLayout = () => {
       <header className="bg-white/80 backdrop-blur-md shadow-md p-4 flex justify-between items-center">
         <Link to="/main" className="flex items-center space-x-3">
           <img src="/images/eonLogo.jpg" alt="학교 로고" className="h-14" />
-          <div className="text-blue-800 font-extrabold text-2xl leading-tight">
+          <div className="text-blue-800 font-extrabold text-3xl leading-tight">
             <div>이온대학교</div>
             <div className="text-xs font-medium tracking-wider">
               EON UNIVERSITY
@@ -107,6 +107,26 @@ const BasicLayout = () => {
                 to="/main/admin/user-list"
                 label="👥 사용자 관리"
                 currentPath={location.pathname}
+              />
+              <ToggleMenu
+                title="🏫 학과/과목 관리"
+                links={[
+                  { to: "/main/admin/departments", label: "학과 관리" },
+                  { to: "/main/admin/courses", label: "과목 관리" },
+                ]}
+                currentPath={location.pathname}
+                hoveredMenu={hoveredMenu}
+                setHoveredMenu={setHoveredMenu}
+              />
+              <ToggleMenu
+                title="🏢 시설 관리"
+                links={[
+                  { to: "/main/admin/buildings", label: "건물 관리" },
+                  { to: "/main/admin/lecture-rooms", label: "강의실 관리" },
+                ]}
+                currentPath={location.pathname}
+                hoveredMenu={hoveredMenu}
+                setHoveredMenu={setHoveredMenu}
               />
               <SimpleLink
                 to="/main/admin/users"

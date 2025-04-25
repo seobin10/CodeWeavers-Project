@@ -155,11 +155,18 @@ const ProfessorClassCreatePage = ({ onSuccess, professorId }) => {
             onChange={handleChange}
           >
             <option value="">강의실 선택</option>
-            {rooms.map((r) => (
-              <option key={r.roomId} value={r.roomId}>
-                {r.buildingName} {r.roomName}
-              </option>
-            ))}
+            {[...rooms]
+              .sort((a, b) => {
+                if (a.buildingName !== b.buildingName) {
+                  return a.buildingName.localeCompare(b.buildingName);
+                }
+                return a.roomName.localeCompare(b.roomName);
+              })
+              .map((r) => (
+                <option key={r.roomId} value={r.roomId}>
+                  {r.buildingName} {r.roomName}
+                </option>
+              ))}
           </select>
         </div>
 

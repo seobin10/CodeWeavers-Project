@@ -19,4 +19,8 @@ public class Building {
 
     @Column(name = "building_name", nullable = false, unique = true, length = 50)
     private String name;
+
+    @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private BuildingStatus status;
 }

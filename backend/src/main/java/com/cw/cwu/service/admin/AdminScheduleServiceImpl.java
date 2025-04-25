@@ -3,6 +3,7 @@ package com.cw.cwu.service.admin;
 import com.cw.cwu.domain.ScheduleSetting;
 import com.cw.cwu.domain.ScheduleType;
 import com.cw.cwu.domain.Semester;
+import com.cw.cwu.domain.SemesterTerm;
 import com.cw.cwu.dto.ScheduleRequestDTO;
 import com.cw.cwu.dto.ScheduleResponseDTO;
 import com.cw.cwu.dto.SemesterRequestDTO;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Transactional
 @Service
@@ -45,35 +47,57 @@ public class AdminScheduleServiceImpl implements AdminScheduleService {
     @Override
     public List<SemesterResponseDTO> getAllSemesters() {
         return semesterRepository.findAll().stream()
-                .map(s -> new SemesterResponseDTO(
-                        s.getId(),
-                        s.getYear(),
-                        s.getTerm(),
-                        s.getStartDate(),
-                        s.getEndDate()
-                ))
+                .sorted((s1, s2) -> {
+                    int yearCompare = s2.getYear() - s1.getYear();
+                    if (yearCompare != 0) return yearCompare;
+
+                    if (s1.getTerm() == SemesterTerm.FIRST && s2.getTerm() == SemesterTerm.SECOND) return -1;
+                    if (s1.getTerm() == SemesterTerm.SECOND && s2.getTerm() == SemesterTerm.FIRST) return 1;
+                    return 0;
+                })
+                .map(s -> {
+                    boolean isLinked = scheduleSettingRepository.existsBySemesterId(s.getId());
+                    return new SemesterResponseDTO(
+                            s.getId(),
+                            s.getYear(),
+                            s.getTerm(),
+                            s.getStartDate(),
+                            s.getEndDate()
+                    );
+                })
                 .toList();
     }
+
+
 
     @Override
     public void updateSemester(Integer semesterId, SemesterRequestDTO dto) {
         Semester semester = semesterRepository.findById(semesterId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 학기를 찾을 수 없습니다."));
 
-        semester.setYear(dto.getYear());
-        semester.setTerm(dto.getTerm());
+        boolean isLinkedToSchedule = scheduleSettingRepository.existsBySemesterId(semesterId);
+
+        if (isLinkedToSchedule) {
+            if (!semester.getYear().equals(dto.getYear()) || !semester.getTerm().equals(dto.getTerm())) {
+                throw new IllegalStateException("해당 학기는 이미 학사 일정에 사용되고 있어 연도 또는 학기 정보는 수정할 수 없습니다.");
+            }
+        } else {
+            semester.setYear(dto.getYear());
+            semester.setTerm(dto.getTerm());
+        }
+
         semester.setStartDate(dto.getStartDate());
         semester.setEndDate(dto.getEndDate());
 
         semesterRepository.save(semester);
     }
 
+
     @Override
     public void deleteSemester(Integer semesterId) {
         if (scheduleSettingRepository.existsBySemesterId(semesterId)) {
             throw new IllegalStateException("해당 학기에 연결된 일정이 있어 삭제할 수 없습니다.");
         }
-
         semesterRepository.deleteById(semesterId);
     }
 
@@ -148,19 +172,31 @@ public class AdminScheduleServiceImpl implements AdminScheduleService {
         return currentSemester.getId();
     }
 
-
-    // 수강신청 학기 찾기
+    // 현재 날짜가 포함된 특정 일정의 학기에 해당하는 semesterId 반환
     @Override
-    public Integer getEnrollSemesterId() {
+    public Integer getSemesterIdByScheduleType(ScheduleType type) {
         LocalDateTime now = LocalDateTime.now();
 
         ScheduleSetting setting = scheduleSettingRepository
-                .findByScheduleTypeAndStartDateBeforeAndEndDateAfter(
-                        ScheduleType.ENROLL, now, now)
-                .orElseThrow(() -> new IllegalStateException("현재 수강신청 기간이 아닙니다."));
+                .findByScheduleTypeAndStartDateBeforeAndEndDateAfter(type, now, now)
+                .orElseThrow(() -> new IllegalStateException("현재 " + type.name() + " 일정이 아닙니다."));
 
         return setting.getSemester().getId();
     }
 
+    // 수강신청 학기 찾기
+    @Override
+    public Integer getEnrollSemesterId() {
+        return getSemesterIdByScheduleType(ScheduleType.ENROLL);
+    }
+
+
+    // 다음 학기(오늘 이후 시작) ID 조회
+    @Override
+    public Optional<Integer> getUpcomingSemesterId() {
+        LocalDate today = LocalDate.now();
+        return semesterRepository.findFirstByStartDateAfterOrderByStartDateAsc(today)
+                .map(Semester::getId);
+    }
 
 }

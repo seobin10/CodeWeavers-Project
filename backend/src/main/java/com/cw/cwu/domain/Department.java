@@ -18,4 +18,8 @@ public class Department {
 
     @Column(name = "department_name", unique = true, nullable = false)
     private String departmentName;
+
+    @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private DepartmentStatus status;
 }
