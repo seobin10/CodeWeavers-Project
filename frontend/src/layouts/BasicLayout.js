@@ -98,6 +98,13 @@ const BasicLayout = () => {
                 hoveredMenu={hoveredMenu}
                 setHoveredMenu={setHoveredMenu}
               />
+                            <ToggleMenu
+                title="✏️ 학적 관리 "
+                links={[{ to: "/main/leavereturn", label: "휴 · 복학 신청" }]}
+                currentPath={location.pathname}
+                hoveredMenu={hoveredMenu}
+                setHoveredMenu={setHoveredMenu}
+              />
             </>
           )}
 
@@ -133,11 +140,22 @@ const BasicLayout = () => {
                 label="🗓 일정 관리"
                 currentPath={location.pathname}
               />
+                            <ToggleMenu
+                title="✏️ 학적 관리 "
+                links={[
+                  { to: "/main/admin/leave", label: "휴학 승인" },
+                  { to: "/main/admin/return", label: "복학 승인" },
+                ]}
+                currentPath={location.pathname}
+                hoveredMenu={hoveredMenu}
+                setHoveredMenu={setHoveredMenu}
+              />
               <SimpleLink
                 to="/main/admin/grades"
                 label="📚 성적 집계"
                 currentPath={location.pathname}
               />
+              
             </>
           )}
 

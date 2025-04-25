@@ -83,6 +83,12 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Integer>
     // 학생 + 학기의 조건에 맞는 수강 정보 리스트를 조회 (2025.04.16 추가)
     List<Enrollment> findByStudentAndEnrolledClassEntity_Semester(User student, Semester current);
 
+    // 해당 학번의 강의 지우기 (2025.04.21 추가)
+    void deleteByStudent_UserId(String studentId);
+
+    // 아이디 찾기(2025.04.25 추가)
+    List<Enrollment> findByStudent_UserId(String studentId);
+
 
 
 }

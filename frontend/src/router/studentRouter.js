@@ -13,6 +13,7 @@ const SchedulePage = lazy(() => import("../pages/SchedulePage"));
 const ChangepwPage = lazy(() => import("../components/ChangepwPage"));
 const EvaluationPage = lazy(() => import("../pages/EvaluationPage"));
 const EvaluationListPage = lazy(() => import("../pages/EvaluationListPage"));
+const LeaveReturnPage = lazy(() => import("../pages/LeaveReturnPage"));
 const studentRouter = [
   {
     path: "grades",
@@ -92,6 +93,14 @@ const studentRouter = [
           <EvaluationPage />
         </Suspense>
       </RoleGuard>
+    ),
+  },
+  {
+    path: "LeaveReturn",
+    element: (
+      <Suspense fallback={<Loading />}>
+        <LeaveReturnPage />
+      </Suspense>
     ),
   },
 ];
