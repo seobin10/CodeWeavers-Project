@@ -36,8 +36,8 @@ public class AdminUserController {
     }
 
     @GetMapping("/departments")
-    public ResponseEntity<List<Department>> getDepartments() {
-        return ResponseEntity.ok(departmentRepository.findAll());
+    public ResponseEntity<List<DepartmentSimpleDTO>> getDepartments() {
+        return ResponseEntity.ok(adminUserService.getAvailableDepartments());
     }
 
     @PreAuthorize("hasRole('ADMIN')")

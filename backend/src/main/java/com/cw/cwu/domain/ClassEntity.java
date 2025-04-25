@@ -50,7 +50,7 @@ public class ClassEntity {
 
     @ToString.Exclude
     @ManyToOne
-    @JoinColumn(name = "room_id", referencedColumnName = "room_id", nullable = true)
+    @JoinColumn(name = "room_id", referencedColumnName = "room_id", nullable = false)
     private LectureRoom lectureRoom;
 }
 

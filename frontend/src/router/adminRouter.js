@@ -5,6 +5,10 @@ import Loading from "../components/Loading";
 const AdminUserListPage = lazy(() => import("../pages/Admin/AdminUserListPage"));
 const AdminSchedulePage = lazy(() => import("../pages/Admin/AdminSchedulePage"));
 const AdminGradePage = lazy(() => import("../pages/Admin/AdminGradePage")); 
+const AdminLectureRoomPage = lazy(() => import("../pages/Admin/AdminLectureRoomPage"));
+const AdminBuildingPage = lazy(() => import("../pages/Admin/AdminBuildingPage"));
+const AdminDeparmentPage = lazy(() => import("../pages/Admin/AdminDepartmentPage"));
+const AdminCoursePage = lazy(() => import("../pages/Admin/AdminCoursePage"));
 
 const adminRouter = [
   {
@@ -37,6 +41,48 @@ const adminRouter = [
       </RoleGuard>
     ),
   },
+  {
+    path: "admin/lecture-rooms",
+    element: (
+      <RoleGuard allowedRoles={["ADMIN"]}>
+        <Suspense fallback={<Loading />}>
+          <AdminLectureRoomPage />
+        </Suspense>
+      </RoleGuard>
+    ),
+  },
+  {
+    path: "admin/buildings",
+    element: (
+      <RoleGuard allowedRoles={["ADMIN"]}>
+        <Suspense fallback={<Loading />}>
+          <AdminBuildingPage />
+        </Suspense>
+      </RoleGuard>
+    ),
+  },
+  {
+    path: "admin/departments",
+    element: (
+      <RoleGuard allowedRoles={["ADMIN"]}>
+        <Suspense fallback={<Loading />}>
+          <AdminDeparmentPage />
+        </Suspense>
+      </RoleGuard>
+    ),
+  },
+  {
+    path: "admin/courses",
+    element: (
+      <RoleGuard allowedRoles={["ADMIN"]}>
+        <Suspense fallback={<Loading />}>
+          <AdminCoursePage />
+        </Suspense>
+      </RoleGuard>
+    ),
+  },
+
+
 ];
 
 export default adminRouter;

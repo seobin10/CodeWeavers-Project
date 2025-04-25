@@ -7,6 +7,7 @@ import com.cw.cwu.dto.SemesterRequestDTO;
 import com.cw.cwu.dto.SemesterResponseDTO;
 import com.cw.cwu.service.admin.AdminScheduleService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -29,20 +30,30 @@ public class AdminScheduleController {
         return ResponseEntity.ok("학기가 등록되었습니다.");
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/semester/{semesterId}")
     public ResponseEntity<String> updateSemester(
             @PathVariable("semesterId") Integer semesterId,
             @RequestBody SemesterRequestDTO dto) {
-        adminScheduleService.updateSemester(semesterId, dto);
-        return ResponseEntity.ok("학기가 수정되었습니다.");
+        try {
+            adminScheduleService.updateSemester(semesterId, dto);
+            return ResponseEntity.ok("학기가 수정되었습니다.");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (DataIntegrityViolationException e) {
+            return ResponseEntity.badRequest().body("해당 연도의 학기가 이미 존재합니다.");
+        }
     }
+
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/semester/{semesterId}")
     public ResponseEntity<String> deleteSemester(@PathVariable("semesterId") Integer semesterId) {
-        adminScheduleService.deleteSemester(semesterId);
-        return ResponseEntity.ok("학기가 삭제되었습니다.");
+        try {
+            adminScheduleService.deleteSemester(semesterId);
+            return ResponseEntity.ok("학기가 삭제되었습니다.");
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
 

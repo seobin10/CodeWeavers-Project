@@ -14,7 +14,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -71,6 +70,27 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
             }
         }
 
+        if (lectureRoomId != null) {
+            LectureRoom room = lectureRoomRepository.findById(lectureRoomId).orElse(null);
+            if (room == null) {
+                return "강의실 정보를 찾을 수 없습니다.";
+            }
+
+            if (room.getStatus() == LectureRoomStatus.UNAVAILABLE) {
+                return "선택한 강의실은 현재 사용 중지 상태입니다.";
+            }
+
+            List<ClassEntity> roomClasses = classEntityRepository
+                    .findByLectureRoom_IdAndDayAndSemester(lectureRoomId, day, semester);
+
+            for (ClassEntity cls : roomClasses) {
+                if (!cls.getId().equals(classIdToExclude) &&
+                        isTimeOverlap(cls.getStartTime(), cls.getEndTime(), startTime, endTime)) {
+                    return "해당 강의실은 이미 사용 중입니다.";
+                }
+            }
+        }
+
         return null;
     }
 
@@ -93,8 +113,9 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
         validateCurrentSemester(currentSemester);
 
         // 기본 검증
-        if (dto.getCourseId() == null || !courseRepository.existsById(dto.getCourseId())) {
-            return "존재하지 않는 과목입니다.";
+        Course course = courseRepository.findById(dto.getCourseId()).orElse(null);
+        if (course == null || course.getStatus() == CourseStatus.UNAVAILABLE) {
+            return "해당 과목은 현재 개설되지 않았습니다.";
         }
 
         if (dto.getLectureRoomId() == null || !lectureRoomRepository.existsById(dto.getLectureRoomId())) {
@@ -117,7 +138,6 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
         if (validationError != null) return validationError;
 
         LectureRoom lectureRoom = lectureRoomRepository.findById(dto.getLectureRoomId()).get();
-        Course course = courseRepository.findById(dto.getCourseId()).get();
 
         ClassEntity classEntity = ClassEntity.builder()
                 .course(course)
@@ -240,7 +260,9 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
 
         Integer deptId = professor.getDepartment().getDepartmentId();
 
-        List<Course> courses = courseRepository.findCoursesByDepartmentOrLiberal(deptId, CourseType.LIBERAL);
+        List<Course> courses = courseRepository.findAvailableCoursesByDepartmentOrLiberal(
+                deptId, CourseType.LIBERAL, CourseStatus.AVAILABLE
+        );
 
         return courses.stream()
                 .map(c -> new CourseSimpleDTO(c.getId(), c.getName(), c.getType(), c.getYear()))
@@ -254,6 +276,7 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
         List<LectureRoom> allRooms = lectureRoomRepository.findAll();
 
         return allRooms.stream()
+                .filter(room -> room.getStatus() == LectureRoomStatus.AVAILABLE)
                 .filter(room -> {
                     List<ClassEntity> classes = classEntityRepository.findByLectureRoom_IdAndDayAndSemester(
                             room.getId(), day, semester

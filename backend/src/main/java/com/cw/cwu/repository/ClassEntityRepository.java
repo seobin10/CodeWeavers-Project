@@ -129,4 +129,19 @@ WHERE\s
     @Query("select c from ClassEntity c where c.id = :classId")
     Optional<ClassEntity> findByClassIdWithLock(@Param("classId") Integer classId);
 
+    List<ClassEntity> findByLectureRoom_IdAndSemester_Id(Integer roomId, Integer semesterId);
+
+    boolean existsByLectureRoom_Id(Integer lectureRoomId);
+
+    boolean existsByLectureRoom_IdAndSemester_Id(Integer roomId, Integer semesterId);
+
+
+    int countByCourse_Department_DepartmentIdAndSemester_IdIn(Integer departmentId, List<Integer> semesterIds);
+
+    @Query("SELECT COUNT(c) > 0 FROM ClassEntity c WHERE c.course.department.departmentId = :departmentId AND c.semester.id IN :semesterIds")
+    boolean existsByCourse_Department_DepartmentIdAndSemester_IdIn(@Param("departmentId") Integer departmentId, @Param("semesterIds") List<Integer> semesterIds);
+
+
+    @Query("SELECT COUNT(c) > 0 FROM ClassEntity c WHERE c.course.id = :courseId AND c.semester.id IN :semesterIds")
+    boolean existsByCourse_IdAndSemester_IdIn(@Param("courseId") Integer courseId, @Param("semesterIds") List<Integer> semesterIds);
 }
