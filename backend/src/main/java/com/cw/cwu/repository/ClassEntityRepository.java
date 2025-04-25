@@ -141,4 +141,7 @@ WHERE\s
     @Query("SELECT COUNT(c) > 0 FROM ClassEntity c WHERE c.course.department.departmentId = :departmentId AND c.semester.id IN :semesterIds")
     boolean existsByCourse_Department_DepartmentIdAndSemester_IdIn(@Param("departmentId") Integer departmentId, @Param("semesterIds") List<Integer> semesterIds);
 
+
+    @Query("SELECT COUNT(c) > 0 FROM ClassEntity c WHERE c.course.id = :courseId AND c.semester.id IN :semesterIds")
+    boolean existsByCourse_IdAndSemester_IdIn(@Param("courseId") Integer courseId, @Param("semesterIds") List<Integer> semesterIds);
 }

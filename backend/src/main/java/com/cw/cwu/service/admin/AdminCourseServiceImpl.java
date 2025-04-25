@@ -1,17 +1,18 @@
 package com.cw.cwu.service.admin;
 
-import com.cw.cwu.domain.Course;
-import com.cw.cwu.domain.CourseType;
-import com.cw.cwu.domain.Department;
+import com.cw.cwu.domain.*;
 import com.cw.cwu.dto.CourseCreateRequestDTO;
 import com.cw.cwu.dto.CourseInfoDTO;
 import com.cw.cwu.dto.CourseUpdateRequestDTO;
+import com.cw.cwu.repository.ClassEntityRepository;
 import com.cw.cwu.repository.CourseRepository;
 import com.cw.cwu.repository.DepartmentRepository;
+import com.cw.cwu.service.user.UserSemesterService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -21,6 +22,29 @@ public class AdminCourseServiceImpl implements AdminCourseService {
 
     private final CourseRepository courseRepository;
     private final DepartmentRepository departmentRepository;
+    private final UserSemesterService userSemesterService;
+    private final AdminScheduleService adminScheduleService;
+    private final ClassEntityRepository classEntityRepository;
+
+    private List<Integer> resolveRelevantSemesterIds() {
+        List<Integer> result = new ArrayList<>();
+        try {
+            result.add(userSemesterService.getCurrentSemester().getId());
+        } catch (Exception ignored) {}
+
+        try {
+            Integer openSemester = adminScheduleService.getSemesterIdByScheduleType(ScheduleType.CLASS);
+            if (!result.contains(openSemester)) result.add(openSemester);
+        } catch (Exception ignored) {}
+
+        adminScheduleService.getUpcomingSemesterId()
+                .ifPresent(id -> {
+                    if (!result.contains(id)) result.add(id);
+                });
+
+        return result;
+    }
+
 
     @Override
     public List<CourseInfoDTO> getCoursesByFilter(String departmentId) {
@@ -37,6 +61,15 @@ public class AdminCourseServiceImpl implements AdminCourseService {
             }
         }
 
+        // 상태 기준 정렬
+        courses = courses.stream()
+                .sorted((c1, c2) -> {
+                    int s1 = c1.getStatus() == CourseStatus.UNAVAILABLE ? 1 : 0;
+                    int s2 = c2.getStatus() == CourseStatus.UNAVAILABLE ? 1 : 0;
+                    return Integer.compare(s1, s2);
+                })
+                .toList();
+
         return courses.stream()
                 .map(course -> new CourseInfoDTO(
                         course.getId(),
@@ -48,6 +81,7 @@ public class AdminCourseServiceImpl implements AdminCourseService {
                         course.getDepartment() != null ? course.getDepartment().getDepartmentId() : null
                 )).toList();
     }
+
 
     @Override
     public void createCourse(CourseCreateRequestDTO dto) {
@@ -130,6 +164,14 @@ public class AdminCourseServiceImpl implements AdminCourseService {
                 throw new IllegalArgumentException("학년은 1~4학년까지만 설정할 수 있습니다.");
             }
             course.setYear(dto.getNewCourseYear());
+        }
+
+        if (dto.getNewStatus() == CourseStatus.UNAVAILABLE) {
+            List<Integer> relevantSemesterIds = resolveRelevantSemesterIds();
+            boolean hasClass = classEntityRepository.existsByCourse_IdAndSemester_IdIn(id, relevantSemesterIds);
+            if (hasClass) {
+                throw new IllegalStateException("이 과목은 현재 강의가 등록되어 있어 운영을 중지할 수 없습니다.");
+            }
         }
 
 

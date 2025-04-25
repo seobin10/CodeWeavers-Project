@@ -113,8 +113,9 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
         validateCurrentSemester(currentSemester);
 
         // 기본 검증
-        if (dto.getCourseId() == null || !courseRepository.existsById(dto.getCourseId())) {
-            return "존재하지 않는 과목입니다.";
+        Course course = courseRepository.findById(dto.getCourseId()).orElse(null);
+        if (course == null || course.getStatus() == CourseStatus.UNAVAILABLE) {
+            return "해당 과목은 현재 개설되지 않았습니다.";
         }
 
         if (dto.getLectureRoomId() == null || !lectureRoomRepository.existsById(dto.getLectureRoomId())) {
@@ -137,7 +138,6 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
         if (validationError != null) return validationError;
 
         LectureRoom lectureRoom = lectureRoomRepository.findById(dto.getLectureRoomId()).get();
-        Course course = courseRepository.findById(dto.getCourseId()).get();
 
         ClassEntity classEntity = ClassEntity.builder()
                 .course(course)
@@ -260,7 +260,9 @@ public class ProfessorClassServiceImpl implements ProfessorClassService {
 
         Integer deptId = professor.getDepartment().getDepartmentId();
 
-        List<Course> courses = courseRepository.findCoursesByDepartmentOrLiberal(deptId, CourseType.LIBERAL);
+        List<Course> courses = courseRepository.findAvailableCoursesByDepartmentOrLiberal(
+                deptId, CourseType.LIBERAL, CourseStatus.AVAILABLE
+        );
 
         return courses.stream()
                 .map(c -> new CourseSimpleDTO(c.getId(), c.getName(), c.getType(), c.getYear()))

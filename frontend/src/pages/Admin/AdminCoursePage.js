@@ -1,16 +1,18 @@
+// 리팩토링된 AdminCoursePage.jsx (ProfessorGradePage 스타일에 맞춤)
+
 import React, { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import {
   getCoursesByFilter,
   createCourse,
   updateCourse,
   deleteCourse,
 } from "../../api/adminCourseApi";
-import { useDispatch } from "react-redux";
+import { getAllDepartments } from "../../api/adminDepartmentApi";
 import { showModal } from "../../slices/modalSlice";
 import useConfirmModal from "../../hooks/useConfirmModal";
-import BaseModal from "../../components/BaseModal";
 import PageComponent from "../../components/PageComponent";
-import { getAllDepartments } from "../../api/adminDepartmentApi";
+import BaseModal from "../../components/BaseModal";
 
 const AdminCoursePage = () => {
   const dispatch = useDispatch();
@@ -19,30 +21,31 @@ const AdminCoursePage = () => {
   const [courses, setCourses] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [selectedDept, setSelectedDept] = useState("");
-  const [form, setForm] = useState({
-    name: "",
-    type: "MAJOR",
-    credit: 1,
-    year: 1,
-    status: "AVAILABLE",
-    departmentId: "",
-  });
-  const [editTarget, setEditTarget] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const fetchCourses = async () => {
-    if (!selectedDept) return;
-    const res = await getCoursesByFilter(selectedDept);
-    setCourses(res.data);
-  };
+  const [form, setForm] = useState({
+    name: "",
+    type: "MAJOR",
+    credit: 3,
+    year: 1,
+    departmentId: "",
+  });
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editTarget, setEditTarget] = useState(null);
 
   const fetchDepartments = async () => {
     const res = await getAllDepartments();
     setDepartments(res.data);
     if (res.data.length > 0) setSelectedDept(String(res.data[0].departmentId));
+  };
+
+  const fetchCourses = async () => {
+    if (!selectedDept) return;
+    const res = await getCoursesByFilter(selectedDept);
+    setCourses(res.data);
   };
 
   useEffect(() => {
@@ -71,6 +74,16 @@ const AdminCoursePage = () => {
 
   const handleSubmit = async () => {
     try {
+      if (form.type === "MAJOR" && !form.departmentId) {
+        dispatch(
+          showModal({
+            message: "전공 과목은 학과를 선택해야 합니다.",
+            type: "error",
+          })
+        );
+        return;
+      }
+
       if (isEditMode && editTarget) {
         await updateCourse(editTarget.courseId, {
           newName: form.name,
@@ -90,20 +103,21 @@ const AdminCoursePage = () => {
             form.type === "MAJOR" && form.departmentId !== ""
               ? Number(form.departmentId)
               : null,
-          status: form.status,
         });
         dispatch(showModal("과목 등록 완료"));
       }
+
       setIsModalOpen(false);
+      setIsEditMode(false);
+      setEditTarget(null);
       setForm({
         name: "",
         type: "MAJOR",
         credit: 3,
         year: 1,
         status: "AVAILABLE",
+        departmentId: "",
       });
-      setIsEditMode(false);
-      setEditTarget(null);
       fetchCourses();
     } catch (err) {
       dispatch(
@@ -113,6 +127,20 @@ const AdminCoursePage = () => {
         })
       );
     }
+  };
+
+  const openEditModal = (course) => {
+    setForm({
+      name: course.courseName,
+      type: course.courseType,
+      credit: course.credit,
+      year: course.courseYear,
+      status: course.status,
+      departmentId: course.departmentId || "",
+    });
+    setEditTarget(course);
+    setIsEditMode(true);
+    setIsModalOpen(true);
   };
 
   const handleDelete = (course) => {
@@ -132,71 +160,61 @@ const AdminCoursePage = () => {
     });
   };
 
-  const openEditModal = (course) => {
-    setForm({
-      name: course.courseName,
-      type: course.courseType,
-      credit: course.credit,
-      year: course.courseYear,
-      status: course.status,
-      departmentId: course.departmentId || "",
-    });
-    setEditTarget(course);
-    setIsEditMode(true);
-    setIsModalOpen(true);
-  };
-
   const paginatedCourses = courses.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
   return (
-    <div className="w-full p-4 md:p-6 lg:p-8 mt-6">
+    <div className="max-w-7xl mx-auto p-8 bg-white shadow-md rounded-md mt-10">
+      {/* 타이틀 영역 */}
       <div className="flex justify-between items-center border-b pb-3 mb-6">
         <h2 className="text-2xl font-semibold text-gray-700">과목 현황</h2>
-        <div className="flex gap-2">
-          <select
-            className="p-2 border rounded"
-            value={selectedDept}
-            onChange={(e) => setSelectedDept(e.target.value)}
-          >
-            {departments.map((d) => (
-              <option key={d.departmentId} value={d.departmentId}>
-                {d.departmentName}
-              </option>
-            ))}
-            <option value="common">공통</option>
-          </select>
-          <button
-            onClick={() => {
-              setForm({
-                name: "",
-                type: "MAJOR",
-                credit: 3,
-                year: 1,
-                status: "AVAILABLE",
-                departmentId: "",
-              });
-              setIsEditMode(false);
-              setIsModalOpen(true);
-            }}
-            className="px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800"
-          >
-            과목 등록
-          </button>
-        </div>
+        <button
+          onClick={() => {
+            setForm({
+              name: "",
+              type: "MAJOR",
+              credit: 3,
+              year: 1,
+              status: "AVAILABLE",
+              departmentId: "",
+            });
+            setIsEditMode(false);
+            setIsModalOpen(true);
+          }}
+          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        >
+          과목 등록
+        </button>
       </div>
 
-      <table className="min-w-full table-auto border border-gray-300 rounded text-sm">
-        <thead className="bg-gray-50 text-gray-600 uppercase">
+      {/* 필터 영역 (테이블 위 좌측 정렬) */}
+      <div className="mb-4">
+        <select
+          className="px-3 py-2 w-64 border border-gray-300 rounded-md shadow-sm text-sm text-gray-700
+      focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+          value={selectedDept}
+          onChange={(e) => setSelectedDept(e.target.value)}
+        >
+          {departments.map((d) => (
+            <option key={d.departmentId} value={d.departmentId}>
+              {d.departmentName}
+            </option>
+          ))}
+          <option value="common">공통</option>
+        </select>
+      </div>
+
+      <table className="min-w-full table-auto shadow-sm border border-gray-200 rounded-md text-sm">
+        <thead className="bg-gray-50 text-gray-600 uppercase text-sm leading-normal">
           <tr className="text-center">
             <th className="py-3 px-4">과목번호</th>
             <th className="py-3 px-4">과목명</th>
+            <th className="py-3 px-4">상태</th>
             <th className="py-3 px-4">구분</th>
             <th className="py-3 px-4">학점</th>
             <th className="py-3 px-4">학년</th>
-            <th className="py-3 px-4">상태</th>
             <th className="py-3 px-4">관리</th>
           </tr>
         </thead>
@@ -209,17 +227,17 @@ const AdminCoursePage = () => {
             </tr>
           ) : (
             paginatedCourses.map((c) => (
-              <tr key={c.courseId} className="border-t hover:bg-gray-50">
+              <tr key={c.courseId} className="hover:bg-gray-50 border-t">
                 <td className="py-2 px-4">{c.courseId}</td>
                 <td className="py-2 px-4">{c.courseName}</td>
+                <td className="py-2 px-4">
+                  {c.status === "AVAILABLE" ? "✅ 개설" : "❌ 미개설"}
+                </td>
                 <td className="py-2 px-4">
                   {c.courseType === "MAJOR" ? "전공" : "교양"}
                 </td>
                 <td className="py-2 px-4">{c.credit}</td>
                 <td className="py-2 px-4">{c.courseYear}</td>
-                <td className="py-2 px-4">
-                  {c.status === "AVAILABLE" ? "✅ 운영 중" : "❌ 운영 중지"}
-                </td>
                 <td className="py-2 px-4 space-x-2">
                   <button
                     onClick={() => openEditModal(c)}
@@ -247,94 +265,123 @@ const AdminCoursePage = () => {
       />
 
       <BaseModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <h2 className="text-xl font-semibold mb-6 text-center">
-          {isEditMode ? "과목 수정" : "과목 등록"}
-        </h2>
+        <div className="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-lg">
+          <h2 className="text-xl font-bold mb-6 text-center">
+            {isEditMode ? "과목 수정" : "과목 등록"}
+          </h2>
 
-        <div className="grid gap-4">
-          <input
-            type="text"
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-            placeholder="과목명"
-            className="w-full p-2 border rounded"
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* 과목명 */}
+            <div className="md:col-span-2">
+              <label className="text-sm font-medium text-gray-700">과목명 *</label>
+              <input
+                type="text"
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                placeholder="과목명을 입력하세요"
+                className="w-full p-2 border rounded"
+              />
+            </div>
 
-          {!isEditMode && (
-            <select
-              name="type"
-              value={form.type}
-              onChange={handleChange}
-              className="w-full p-2 border rounded"
-            >
-              <option value="MAJOR">전공</option>
-              <option value="LIBERAL">교양</option>
-            </select>
-          )}
+            {/* 구분 */}
+            {!isEditMode && (
+              <div className="md:col-span-2">
+                <label className="text-sm font-medium text-gray-700">과목 구분 *</label>
+                <select
+                  name="type"
+                  value={form.type}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded"
+                >
+                  <option value="MAJOR">전공</option>
+                  <option value="LIBERAL">교양</option>
+                </select>
+              </div>
+            )}
 
-          {!isEditMode ? (
-            form.type === "MAJOR" ? (
+            {/* 학과 (전공일 경우만) */}
+            {form.type === "MAJOR" && (
+              <div className="md:col-span-2">
+                <label className="text-sm font-medium text-gray-700">소속 학과 *</label>
+                <select
+                  name="departmentId"
+                  value={form.departmentId}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded"
+                >
+                  <option value="">학과 선택</option>
+                  {departments.map((dept) => (
+                    <option key={dept.departmentId} value={dept.departmentId}>
+                      {dept.departmentName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* 학점 */}
+            <div>
+              <label className="text-sm font-medium text-gray-700">학점 *</label>
+              {form.type === "MAJOR" ? (
+                <input
+                  type="number"
+                  name="credit"
+                  value={3}
+                  readOnly
+                  className="w-full p-2 border rounded bg-gray-100 cursor-not-allowed"
+                />
+              ) : (
+                <select
+                  name="credit"
+                  value={form.credit}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded"
+                >
+                  <option value={1}>1학점</option>
+                  <option value={2}>2학점</option>
+                </select>
+              )}
+            </div>
+
+            {/* 대상 학년 */}
+            <div>
+              <label className="text-sm font-medium text-gray-700">대상 학년 *</label>
               <input
                 type="number"
-                name="credit"
-                value={3}
-                readOnly
-                className="w-full p-2 border rounded bg-gray-100 cursor-not-allowed"
+                name="year"
+                value={form.year}
+                onChange={handleChange}
+                min={1}
+                max={4}
+                className="w-full p-2 border rounded"
               />
-            ) : (
-              <select
-                name="credit"
-                value={form.credit}
-                onChange={handleChange}
-                className="w-full p-2 border rounded"
-              >
-                <option value={1}>1학점</option>
-                <option value={2}>2학점</option>
-              </select>
-            )
-          ) : (
-            form.type === "LIBERAL" && (
-              <select
-                name="credit"
-                value={form.credit}
-                onChange={handleChange}
-                className="w-full p-2 border rounded"
-              >
-                <option value={1}>1학점</option>
-                <option value={2}>2학점</option>
-              </select>
-            )
-          )}
+            </div>
 
-          <input
-            type="number"
-            name="year"
-            value={form.year}
-            onChange={handleChange}
-            placeholder="대상 학년"
-            min={1}
-            max={4}
-            className="w-full p-2 border rounded"
-          />
-
-          <select
-            name="status"
-            value={form.status}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-          >
-            <option value="AVAILABLE">운영 중</option>
-            <option value="UNAVAILABLE">운영 중지</option>
-          </select>
+            {/* 상태 (수정일 때만 노출) */}
+            {isEditMode && (
+              <div className="md:col-span-2">
+                <label className="text-sm font-medium text-gray-700">과목 상태</label>
+                <select
+                  name="status"
+                  value={form.status}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded"
+                >
+                  <option value="AVAILABLE">개설</option>
+                  <option value="UNAVAILABLE">미개설</option>
+                </select>
+              </div>
+            )}
+          </div>
 
           <button
             onClick={handleSubmit}
-            className={`mt-6 w-full ${
+            className={`mt-6 w-full text-white py-3 rounded ${
               isEditMode
                 ? "bg-green-600 hover:bg-green-700"
                 : "bg-blue-600 hover:bg-blue-700"
-            } text-white py-2 rounded`}
+            }`}
           >
             {isEditMode ? "수정" : "등록"}
           </button>
