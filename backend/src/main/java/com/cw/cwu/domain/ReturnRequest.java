@@ -45,4 +45,8 @@ public class ReturnRequest {
 
     @Column(name = "denial_reason")
     private String denialReason;
+
+    public void changeStatus(String status){this.status = RequestStatus.valueOf(status);}
+    public void changeDenialReason(String denialReason){this.denialReason=denialReason;}
+    public void changeApprovedDate() {this.approvedDate = LocalDate.now();}
 }

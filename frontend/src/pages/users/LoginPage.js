@@ -5,11 +5,11 @@ import { loginPostAsync } from "../../slices/authSlice";
 import { findUserId, findUserPw } from "../../api/memberApi";
 
 const images = [
-  "/images/u1.jpg",
-  "/images/u2.jpg",
-  "/images/u3.jpg",
-  "/images/u4.jpg",
-  "/images/u5.jpg",
+  "/images/Eon10.jpg",
+  "/images/Eon11.jpg",
+  "/images/Eon12.jpg",
+  "/images/Eon13.jpg",
+  "/images/Eon14.jpg",
 ];
 
 function LoginPage() {
@@ -137,8 +137,9 @@ function LoginPage() {
         </div>
       </div>
 
-      <div className="fixed left-32 top-1/2 transform -translate-y-1/2 z-10 hidden [@media(max-width:1300px)]:hidden 2xl:block">
-        <p className="text-5xl font-extrabold leading-relaxed text-gray-200 text-opacity-85">
+      {/* hidden [@media(max-width:1100)]:hidden xl:block 이부분 조절하면 창 줄어듬 */}
+      <div className="fixed left-32 top-1/2 transform -translate-y-1/2 z-10 hidden [@media(max-width:1100)]:hidden xl:block">
+        <p className="text-5xl font-extrabold leading-relaxed text-white text-opacity-90">
           <span className="block">기술이 아닌,</span>
           <span className="block">가능성을 설계합니다.</span>
           <span className="block">AI시대 배움의 기준이 되다.</span>
