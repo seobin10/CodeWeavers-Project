@@ -7,6 +7,7 @@ import {
 } from "../../api/adminGradeApi";
 import { useDispatch } from "react-redux";
 import { showModal } from "../../slices/modalSlice";
+import Loading from "../../components/Loading";
 
 const AdminGradeStatusPage = () => {
   const dispatch = useDispatch();
@@ -66,8 +67,11 @@ const AdminGradeStatusPage = () => {
     }
 
     try {
+      setIsLoading(true);
       await finalizeGradesByDepartment(selectedDepartmentId);
+
       dispatch(showModal({ message: "성적 집계가 완료되었습니다." }));
+
       const res = await getGradeStatusSummary(selectedDepartmentId);
       setGradeStatusResponse(res.data);
     } catch (e) {
@@ -82,6 +86,8 @@ const AdminGradeStatusPage = () => {
           type: "error",
         })
       );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -102,6 +108,7 @@ const AdminGradeStatusPage = () => {
 
   return (
     <div className="max-w-7xl mx-auto p-8 bg-white shadow-md rounded-md mt-10 space-y-12">
+      {isLoading && <Loading />}
       <div className="flex justify-between items-center border-b pb-3 mb-4">
         <h2 className="text-2xl font-semibold text-gray-700">성적 집계 현황</h2>
         <div className="flex items-center gap-6">

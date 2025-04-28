@@ -7,6 +7,7 @@ import BaseModal from "../../components/BaseModal";
 import AdminUserCreatePage from "./AdminUserCreatePage";
 import AdminUserEditPage from "./AdminUserEditPage";
 import useConfirmModal from "../../hooks/useConfirmModal";
+import AdminUserMultiUploadPage from "./AdminUserMultiUploadPage";
 
 const AdminUserListPage = () => {
   const dispatch = useDispatch();
@@ -25,6 +26,7 @@ const AdminUserListPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editUser, setEditUser] = useState(null);
   const [hoveredUser, setHoveredUser] = useState(null);
+  const [isMultiUploadModalOpen, setIsMultiUploadModalOpen] = useState(false);
 
   const fetchUsers = async (page = 1) => {
     try {
@@ -82,12 +84,22 @@ const AdminUserListPage = () => {
     <div className="max-w-7xl mx-auto p-8 bg-white shadow-md rounded-md mt-10">
       <div className="flex justify-between items-center border-b pb-3 mb-6">
         <h2 className="text-2xl font-semibold text-gray-700">사용자 관리</h2>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800 transition"
-        >
-          사용자 추가
-        </button>
+
+        <div className="flex gap-2">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-800 transition"
+          >
+            사용자 등록
+          </button>
+
+          <button
+            onClick={() => setIsMultiUploadModalOpen(true)}
+            className="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-800 transition"
+          >
+            일괄 등록
+          </button>
+        </div>
       </div>
 
       <div className="flex justify-end mb-4">
@@ -104,7 +116,7 @@ const AdminUserListPage = () => {
         <thead className="bg-gray-50 text-gray-600 uppercase text-sm leading-normal">
           <tr>
             {[
-              { label: "학번/교번", field: "userId" },
+              { label: "학번/ID", field: "userId" },
               { label: "이름", field: "userName" },
               { label: "생년월일", field: "userBirth" },
               { label: "이메일" },
@@ -157,8 +169,12 @@ const AdminUserListPage = () => {
                 )}
               </td>
               <td className="py-3 px-4">{user.userBirth}</td>
-              <td className="py-3 px-4">{user.userEmail ? user.userEmail : "-"}</td>
-              <td className="py-3 px-4">{user.userPhone ? user.userPhone : "-"}</td>
+              <td className="py-3 px-4">
+                {user.userEmail ? user.userEmail : "-"}
+              </td>
+              <td className="py-3 px-4">
+                {user.userPhone ? user.userPhone : "-"}
+              </td>
               <td className="py-3 px-4">{getRoleLabel(user.userRole)}</td>
               <td className="py-3 px-4">{user.departmentName || "-"}</td>
               <td className="py-3 px-4 space-x-2">
@@ -195,6 +211,16 @@ const AdminUserListPage = () => {
           user={editUser}
           onSuccess={() => fetchUsers(currentPage)}
           onClose={() => setEditUser(null)}
+        />
+      </BaseModal>
+
+      <BaseModal
+        isOpen={isMultiUploadModalOpen}
+        onClose={() => setIsMultiUploadModalOpen(false)}
+      >
+        <AdminUserMultiUploadPage
+          onSuccess={() => fetchUsers(currentPage)}
+          onClose={() => setIsMultiUploadModalOpen(false)}
         />
       </BaseModal>
 
