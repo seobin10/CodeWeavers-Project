@@ -157,8 +157,8 @@ const AdminUserListPage = () => {
                 )}
               </td>
               <td className="py-3 px-4">{user.userBirth}</td>
-              <td className="py-3 px-4">{user.userEmail}</td>
-              <td className="py-3 px-4">{user.userPhone}</td>
+              <td className="py-3 px-4">{user.userEmail ? user.userEmail : "-"}</td>
+              <td className="py-3 px-4">{user.userPhone ? user.userPhone : "-"}</td>
               <td className="py-3 px-4">{getRoleLabel(user.userRole)}</td>
               <td className="py-3 px-4">{user.departmentName || "-"}</td>
               <td className="py-3 px-4 space-x-2">

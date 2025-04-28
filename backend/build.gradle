@@ -50,6 +50,9 @@ dependencies {
 
 	// 문자메시지 발송 API
 	implementation 'net.nurigo:sdk:4.3.0'
+
+	// Apache POI : Java로 MS Office 파일을 읽고 쓰는 오픈소스 라이브러리
+	implementation 'org.apache.poi:poi-ooxml:5.4.1'
 }
 
 tasks.named('test') {

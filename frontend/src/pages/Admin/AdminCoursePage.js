@@ -1,5 +1,3 @@
-// 리팩토링된 AdminCoursePage.jsx (ProfessorGradePage 스타일에 맞춤)
-
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import {
@@ -30,6 +28,7 @@ const AdminCoursePage = () => {
     credit: 3,
     year: 1,
     departmentId: "",
+    status: "AVAILABLE"
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -103,6 +102,7 @@ const AdminCoursePage = () => {
             form.type === "MAJOR" && form.departmentId !== ""
               ? Number(form.departmentId)
               : null,
+          status: form.status || "AVAILABLE",
         });
         dispatch(showModal("과목 등록 완료"));
       }
@@ -273,7 +273,9 @@ const AdminCoursePage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* 과목명 */}
             <div className="md:col-span-2">
-              <label className="text-sm font-medium text-gray-700">과목명 *</label>
+              <label className="text-sm font-medium text-gray-700">
+                과목명 *
+              </label>
               <input
                 type="text"
                 name="name"
@@ -287,7 +289,9 @@ const AdminCoursePage = () => {
             {/* 구분 */}
             {!isEditMode && (
               <div className="md:col-span-2">
-                <label className="text-sm font-medium text-gray-700">과목 구분 *</label>
+                <label className="text-sm font-medium text-gray-700">
+                  과목 구분 *
+                </label>
                 <select
                   name="type"
                   value={form.type}
@@ -303,7 +307,9 @@ const AdminCoursePage = () => {
             {/* 학과 (전공일 경우만) */}
             {form.type === "MAJOR" && (
               <div className="md:col-span-2">
-                <label className="text-sm font-medium text-gray-700">소속 학과 *</label>
+                <label className="text-sm font-medium text-gray-700">
+                  소속 학과 *
+                </label>
                 <select
                   name="departmentId"
                   value={form.departmentId}
@@ -322,7 +328,9 @@ const AdminCoursePage = () => {
 
             {/* 학점 */}
             <div>
-              <label className="text-sm font-medium text-gray-700">학점 *</label>
+              <label className="text-sm font-medium text-gray-700">
+                학점 *
+              </label>
               {form.type === "MAJOR" ? (
                 <input
                   type="number"
@@ -346,7 +354,9 @@ const AdminCoursePage = () => {
 
             {/* 대상 학년 */}
             <div>
-              <label className="text-sm font-medium text-gray-700">대상 학년 *</label>
+              <label className="text-sm font-medium text-gray-700">
+                대상 학년 *
+              </label>
               <input
                 type="number"
                 name="year"
@@ -361,7 +371,9 @@ const AdminCoursePage = () => {
             {/* 상태 (수정일 때만 노출) */}
             {isEditMode && (
               <div className="md:col-span-2">
-                <label className="text-sm font-medium text-gray-700">과목 상태</label>
+                <label className="text-sm font-medium text-gray-700">
+                  과목 상태
+                </label>
                 <select
                   name="status"
                   value={form.status}

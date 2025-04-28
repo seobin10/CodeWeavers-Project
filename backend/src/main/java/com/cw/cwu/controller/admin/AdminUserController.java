@@ -96,4 +96,17 @@ public class AdminUserController {
         return ResponseEntity.ok(result);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/users/multi-upload")
+    public ResponseEntity<?> multiUploadUsers(@RequestParam("file") MultipartFile file) {
+        MultiUploadResponseDTO result = adminUserService.multiUploadUsers(file);
+
+        if (result.getFailureCount() > 0) {
+            return ResponseEntity.badRequest().body(result);
+        }
+
+        return ResponseEntity.ok(result);
+    }
+
+
 }
