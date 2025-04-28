@@ -7,6 +7,7 @@ import com.cw.cwu.domain.UserRole;
 import com.cw.cwu.dto.*;
 import com.cw.cwu.repository.DepartmentRepository;
 import com.cw.cwu.repository.UserRepository;
+import com.cw.cwu.util.ExcelParserUtil;
 import com.cw.cwu.util.PageUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,9 +15,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,20 +46,23 @@ public class AdminUserServiceImpl implements AdminUserService {
         if (userRepository.existsById(dto.getUserId())) {
             return "이미 존재하는 사용자 ID입니다.";
         }
-        if (userRepository.existsByUserEmail(dto.getUserEmail())) {
-            return "이미 등록된 이메일입니다.";
+
+        if (dto.getUserEmail() != null) {
+            if (userRepository.existsByUserEmail(dto.getUserEmail())) {
+                return "이미 등록된 이메일입니다.";
+            }
+            if (!dto.getUserEmail().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
+                return "이메일 형식이 올바르지 않습니다.";
+            }
         }
 
-        if (userRepository.existsByUserPhone(dto.getUserPhone())) {
-            return "이미 등록된 전화번호입니다.";
-        }
-
-        if (!dto.getUserPhone().matches("^010-\\d{4}-\\d{4}$")) {
-            return "전화번호는 010-XXXX-XXXX 형식이어야 합니다.";
-        }
-
-        if (!dto.getUserEmail().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
-            return "이메일 형식이 올바르지 않습니다.";
+        if (dto.getUserPhone() != null) {
+            if (userRepository.existsByUserPhone(dto.getUserPhone())) {
+                return "이미 등록된 전화번호입니다.";
+            }
+            if (!dto.getUserPhone().matches("^010-\\d{4}-\\d{4}$")) {
+                return "전화번호는 010-XXXX-XXXX 형식이어야 합니다.";
+            }
         }
 
         if (dto.getUserBirth().isAfter(LocalDate.now())) {
@@ -209,5 +215,33 @@ public class AdminUserServiceImpl implements AdminUserService {
                 .stream()
                 .map(d -> new DepartmentSimpleDTO(d.getDepartmentId(), d.getDepartmentName()))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public MultiUploadResponseDTO multiUploadUsers(MultipartFile file) {
+        List<UserCreateRequestDTO> dtos;
+        try {
+            dtos = ExcelParserUtil.parseUserExcel(file);
+        } catch (Exception e) {
+            throw new RuntimeException("엑셀 파일 파싱 실패: " + e.getMessage());
+        }
+
+        int success = 0;
+        List<String> failures = new ArrayList<>();
+
+        for (UserCreateRequestDTO dto : dtos) {
+            try {
+                String result = createUser(dto);
+                if ("성공".equals(result)) {
+                    success++;
+                } else {
+                    failures.add(dto.getUserId() + ": " + result);
+                }
+            } catch (Exception e) {
+                failures.add(dto.getUserId() + ": 등록 중 오류 (" + e.getMessage() + ")");
+            }
+        }
+
+        return new MultiUploadResponseDTO(success, failures.size(), failures);
     }
 }

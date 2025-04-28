@@ -66,8 +66,11 @@ const AdminUserCreatePage = ({ onSuccess }) => {
     const emailId = e.target.value;
     setEmailId(emailId);
     const domain = emailDomain === "custom" ? customEmailDomain : emailDomain;
-    setForm((prev) => ({ ...prev, userEmail: emailId + domain }));
-  };
+    setForm((prev) => ({
+        ...prev,
+        userEmail: emailId ? (domain ? emailId + domain : null) : null,
+    }));
+};
 
   const handleEmailDomainChange = (e) => {
     const selected = e.target.value;
@@ -113,10 +116,19 @@ const AdminUserCreatePage = ({ onSuccess }) => {
       setUploadMsg("❌ 이미지 업로드에 실패하였습니다.");
     }
   };
+  
+  const cleanFormBeforeSubmit = () => {
+    const newForm = { ...form };
+    if (!emailId) newForm.userEmail = null;
+    if (!phoneParts.part2 || !phoneParts.part3) newForm.userPhone = null;
+    return newForm;
+  };
+  
 
   const handleSubmit = async () => {
     try {
-      const response = await createUser(form);
+      const finalForm = cleanFormBeforeSubmit(); 
+      const response = await createUser(finalForm);
       const msg =
         typeof response.data === "string"
           ? response.data
