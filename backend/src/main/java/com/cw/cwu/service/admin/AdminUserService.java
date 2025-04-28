@@ -1,6 +1,7 @@
 package com.cw.cwu.service.admin;
 
 import com.cw.cwu.dto.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -45,4 +46,6 @@ public interface AdminUserService {
    String resetPassword(String userId);
 
     List<DepartmentSimpleDTO> getAvailableDepartments();
+
+    MultiUploadResponseDTO multiUploadUsers(MultipartFile file);
 }

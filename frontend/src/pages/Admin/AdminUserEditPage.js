@@ -33,14 +33,24 @@ const AdminUserEditPage = ({ user, onSuccess, onClose }) => {
 
   useEffect(() => {
     if (user) {
-      const [idPart, domainPart] = user.userEmail.split("@");
-      setEmailId(idPart);
-      setEmailDomain("@" + domainPart);
-
-      const [part1, part2, part3] = user.userPhone.split("-");
-      setPhoneParts({ part1, part2, part3 });
+      if (user.userEmail) {
+        const [idPart, domainPart] = user.userEmail.split("@");
+        setEmailId(idPart);
+        setEmailDomain(domainPart ? "@" + domainPart : "@naver.com"); 
+      } else {
+        setEmailId("");
+        setEmailDomain("@naver.com");
+      }
+  
+      if (user.userPhone) {
+        const [part1, part2, part3] = user.userPhone.split("-");
+        setPhoneParts({ part1, part2, part3 });
+      } else {
+        setPhoneParts({ part1: "010", part2: "", part3: "" });
+      }
     }
   }, [user]);
+  
 
   const handleChange = (e) => {
     const { name, value } = e.target;

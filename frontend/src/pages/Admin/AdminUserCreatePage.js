@@ -66,8 +66,11 @@ const AdminUserCreatePage = ({ onSuccess }) => {
     const emailId = e.target.value;
     setEmailId(emailId);
     const domain = emailDomain === "custom" ? customEmailDomain : emailDomain;
-    setForm((prev) => ({ ...prev, userEmail: emailId + domain }));
-  };
+    setForm((prev) => ({
+        ...prev,
+        userEmail: emailId ? (domain ? emailId + domain : null) : null,
+    }));
+};
 
   const handleEmailDomainChange = (e) => {
     const selected = e.target.value;
@@ -113,10 +116,19 @@ const AdminUserCreatePage = ({ onSuccess }) => {
       setUploadMsg("❌ 이미지 업로드에 실패하였습니다.");
     }
   };
+  
+  const cleanFormBeforeSubmit = () => {
+    const newForm = { ...form };
+    if (!emailId) newForm.userEmail = null;
+    if (!phoneParts.part2 || !phoneParts.part3) newForm.userPhone = null;
+    return newForm;
+  };
+  
 
   const handleSubmit = async () => {
     try {
-      const response = await createUser(form);
+      const finalForm = cleanFormBeforeSubmit(); 
+      const response = await createUser(finalForm);
       const msg =
         typeof response.data === "string"
           ? response.data
@@ -240,69 +252,6 @@ const AdminUserCreatePage = ({ onSuccess }) => {
             >
               {showPassword ? "🔓" : "🔒"}
             </button>
-          </div>
-        </div>
-
-        {/* 이메일 */}
-        <div className="md:col-span-2">
-          <label className="block mb-1 text-sm font-medium text-gray-700">
-            이메일 *
-          </label>
-          <div className="flex flex-wrap gap-2">
-            <input
-              className="flex-1 min-w-[100px] p-2 border rounded"
-              placeholder="아이디"
-              value={emailId}
-              onChange={handleEmailIdChange}
-            />
-            <span className="self-center">@</span>
-            <select
-              className="flex-1 min-w-[120px] p-2 border rounded"
-              onChange={handleEmailDomainChange}
-              value={emailDomain}
-            >
-              <option value="@naver.com">naver.com</option>
-              <option value="@gmail.com">gmail.com</option>
-              <option value="custom">직접 입력</option>
-            </select>
-            {emailDomain === "custom" && (
-              <input
-                className="flex-1 min-w-[120px] p-2 border rounded"
-                placeholder="직접입력"
-                value={customEmailDomain}
-                onChange={handleCustomDomainChange}
-              />
-            )}
-          </div>
-        </div>
-
-        {/* 전화번호 */}
-        <div className="md:col-span-2">
-          <label className="block mb-1 text-sm font-medium text-gray-700">
-            전화번호 *
-          </label>
-          <div className="flex space-x-2">
-            <input
-              name="part1"
-              maxLength={3}
-              className="w-1/3 p-2 border rounded"
-              value={phoneParts.part1}
-              onChange={handlePhoneChange}
-            />
-            <input
-              name="part2"
-              maxLength={4}
-              className="w-1/3 p-2 border rounded"
-              value={phoneParts.part2}
-              onChange={handlePhoneChange}
-            />
-            <input
-              name="part3"
-              maxLength={4}
-              className="w-1/3 p-2 border rounded"
-              value={phoneParts.part3}
-              onChange={handlePhoneChange}
-            />
           </div>
         </div>
 

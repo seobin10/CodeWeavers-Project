@@ -53,7 +53,11 @@ export const updateUser = (userData) => {
 export const resetPassword = (userId) => {
   return axios.put(
     `${prefix}/users/${userId}/reset-password`,
-    null, // body 없음 → null 명시
-    getAuthHeader() // 세 번째 인자에 headers 설정
+    null,
+    getAuthHeader()
   );
+};
+
+export const multiUploadUsers = (formData) => {
+  return axios.post(`${prefix}/users/multi-upload`, formData, getAuthHeader());
 };
