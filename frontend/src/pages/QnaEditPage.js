@@ -159,7 +159,7 @@ const QnaEditPage = () => {
             id="secret"
             defaultChecked={/^🔒/.test(contentData.title)}
           />{" "}
-          비밀 글
+          비밀글
         </label>
         <div className="flex float-right mb-10">
           <button

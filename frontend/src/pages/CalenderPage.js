@@ -1,10 +1,25 @@
 import React, { useState } from "react";
 
-const CalenderPage = () => {
+const CalendarPage = () => {
   const events = [
-    { start: "2025-04-01", end: "2025-04-07", event: "학생설계전공 신청" },
-    { start: "2025-04-16", end: "2025-04-18", event: "융합전공 신청" },
-    { start: "2025-04-21", end: "2025-04-25", event: "1학기 중간고사" },
+    {
+      start: "2025-04-01",
+      end: "2025-04-07",
+      event: "학생설계전공 신청",
+      color: "bg-red-100",
+    },
+    {
+      start: "2025-04-16",
+      end: "2025-04-18",
+      event: "융합전공 신청",
+      color: "bg-blue-100", 
+    },
+    {
+      start: "2025-04-21",
+      end: "2025-04-25",
+      event: "1학기 중간고사",
+      color: "bg-yellow-100",
+    },
   ];
 
   const [selectedYear, setSelectedYear] = useState(2025);
@@ -103,7 +118,7 @@ const CalenderPage = () => {
             {selectedYear}. {String(selectedMonth).padStart(2, "0")}.
           </div>
 
-          {/* 요일 + 날짜 배경 한 덩어리 */}
+          {/* 요일 + 날짜 배경 */}
           <div className=" p-1.5 rounded">
             <div className="grid grid-cols-7 text-center text-sm font-semibold mb-1.5">
               {["일", "월", "화", "수", "목", "금", "토"].map((d) => (
@@ -164,4 +179,4 @@ const CalenderPage = () => {
   );
 };
 
-export default CalenderPage;
+export default CalendarPage;

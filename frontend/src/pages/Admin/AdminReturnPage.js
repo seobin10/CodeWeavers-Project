@@ -8,6 +8,7 @@ import {
   seeReturnList,
 } from "../../api/adminLeaveReturnApi";
 import { getAllSemesters } from "../../api/adminScheduleApi";
+import PageComponent from "../../components/PageComponent";
 
 const AdminReturnPage = () => {
   const [returnRequests, setReturnRequests] = useState([]);
@@ -19,12 +20,19 @@ const AdminReturnPage = () => {
   const [alertMessage, setAlertMessage] = useState("");
   const [alertType, setAlertType] = useState("success");
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  const paginatedReturnRequests = returnRequests.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   const fetchReturnRequests = async () => {
     try {
       setLoading(true);
       const data = await seeReturnList();
       setReturnRequests(data);
-      console.log(data);
       setLoading(false);
     } catch (error) {
       console.error("복학 신청 목록을 불러오는 중 오류 발생:", error);
@@ -135,9 +143,9 @@ const AdminReturnPage = () => {
           🔍 복학 신청 관리
         </h2>
 
-        <table className="w-full text-base text-center border border-gray-200">
-          <thead className="bg-gray-50 text-gray-600">
-            <tr>
+        <table className="min-w-full table-fixed border border-gray-300 rounded text-sm">
+          <thead className="bg-gray-50 text-gray-600 uppercase">
+            <tr className="text-center h-16">
               <th className="py-3 px-4">NO</th>
               <th className="py-3 px-4">학번</th>
               <th className="py-3 px-4">이름</th>
@@ -150,11 +158,19 @@ const AdminReturnPage = () => {
             </tr>
           </thead>
           <tbody className="text-gray-700">
-            {returnRequests.length > 0 ? (
-              returnRequests.map((req, index) => (
-                <tr key={req.returnId} className="border-t">
-                  <td className="py-3 px-4">{index + 1}</td>
-                  <td className="py-3 px-4">{req.student}</td>
+            {paginatedReturnRequests.length > 0 ? (
+              paginatedReturnRequests.map((req, index) => (
+                <tr key={req.returnId} className="border-t h-16">
+                  <td className="py-3 px-4">
+                    <div className="h-full flex items-center justify-center">
+                      {(currentPage - 1) * itemsPerPage + index + 1}
+                    </div>
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="h-full flex items-center justify-center">
+                      {req.student}
+                    </div>
+                  </td>
                   <td>
                     {
                       void requestAnimationFrame(() =>
@@ -164,9 +180,18 @@ const AdminReturnPage = () => {
                         })
                       )
                     }
-                    <span id={req.returnId}>불러오는 중...</span>
+                    <span
+                      id={req.returnId}
+                      className="h-full flex items-center justify-center"
+                    >
+                      불러오는 중...
+                    </span>
                   </td>
-                  <td className="py-3 px-4">{req.requestDate}</td>
+                  <td className="py-3 px-4">
+                    <div className="h-full flex items-center justify-center">
+                      {req.requestDate}
+                    </div>
+                  </td>
                   <td>
                     {
                       void requestAnimationFrame(() =>
@@ -178,39 +203,52 @@ const AdminReturnPage = () => {
                         })
                       )
                     }
-                    <span id={`semester-${req.returnId}`}>불러오는 중...</span>
-                  </td>
-                  <td className="py-3 px-4">
                     <span
-                      className={`px-2 py-1 rounded text-sm ${
-                        req.status === "승인"
-                          ? "bg-green-100 text-green-800"
-                          : req.status === "거절"
-                          ? "bg-red-100 text-red-800"
-                          : "bg-yellow-100 text-yellow-800"
-                      }`}
+                      id={`semester-${req.returnId}`}
+                      className="h-full flex items-center justify-center"
                     >
-                      {getStatusLabel(req.status)}
+                      불러오는 중...
                     </span>
                   </td>
-                  <td className="py-3 px-4">{req.approvedDate || "-"}</td>
+                  <td className="py-3 px-4">
+                    <div className="h-full flex items-center justify-center">
+                      <span
+                        className={`px-2 py-1 rounded text-sm ${
+                          req.status === "승인"
+                            ? "bg-green-100 text-green-800"
+                            : req.status === "거절"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {getStatusLabel(req.status)}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="h-full flex items-center justify-center">
+                      {req.approvedDate || "-"}
+                    </div>
+                  </td>
                   <td className="py-3 px-4 max-w-xs truncate">
-                    {req.denialReason || "-"}
+                    <div className="h-full flex items-center justify-center">
+                      {req.denialReason || "-"}
+                    </div>
                   </td>
                   <td className="py-3 px-4">
                     {req.status === "대기" && (
-                      <div className="flex space-x-2 justify-center">
+                      <div className="flex space-x-2 justify-center h-full items-center">
                         <button
                           onClick={() => handleApprove(req)}
-                          className="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm"
+                          className="h-full flex items-center justify-center px-3 py-0 text-xl"
                         >
-                          승인
+                          ✔️
                         </button>
                         <button
                           onClick={() => openRejectModal(req)}
-                          className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm"
+                          className="h-full flex items-center justify-center px-3 py-0 text-xl"
                         >
-                          거절
+                          ❌
                         </button>
                       </div>
                     )}
@@ -218,17 +256,22 @@ const AdminReturnPage = () => {
                 </tr>
               ))
             ) : (
-              <tr className="border-t">
-                <td colSpan={9} className="py-4 text-gray-400">
+              <tr className="border-t h-16">
+                <td colSpan={9} className="py-4 text-gray-400 text-center">
                   처리할 복학 신청 내역이 없습니다.
                 </td>
               </tr>
             )}
           </tbody>
         </table>
+
+        <PageComponent
+          currentPage={currentPage}
+          totalPage={Math.ceil(returnRequests.length / itemsPerPage)}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
       </div>
 
-      {/* 거절 사유 입력 모달 */}
       <BaseModal
         isOpen={rejectModalOpen}
         onClose={() => setRejectModalOpen(false)}
@@ -244,26 +287,6 @@ const AdminReturnPage = () => {
               <p>
                 <span className="font-semibold">이름:</span>{" "}
                 {currentRequest?.studentName}
-              </p>
-              <p>
-                <b>복학 학기:</b>&nbsp;
-                {currentRequest?.semester &&
-                  currentRequest?.returnId &&
-                  void requestAnimationFrame(() =>
-                    handlePrintSemester(currentRequest.semester).then(
-                      (label) => {
-                        const element = document.getElementById(
-                          `modal-semester-${currentRequest.returnId}`
-                        );
-                        if (element) element.innerText = label;
-                      }
-                    )
-                  )}
-                <span
-                  id={`modal-semester-${currentRequest?.returnId ?? "temp"}`}
-                >
-                  불러오는 중...
-                </span>
               </p>
             </div>
             <label className="block mb-2 font-medium">거절 사유</label>
@@ -294,7 +317,6 @@ const AdminReturnPage = () => {
         </form>
       </BaseModal>
 
-      {/* 알림 모달 */}
       <AlertModal
         isOpen={alertOpen}
         message={alertMessage}

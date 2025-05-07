@@ -153,7 +153,7 @@ const LeavePage = () => {
               <th className="py-3 px-6">상세 사유</th>
               <th className="py-3 px-6">접수 날짜</th>
               <th className="py-3 px-6">예정 학기</th>
-              <th className="py-3 px-6">처리 구분</th>
+              <th className="py-3 px-6">처리 상태</th>
               <th className="py-3 px-6">처리 날짜</th>
               <th className="py-3 px-6">미승인 사유</th>
             </tr>
@@ -204,7 +204,7 @@ const LeavePage = () => {
               <th className="py-3 px-6">NO.</th>
               <th className="py-3 px-6">접수 날짜</th>
               <th className="py-3 px-6">복학 학기</th>
-              <th className="py-3 px-6">처리 구분</th>
+              <th className="py-3 px-6">처리 상태</th>
               <th className="py-3 px-6">처리 날짜</th>
               <th className="py-3 px-6">거절 사유</th>
             </tr>

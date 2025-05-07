@@ -15,6 +15,8 @@ const QnaListPage = () => {
   const location = useLocation();
   const userId = useSelector((state) => state.auth?.userId);
   const userRole = useSelector((state) => state.auth?.userRole);
+  const [inputKeyword, setInputKeyword] = useState("");
+  const [keyword, setKeyword] = useState("");
 
   const [message, setMessage] = useState("");
   const [qnaInfo, setQnaInfo] = useState([]);
@@ -26,12 +28,18 @@ const QnaListPage = () => {
     if (userId) {
       fetchQnaInfo();
     }
-  }, [userId]);
+  }, [userId, keyword]);
 
   const fetchQnaInfo = async () => {
     try {
       const data = await getQnaList();
-      setQnaInfo(data);
+      console.log(data);
+      const filtered = keyword
+      ? data.filter(
+          (n) => n.title.includes(keyword) || n.content.includes(keyword)
+        )
+      : data;
+      setQnaInfo(filtered);
     } catch (error) {
       setMessage("Q&A 정보를 불러올 수 없습니다.");
     }
@@ -72,9 +80,41 @@ const QnaListPage = () => {
   const currentItem = qnaInfo.slice(firstItem, lastItem);
   const totalPage = Math.ceil(qnaInfo.length / itemCount);
 
+    // 검색 처리
+    const handleKeyword = () => {
+      const userInputData = document.getElementById('searchKeyword').value;
+      setInputKeyword(userInputData);
+    }
+
+    const handleSearch = async (searchKeyword) => {
+      setKeyword(searchKeyword);
+  };
+
   return (
     <div className="max-w-7xl mx-auto p-8 bg-white shadow-md rounded-md mt-10">
       <h1 className="text-3xl font-bold text-center mb-6">Q&A</h1>
+      {keyword && (
+        <p className="text-sm text-center text-gray-600 mb-2">
+          🔍 "<span className="font-semibold">{keyword}</span>" 관련 검색
+          결과입니다.
+        </p>
+      )}
+            <div className="flex justify-end mb-6">
+        <input
+          type="text"
+          placeholder="검색어 입력"
+          id="searchKeyword"
+          className="px-3 py-2 w-64 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          onChange={handleKeyword}
+        />
+        <button
+          onClick={() => handleSearch(inputKeyword)}
+          className="px-5 py-2 ml-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-semibold"
+        >
+          검색 🔍
+        </button>
+      </div>
+
       {message && <p className="text-red-500 text-center">{message}</p>}
       <hr />
       <br />

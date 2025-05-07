@@ -6,7 +6,6 @@ import Loading from "../components/Loading";
 
 const GradePage = lazy(() => import("../pages/GradePage"));
 const AllGradePage = lazy(() => import("../pages/AllGradePage"));
-const CurrentPage = lazy(() => import("../pages/CurrentPage"));
 const EnrollmentPage = lazy(() => import("../pages/EnrollmentPage"));
 const HistoryPage = lazy(() => import("../pages/HistoryPage"));
 const SchedulePage = lazy(() => import("../pages/SchedulePage"));
@@ -33,14 +32,6 @@ const studentRouter = [
           <AllGradePage />
         </Suspense>
       </RoleGuard>
-    ),
-  },
-  {
-    path: "currentgrades",
-    element: (
-      <Suspense fallback={<Loading />}>
-        <CurrentPage />
-      </Suspense>
     ),
   },
   {

@@ -156,7 +156,8 @@ const AdminUserCreatePage = ({ onSuccess }) => {
       let message = "알 수 없는 에러가 발생했습니다.";
       if (typeof errorData === "string") message = errorData;
       else if (typeof errorData === "object" && errorData.message)
-        message = errorData.message;
+        // message = errorData.message;
+        console.log(errorData.message);
 
       dispatch(
         showModal({

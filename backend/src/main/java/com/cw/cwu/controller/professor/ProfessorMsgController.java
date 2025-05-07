@@ -30,7 +30,7 @@ public class ProfessorMsgController {
     public SingleMessageSentResponse sendOne(String to, String text) {
         try {
             Message msg = new Message();
-            msg.setFrom(fromPhoneNumber);  // 이 부분 변경
+            msg.setFrom(fromPhoneNumber);
             msg.setTo(to);
             msg.setText(text);
             return this.messageService.sendOne(new SingleMessageSendingRequest(msg));

@@ -9,7 +9,7 @@ export const loginPostAsync = createAsyncThunk(
   async (param, thunkAPI) => {
     try {
       const response = await loginPost(param);
-      // ✅ accessToken 저장
+      // accessToken 저장
       const token = response.accessToken;
       if (token) {
         localStorage.setItem("accessToken", token);
@@ -58,7 +58,7 @@ const authSlice = createSlice({
     },
     logout: (state) => {
       removeCookie("member");
-      localStorage.removeItem("accessToken"); // ✅ 토큰 제거
+      localStorage.removeItem("accessToken"); // 토큰 제거
       state.userId = null;
       state.userRole = null;
     },

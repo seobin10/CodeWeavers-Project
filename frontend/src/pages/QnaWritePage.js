@@ -157,8 +157,8 @@ const QnaWritePage = () => {
         </tbody>
       </table>
       <div className="mt-4">
-        <p title="비밀 글을 작성하고 싶다면 체크하세요">
-          <input type="checkbox" id="secret" /> 비밀 글
+        <p title="비밀글을 작성하고 싶다면 체크하세요">
+          <input type="checkbox" id="secret" /> 비밀글
         </p>
         <div className="flex float-right mb-10">
           <Link

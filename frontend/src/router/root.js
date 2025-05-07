@@ -85,6 +85,14 @@ const root = createBrowserRouter([
       </Suspense>
     ),
   },
+  {
+    path: "calender",
+    element: (
+      <Suspense fallback={<Loading />}>
+        <CalenderPage />
+      </Suspense>
+    ),
+  },
 ]);
 
 export default root;

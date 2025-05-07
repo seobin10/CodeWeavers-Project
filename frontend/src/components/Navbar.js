@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Menu, X } from "lucide-react"; // 햄버거/닫기 아이콘
 
-const Navbar = ({name, onListClick, onEditClick, onDelClick}) => {
+const Navbar = ({ name, onListClick, onEditClick, onDelClick }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   return (
     <nav className="bg-blue-800 text-white p-4 flex justify-between items-center">
@@ -11,17 +11,32 @@ const Navbar = ({name, onListClick, onEditClick, onDelClick}) => {
       {/* 데스크탑 메뉴 */}
       <ul className="hidden md:flex gap-6">
         <li>
-          <p className="cursor-pointer hover:text-yellow-300" onClick={() => {onListClick()}}>
+          <p
+            className="cursor-pointer hover:text-yellow-300"
+            onClick={() => {
+              onListClick();
+            }}
+          >
             List
           </p>
         </li>
         <li>
-          <p className="cursor-pointer hover:text-yellow-300" onClick={() => {onEditClick()}}>
+          <p
+            className="cursor-pointer hover:text-yellow-300"
+            onClick={() => {
+              onEditClick();
+            }}
+          >
             Edit
           </p>
         </li>
         <li>
-          <p className="cursor-pointer hover:text-yellow-300" onClick={() => {onDelClick()}}>
+          <p
+            className="cursor-pointer hover:text-yellow-300"
+            onClick={() => {
+              onDelClick();
+            }}
+          >
             Delete
           </p>
         </li>
@@ -34,21 +49,41 @@ const Navbar = ({name, onListClick, onEditClick, onDelClick}) => {
 
       {/* 모바일 메뉴 */}
       <div
-        className={`fixed top-0 left-0 w-full h-full bg-gray-900 text-white flex flex-col items-center justify-center gap-10 transition-transform duration-300 ${
+        className={`fixed top-0 left-0 w-full h-full bg-gray-900 text-white flex flex-col items-center justify-center gap-10 transition-transform duration-300 z-50 ${
           menuOpen ? "translate-x-0" : "-translate-x-full"
         } md:hidden`}
       >
-        
-        <p className="cursor-pointer hover:text-yellow-300" onClick={() => {setMenuOpen(false); onListClick()}}>
+        <p
+          className="cursor-pointer hover:text-yellow-300"
+          onClick={() => {
+            setMenuOpen(false);
+            onListClick();
+          }}
+        >
           List
         </p>
-        <p className="cursor-pointer hover:text-yellow-300" onClick={() => {setMenuOpen(false); onEditClick()}}>
+        <p
+          className="cursor-pointer hover:text-yellow-300"
+          onClick={() => {
+            setMenuOpen(false);
+            onEditClick();
+          }}
+        >
           Edit
         </p>
-        <p className="cursor-pointer hover:text-yellow-300" onClick={() => {setMenuOpen(false); onDelClick()}}>
+        <p
+          className="cursor-pointer hover:text-yellow-300"
+          onClick={() => {
+            setMenuOpen(false);
+            onDelClick();
+          }}
+        >
           Delete
         </p>
-        <p className="cursor-pointer hover:text-yellow-300" onClick={() => setMenuOpen(false)}>
+        <p
+          className="cursor-pointer hover:text-yellow-300"
+          onClick={() => setMenuOpen(false)}
+        >
           Close
         </p>
       </div>
