@@ -7,6 +7,7 @@ import {
   seeLeaveList,
 } from "../../api/adminLeaveReturnApi";
 import { getAllSemesters } from "../../api/adminScheduleApi";
+import PageComponent from "../../components/PageComponent";
 
 const AdminLeavePage = () => {
   const [leaveRequests, setLeaveRequests] = useState([]);
@@ -17,6 +18,14 @@ const AdminLeavePage = () => {
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertType, setAlertType] = useState("success");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  const paginatedLeaveRequests = leaveRequests.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const fetchLeaveRequests = async () => {
     try {
@@ -92,11 +101,7 @@ const AdminLeavePage = () => {
   const openRejectModal = (request) => {
     const nameElement = document.getElementById(request.leaveId);
     const name = nameElement ? nameElement.innerText : "";
-    setCurrentRequest({
-      ...request,
-      studentName: name,
-    });
-
+    setCurrentRequest({ ...request, studentName: name });
     setDenialReason("");
     setRejectModalOpen(true);
   };
@@ -134,34 +139,47 @@ const AdminLeavePage = () => {
   };
 
   if (loading)
-    return <div className="flex justify-center h-64">로딩 중...</div>;
+    return (
+      <div className="flex justify-center items-center h-64">로딩 중...</div>
+    );
 
   return (
     <div className="max-w-8xl mx-auto p-12">
       <div className="bg-white shadow rounded-2xl p-8">
-        <h2 className="text-2xl font-semibold mb-6">🔍 휴학 신청 관리</h2>
-        <table className="w-full text-center border">
-          <thead className="bg-gray-50">
-            <tr>
-              <th>No.</th>
-              <th>학번</th>
-              <th>이름</th>
-              <th>신청 사유</th>
-              <th>상세 사유</th>
-              <th>신청일</th>
-              <th>복학 예정 학기</th>
-              <th>처리 상태</th>
-              <th>처리일</th>
-              <th>거절 사유</th>
-              <th>관리</th>
+        <h2 className="text-2xl font-semibold text-gray-700 mb-6">
+          🔍 휴학 신청 관리
+        </h2>
+
+        <table className="min-w-full table-auto border border-gray-300 rounded text-sm">
+          <thead className="bg-gray-50 text-gray-600 uppercase">
+            <tr className="text-center h-16">
+              <th className="py-3 px-4">No</th>
+              <th className="py-3 px-4">학번</th>
+              <th className="py-3 px-4">이름</th>
+              <th className="py-3 px-4">신청 사유</th>
+              <th className="py-3 px-4">상세 사유</th>
+              <th className="py-3 px-4">신청일</th>
+              <th className="py-3 px-4">복학 예정 학기</th>
+              <th className="py-3 px-4">처리 상태</th>
+              <th className="py-3 px-4">처리일</th>
+              <th className="py-3 px-4">거절 사유</th>
+              <th className="py-3 px-4">관리</th>
             </tr>
           </thead>
-          <tbody>
-            {leaveRequests.length > 0 ? (
-              leaveRequests.map((req, idx) => (
-                <tr key={req.leaveId} className="border-t">
-                  <td>{idx + 1}</td>
-                  <td>{req.student}</td>
+          <tbody className="text-gray-700">
+            {paginatedLeaveRequests.length > 0 ? (
+              paginatedLeaveRequests.map((req, idx) => (
+                <tr key={req.leaveId} className="border-t h-16">
+                  <td className="py-3 px-4">
+                    <div className="h-full flex items-center justify-center">
+                      {(currentPage - 1) * itemsPerPage + idx + 1}
+                    </div>
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="h-full flex items-center justify-center">
+                      {req.student}
+                    </div>
+                  </td>
                   <td>
                     {
                       void requestAnimationFrame(() =>
@@ -171,55 +189,87 @@ const AdminLeavePage = () => {
                         })
                       )
                     }
-                    <span id={req.leaveId}>불러오는 중...</span>
+                    <span
+                      id={req.leaveId}
+                      className="h-full flex items-center justify-center"
+                    >
+                      불러오는 중...
+                    </span>
                   </td>
-                  <td>{getReasonLabel(req.reason)}</td>
-                  <td className="truncate max-w-xs">{req.reasonDetail}</td>
-                  <td>{req.requestDate}</td>
+                  <td className="py-3 px-4">
+                    <div className="h-full flex items-center justify-center">
+                      {getReasonLabel(req.reason)}
+                    </div>
+                  </td>
+                  <td className="py-3 px-4 max-w-xs truncate">
+                    <div className="h-full flex items-center justify-center">
+                      {req.reasonDetail}
+                    </div>
+                  </td>
+                  <td className="py-3 px-4">
+                    <div className="h-full flex items-center justify-center">
+                      {req.requestDate}
+                    </div>
+                  </td>
                   <td>
                     {
                       void requestAnimationFrame(() =>
-                        handlePrintSemester(req.expectedSemester).then((label) => {
-                          const element = document.getElementById(
-                            `semester-${req.leaveId}`
-                          );
-                          if (element) element.innerText = label;
-                        })
+                        handlePrintSemester(req.expectedSemester).then(
+                          (label) => {
+                            const element = document.getElementById(
+                              `semester-${req.leaveId}`
+                            );
+                            if (element) element.innerText = label;
+                          }
+                        )
                       )
                     }
-                    <span id={`semester-${req.leaveId}`}>불러오는 중...</span>
-                  </td>
-                  <td>
                     <span
-                      className={`px-2 py-1 text-sm rounded ${
-                        req.status === "승인"
-                          ? "bg-green-100 text-green-700"
-                          : req.status === "거절"
-                          ? "bg-red-100 text-red-700"
-                          : "bg-yellow-100 text-yellow-700"
-                      }`}
+                      id={`semester-${req.leaveId}`}
+                      className="h-full flex items-center justify-center"
                     >
-                      {getStatusLabel(req.status)}
+                      불러오는 중...
                     </span>
                   </td>
-                  <td>{req.approvedDate || "-"}</td>
-                  <td className="truncate max-w-xs">
-                    {req.denialReason || "-"}
+                  <td className="py-3 px-4">
+                    <div className="h-full flex items-center justify-center">
+                      <span
+                        className={`px-2 py-1 rounded text-sm ${
+                          req.status === "승인"
+                            ? "bg-green-100 text-green-800"
+                            : req.status === "거절"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {getStatusLabel(req.status)}
+                      </span>
+                    </div>
                   </td>
-                  <td>
+                  <td className="py-3 px-4">
+                    <div className="h-full flex items-center justify-center">
+                      {req.approvedDate || "-"}
+                    </div>
+                  </td>
+                  <td className="py-3 px-4 max-w-xs truncate">
+                    <div className="h-full flex items-center justify-center">
+                      {req.denialReason || "-"}
+                    </div>
+                  </td>
+                  <td className="py-3 px-4">
                     {req.status === "대기" && (
-                      <div className="flex gap-2 justify-center">
+                      <div className="flex space-x-2 justify-center h-full items-center">
                         <button
                           onClick={() => handleApprove(req)}
-                          className="bg-green-600 text-white rounded px-3 py-1 text-sm"
+                          className="h-full flex items-center justify-center px-3 py-0 text-xl"
                         >
-                          승인
+                          ✔️
                         </button>
                         <button
                           onClick={() => openRejectModal(req)}
-                          className="bg-red-600 text-white rounded px-3 py-1 text-sm"
+                          className="h-full flex items-center justify-center px-3 py-0 text-xl"
                         >
-                          거절
+                          ❌
                         </button>
                       </div>
                     )}
@@ -227,49 +277,71 @@ const AdminLeavePage = () => {
                 </tr>
               ))
             ) : (
-              <tr>
-                <td colSpan={11} className="text-gray-400 py-4">
-                  신청 내역 없음
+              <tr className="border-t h-16">
+                <td colSpan={11} className="py-4 text-gray-400 text-center">
+                  처리할 휴학 신청 내역이 없습니다.
                 </td>
               </tr>
             )}
           </tbody>
         </table>
+
+        <PageComponent
+          currentPage={currentPage}
+          totalPage={Math.ceil(leaveRequests.length / itemsPerPage)}
+          onPageChange={(page) => setCurrentPage(page)}
+        />
       </div>
 
       <BaseModal
         isOpen={rejectModalOpen}
         onClose={() => setRejectModalOpen(false)}
       >
-        <form onSubmit={handleReject} className="p-4 space-y-4">
-          <h2 className="text-xl font-bold">❌ 휴학 신청 거절</h2>
-          <p>학번: {currentRequest?.student}</p>
-          <p>이름: {currentRequest?.studentName}</p>
-          <p>사유: {getReasonLabel(currentRequest?.reason)}</p>
-          <textarea
-            value={denialReason}
-            onChange={(e) => setDenialReason(e.target.value)}
-            className="w-full border rounded p-2"
-            rows={4}
-            placeholder="거절 사유를 입력해주세요"
-            required
-          />
-          <div className="flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={() => setRejectModalOpen(false)}
-              className="bg-gray-300 px-4 py-2 rounded"
-            >
-              취소
-            </button>
-            <button
-              type="submit"
-              className="bg-red-600 text-white px-4 py-2 rounded"
-            >
-              거절 확인
-            </button>
-          </div>
-        </form>
+        {/* Modal Content */}
+        <BaseModal
+          isOpen={rejectModalOpen}
+          onClose={() => setRejectModalOpen(false)}
+        >
+          <form onSubmit={handleReject} className="space-y-6 p-4">
+            <h2 className="text-xl font-bold">❌ 휴학 신청 거절</h2>
+            <div>
+              <div className="mb-4">
+                <p>
+                  <span className="font-semibold">학번:</span>{" "}
+                  {currentRequest?.student}
+                </p>
+                <p>
+                  <span className="font-semibold">이름:</span>{" "}
+                  {currentRequest?.studentName}
+                </p>
+              </div>
+              <label className="block mb-2 font-medium">거절 사유</label>
+              <textarea
+                value={denialReason}
+                onChange={(e) => setDenialReason(e.target.value)}
+                className="w-full border rounded p-3"
+                rows={4}
+                placeholder="거절 사유를 입력해주세요"
+                required
+              />
+            </div>
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setRejectModalOpen(false)}
+                className="px-6 py-3 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
+              >
+                취소
+              </button>
+              <button
+                type="submit"
+                className="px-6 py-3 bg-red-600 text-white rounded hover:bg-red-700"
+              >
+                거절 확인
+              </button>
+            </div>
+          </form>
+        </BaseModal>
       </BaseModal>
 
       <AlertModal

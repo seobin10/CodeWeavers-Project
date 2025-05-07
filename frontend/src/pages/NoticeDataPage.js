@@ -6,7 +6,7 @@ import AlertModal from "../components/AlertModal";
 import ConfirmModal from "../components/ConfirmModal";
 import { getAuthHeader } from "../util/authHeader";
 import Navbar from "../components/Navbar";
-const QnaDataPage = () => {
+const NoticeDataPage = () => {
   const navigate = useNavigate();
   const [alertModalOpen, setAlertModalOpen] = useState(false);
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
@@ -170,4 +170,4 @@ const QnaDataPage = () => {
   );
 };
 
-export default QnaDataPage;
+export default NoticeDataPage;

@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import axios from "axios";
 import PageComponent from "../components/PageComponent";
-import { getAuthHeader } from "../util/authHeader";
 import { useSelector } from "react-redux";
 import { getList } from "../api/noticeApi";
 
@@ -11,18 +9,20 @@ const NoticeListPage = () => {
   const [noticeInfo, setNoticeInfo] = useState([]);
   const location = useLocation();
   const checkPage = location.state?.page ?? 1;
-  const keyword = location.state?.keyword ?? "";
+  const [keyword, setKeyword] = useState(location.state?.keyword || "");
   const [currentPage, setCurrentPage] = useState(checkPage);
   const itemCount = 10;
 
   const userId = useSelector((state) => state.auth?.userId);
   const userRole = useSelector((state) => state.auth?.userRole);
-
+  const [inputKeyword, setInputKeyword] = useState("");
+  
   useEffect(() => {
     if (userId) {
       fetchNoticeInfo();
     }
-  }, [userId]);
+  }, [userId, keyword]);
+  
 
   const fetchNoticeInfo = async () => {
     try {
@@ -47,11 +47,22 @@ const NoticeListPage = () => {
   const pinned = noticeInfo.filter((i) => i.pin === 1);
   const unpinned = noticeInfo.filter((i) => i.pin !== 1);
 
+  // 페이징 처리
   const lastItem = currentPage * itemCount;
   const firstItem = lastItem - itemCount;
   const currentItem = unpinned.slice(firstItem, lastItem);
   const totalPage = Math.ceil(unpinned.length / itemCount);
 
+  // 검색 처리
+  const handleKeyword = () => {
+    const userInputData = document.getElementById('searchKeyword').value;
+    setInputKeyword(userInputData);
+  }
+
+  const handleSearch = async (searchKeyword) => {
+      setKeyword(searchKeyword);
+  };
+  
   return (
     <div className="max-w-7xl mx-auto p-8 bg-white shadow-md rounded-md mt-10">
       <h1 className="text-3xl font-bold text-center mb-6">공지사항</h1>
@@ -61,6 +72,23 @@ const NoticeListPage = () => {
           결과입니다.
         </p>
       )}
+
+      <div className="flex justify-end mb-6">
+        <input
+          type="text"
+          placeholder="검색어 입력"
+          id="searchKeyword"
+          className="px-3 py-2 w-64 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          onChange={handleKeyword}
+        />
+        <button
+          onClick={() => handleSearch(inputKeyword)}
+          className="px-5 py-2 ml-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-semibold"
+        >
+          검색 🔍
+        </button>
+      </div>
+
       {message && <p className="text-red-500 text-center">{message}</p>}
       <hr />
       <br />
@@ -86,7 +114,7 @@ const NoticeListPage = () => {
             </tr>
           </thead>
           <tbody>
-            {currentItem.length > 0 ? (
+            {pinned || currentItem.length > 0 ? (
               [...pinned, ...currentItem].map((notice, i) => {
                 const cellStyle =
                   notice.pin === 1
@@ -138,6 +166,7 @@ const NoticeListPage = () => {
             )}
           </tbody>
         </table>
+
         <PageComponent
           currentPage={currentPage}
           totalPage={totalPage}

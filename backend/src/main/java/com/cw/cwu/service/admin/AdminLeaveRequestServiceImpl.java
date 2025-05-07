@@ -38,7 +38,7 @@ public class AdminLeaveRequestServiceImpl implements AdminLeaveRequestService {
         request.changeApprovedDate();
 
         if (Objects.equals(dto.getStatus(), "APPROVED")) {
-            // 수강 삭제(학기 구분없이 전역 삭제되므로, 수정이 필요할 수 있음)
+            // 수강 삭제
             List<Enrollment> enrollments = enrollmentRepository.findByStudent_UserId(studentId);
 
             for (Enrollment enrollment : enrollments) {
