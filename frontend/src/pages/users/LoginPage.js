@@ -48,6 +48,17 @@ function LoginPage() {
     return () => clearInterval(interval);
   }, []);
 
+  const handleChecked = async () => {
+    const isChecked = document.getElementById("rememberId").checked;
+    if (!isChecked){
+      localStorage.removeItem("savedUserId");
+    }
+  }
+
+  useEffect(() => {
+    handleChecked();
+  }, [])
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setUser((prev) => ({
@@ -201,10 +212,12 @@ function LoginPage() {
             <label className="flex items-center gap-2 whitespace-nowrap">
               <input
                 type="checkbox"
+                id = "rememberId"
                 name="remember"
                 className="w-4 h-3"
                 checked={user.remember}
                 onChange={handleChange}
+                onClick={handleChecked}
               />
               <span className="text-sm text-gray-500">학번 저장</span>
             </label>
