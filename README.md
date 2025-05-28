@@ -1,4 +1,4 @@
-# 💎이온 학사정보시스템 Eon Univercity Management Project
+# 💎이온 학사정보시스템
 ![image](https://github.com/user-attachments/assets/0b7076da-054c-4d48-8099-e6f724104d08)
 
 
