@@ -39,6 +39,7 @@
 
 ## 🎭배포
 이온대학교 학사관리시스템을 체험해보세요!
+<br/>※테스트 계정의 경우, 일부 권한이 제한되어 있습니다.
 
 <p align="center">
 <img src="https://github.com/user-attachments/assets/18e4830a-0676-4b1c-8ed3-3927c57338e6" height="500" width="500"/>
@@ -57,5 +58,5 @@ https://www.eonuniversity.co.kr/
 (id - 100000001, pw - test)
 
 학생
-(id - 21000000, pw - test)
+(id - 210000000, pw - test)
 ```
