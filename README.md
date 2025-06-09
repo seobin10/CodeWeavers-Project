@@ -34,7 +34,10 @@
 | **교수** | 강의 관리, 강의 평가 조회, 학기 별 성적 관리, 문자 발송 |
 | **관리자** | 공지사항 관리, 사용자 관리, 학과 및 과목 관리, 시설 관리, 일정 관리, 학적 관리, 성적 집계, Q&A 답변 작성/삭제 |
 
+<br/>
+
 ## 🎞시연 영상
+<a href="https://youtu.be/fzXBGTwPm2k"><img src="https://github.com/user-attachments/assets/4489bcd8-4b55-4865-a013-6b54e1cf12ae" alt="시연 영상"/></a>
 <br/><br/><br/>
 
 ## 🎭배포
@@ -42,7 +45,7 @@
 <br/>※테스트 계정의 경우, 일부 권한이 제한되어 있습니다.
 
 <p align="center">
-<img src="https://github.com/user-attachments/assets/69508ced-a18d-463c-97fa-e1538f24eaf5" height="500" width="500"/>
+<img src="https://github.com/user-attachments/assets/69508ced-a18d-463c-97fa-e1538f24eaf5" alt="배포 설명 이미지" height="500" width="500"/>
 </p>
 <p align="center">
 <b>배포 주소</b>
